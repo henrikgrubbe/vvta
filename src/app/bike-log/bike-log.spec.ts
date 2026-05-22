@@ -1,10 +1,14 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { provideHttpClient } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
+import { provideRouter } from "@angular/router";
+import { signal } from "@angular/core";
 import { BehaviorSubject } from 'rxjs';
 import { vi } from 'vitest';
 import { BikeLogComponent, BikeEntry } from './bike-log';
 import { BikeLogService } from './bike-log.service';
+import { AuthService } from '../auth.service';
+import { UserProfileService } from '../user-profile.service';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -79,7 +83,7 @@ describe('BikeLogComponent', () => {
   }
 
   function getDeleteButtons(): HTMLButtonElement[] {
-    return Array.from(el.querySelectorAll('button[aria-label^="Delete"]'));
+    return Array.from(el.querySelectorAll('button[aria-label^="Delete ride"]'));
   }
 
   function getCancelButton(): HTMLButtonElement | null {
@@ -117,7 +121,24 @@ describe('BikeLogComponent', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideRouter([]),
         { provide: BikeLogService, useValue: mockService },
+        {
+          provide: AuthService,
+          useValue: {
+            user: signal({ uid: 'test-uid', email: 'test@test.com' }),
+            signOut: vi.fn().mockResolvedValue(undefined),
+          },
+        },
+        {
+          provide: UserProfileService,
+          useValue: {
+            currentProfile: signal({ uid: 'test-uid', firstName: 'Test', email: 'test@test.com' }),
+            getProfile: vi.fn().mockResolvedValue(null),
+            saveProfile: vi.fn().mockResolvedValue(undefined),
+            setCurrentProfile: vi.fn(),
+          },
+        },
       ],
     }).compileComponents();
 
