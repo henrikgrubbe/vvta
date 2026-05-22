@@ -1,5 +1,76 @@
-
 You are an expert in TypeScript, Angular, and scalable web application development. You write functional, maintainable, performant, and accessible code following Angular and TypeScript best practices.
+
+## Project Overview
+
+Bike commute logging app ("Rune's Bike Commute Log") built with Angular 21, Firebase/Firestore, and Tailwind CSS 4. Single-feature app that tracks daily bicycle rides with auto weather detection via Open-Meteo API.
+
+## Tech Stack
+
+- **Framework:** Angular 21 (standalone components, signal-based forms)
+- **Styling:** Tailwind CSS 4 (`@import 'tailwindcss'` in `src/styles.css`)
+- **Backend:** Firebase Firestore (`@angular/fire`) — collection: `bike-entries`
+- **Weather API:** Open-Meteo (archive + forecast endpoints, no API key needed)
+- **Unit Tests:** Vitest via `@angular/build:unit-test`
+- **E2E Tests:** Playwright (Chromium only, `e2e/` directory)
+- **Formatter:** Prettier
+
+## Commands
+
+| Action | Command |
+|---|---|
+| Dev server | `npm start` (port 4200) |
+| Build | `npm run build` |
+| Unit tests | `npm test` |
+| E2E tests | `npm run e2e` (auto-starts dev server) |
+| Deploy | `firebase deploy` (builds to `dist/vvta/browser`) |
+
+## Project Structure
+
+```
+src/app/
+  app.ts                  # Root component (router-outlet only)
+  app.config.ts           # Providers: router, HttpClient, Firebase
+  app.routes.ts           # Top-level routes (lazy-loads feature routes)
+  bike-log/
+    bike-log.ts           # Main feature component + BikeEntry interface
+    bike-log.html         # External template (Tailwind utility classes)
+    bike-log.routes.ts    # Feature routes (default export, lazy loadComponent)
+    bike-log.service.ts   # Firestore CRUD for bike-entries collection
+    weather.service.ts    # Open-Meteo API (wasRaining check for Aarhus)
+src/environments/
+  environment.ts          # Firebase config
+```
+
+## Key Patterns
+
+### File Naming
+
+Components use short `.ts` filenames (not `.component.ts`): `bike-log.ts` containing `BikeLogComponent`. Routes are `*.routes.ts` with default exports.
+
+### Feature Routing
+
+Features are lazy-loaded at two levels — `loadChildren` in `app.routes.ts`, then `loadComponent` in feature routes:
+```typescript
+// app.routes.ts
+{ path: '', loadChildren: () => import('./bike-log/bike-log.routes') }
+
+// bike-log/bike-log.routes.ts
+{ path: '', loadComponent: () => import('./bike-log').then(m => m.BikeLogComponent) }
+export default routes;
+```
+
+### Signal-Based Forms
+
+Uses `@angular/forms/signals` (`form()`, `FormField`, `submit()`, `required()`, `min()`). See `bike-log.ts` for the pattern with `rideModel` signal + `rideForm` derived from it.
+
+### Service Pattern
+
+Services use `inject()` function, `providedIn: 'root'`, and AngularFire's `collectionData`/`addDoc`/`updateDoc`/`deleteDoc`. See `bike-log.service.ts`.
+
+### Testing
+
+- **Unit tests** (`*.spec.ts` alongside source): Use Vitest (`vi.spyOn`), `TestBed`, `provideHttpClientTesting`. Mock Firestore services with `BehaviorSubject`. Flush weather HTTP requests with `httpMock.match()`. See `bike-log.spec.ts` for the full pattern.
+- **E2E tests** (`e2e/*.spec.ts`): Playwright tests with helper functions. Dev server auto-starts via `playwright.config.ts`. Target `localhost:4200`.
 
 ## TypeScript Best Practices
 
