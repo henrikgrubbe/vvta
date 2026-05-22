@@ -51,6 +51,9 @@ __screenshots__/
 /blob-report/
 /playwright/.cache/
 
+# Firebase
+.firebase/
+
 # System files
 .DS_Store
 Thumbs.db
