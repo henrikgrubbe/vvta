@@ -1,6 +1,30 @@
 <div class="max-w-lg mx-auto p-6">
-  <h1 class="text-3xl font-bold text-gray-900 mb-2">🚴 Vi viber til arbejde</h1>
-  <p class="text-gray-600 mb-6">Log dine daglige cykelture til arbejde.</p>
+  <header class="flex items-start justify-between mb-6">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">🚴 Vi viber til arbejde</h1>
+      @if (firstName()) {
+        <p class="text-gray-600 mt-1">Hej, <strong>{{ firstName() }}</strong>! Log dine daglige cykelture.</p>
+      } @else {
+        <p class="text-gray-600 mt-1">Log dine daglige cykelture til arbejde.</p>
+      }
+    </div>
+    <nav class="flex items-center gap-2 shrink-0 ml-4" aria-label="App navigation">
+      <a
+        routerLink="/leaderboard"
+        class="text-sm text-blue-600 hover:underline focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 rounded whitespace-nowrap"
+      >
+        🏆 Leaderboard
+      </a>
+      <span class="text-gray-300" aria-hidden="true">|</span>
+      <button
+        type="button"
+        (click)="signOut()"
+        class="text-sm text-gray-500 hover:text-gray-700 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 rounded whitespace-nowrap"
+      >
+        Sign out
+      </button>
+    </nav>
+  </header>
 
   <form (submit)="onSubmit(); $event.preventDefault()" class="mb-8 space-y-4">
     <div>

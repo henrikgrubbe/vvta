@@ -2,9 +2,12 @@ import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signa
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { form, FormField, submit, required, min } from '@angular/forms/signals';
 import { DatePipe } from '@angular/common';
+import { Router, RouterLink } from '@angular/router';
 import { filter, switchMap, tap } from 'rxjs';
 import { WeatherService } from './weather.service';
 import { BikeLogService } from './bike-log.service';
+import { AuthService } from '../auth.service';
+import { UserProfileService } from '../user-profile.service';
 
 export type SortField = 'date' | 'kilometers';
 export type SortDirection = 'asc' | 'desc';
@@ -15,17 +18,22 @@ export interface BikeEntry {
   kilometers: number;
   raining: boolean;
   rainingSource: 'auto' | 'manual';
+  userId: string;
+  userName: string;
 }
 
 @Component({
   selector: 'app-bike-log',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormField, DatePipe],
+  imports: [FormField, DatePipe, RouterLink],
   templateUrl: './bike-log.html',
 })
 export class BikeLogComponent {
   private readonly weather = inject(WeatherService);
   private readonly bikeLogService = inject(BikeLogService);
+  private readonly authService = inject(AuthService);
+  private readonly profileService = inject(UserProfileService);
+  private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly rideModel = signal({ date: this.todayIso(), kilometers: 0, raining: false });
@@ -35,6 +43,9 @@ export class BikeLogComponent {
     required(s.kilometers, { message: 'Kilometers is required' });
     min(s.kilometers, 0.1, { message: 'Must be at least 0.1 km' });
   });
+
+  readonly currentUser = this.authService.user;
+  readonly firstName = signal<string | null>(null);
 
   readonly entries = toSignal(this.bikeLogService.entries$);
   readonly loadError = signal(false);
@@ -63,6 +74,25 @@ export class BikeLogComponent {
   });
 
   constructor() {
+    // Load the current user's first name
+    toObservable(this.currentUser)
+      .pipe(
+        filter(u => u !== undefined),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(async user => {
+        if (!user) {
+          await this.router.navigateByUrl('/login');
+          return;
+        }
+        const profile = await this.profileService.getProfile(user.uid);
+        if (!profile) {
+          await this.router.navigateByUrl('/onboarding');
+          return;
+        }
+        this.firstName.set(profile.firstName);
+      });
+
     // Auto-check weather whenever the date changes
     toObservable(computed(() => this.rideForm.date().value()))
       .pipe(
@@ -85,6 +115,10 @@ export class BikeLogComponent {
       const { date, kilometers, raining } = this.rideModel();
       const currentEditId = this.editingId();
       const rainingSource = this.rainingSource();
+      const user = this.currentUser();
+      const userName = this.firstName() ?? 'Unknown';
+
+      if (!user) return;
 
       this.saving.set(true);
       try {
@@ -92,7 +126,11 @@ export class BikeLogComponent {
           await this.bikeLogService.update(currentEditId, { date, kilometers, raining, rainingSource });
           this.editingId.set(null);
         } else {
-          await this.bikeLogService.add({ date, kilometers, raining, rainingSource });
+          await this.bikeLogService.add({
+            date, kilometers, raining, rainingSource,
+            userId: user.uid,
+            userName,
+          });
         }
       } finally {
         this.saving.set(false);
@@ -131,6 +169,11 @@ export class BikeLogComponent {
       this.sortField.set(field);
       this.sortDirection.set('desc');
     }
+  }
+
+  async signOut(): Promise<void> {
+    await this.authService.signOut();
+    await this.router.navigateByUrl('/login');
   }
 
   private todayIso(): string {
