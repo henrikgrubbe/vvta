@@ -11,7 +11,7 @@ import {
   updateDoc,
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
-import { BikeEntry } from './bike-log/bike-log';
+import { BikeEntry } from './bike-log';
 
 @Injectable({ providedIn: 'root' })
 export class BikeLogService {

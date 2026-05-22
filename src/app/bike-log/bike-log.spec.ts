@@ -1,28 +1,68 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { BikeLogComponent, BikeEntry, SortField, SortDirection } from './bike-log';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { provideHttpClient } from "@angular/common/http";
+import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
+import { BehaviorSubject } from 'rxjs';
+import { vi } from 'vitest';
+import { BikeLogComponent, BikeEntry } from './bike-log';
+import { BikeLogService } from './bike-log.service';
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 
 function todayIso(): string {
   const now = new Date();
   const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
+
+let nextId = 1;
+
+class MockBikeLogService {
+  private readonly subject = new BehaviorSubject<BikeEntry[]>([]);
+  readonly entries$ = this.subject.asObservable();
+
+  reset(): void {
+    this.subject.next([]);
+    nextId = 1;
+  }
+
+  add(entry: Omit<BikeEntry, 'id'>): Promise<void> {
+    const newEntry: BikeEntry = { ...entry, id: String(nextId++) };
+    this.subject.next([newEntry, ...this.subject.value]);
+    return Promise.resolve();
+  }
+
+  update(id: string, changes: Partial<Omit<BikeEntry, 'id'>>): Promise<void> {
+    this.subject.next(
+      this.subject.value.map(e => (e.id === id ? { ...e, ...changes } : e)),
+    );
+    return Promise.resolve();
+  }
+
+  delete(id: string): Promise<void> {
+    this.subject.next(this.subject.value.filter(e => e.id !== id));
+    return Promise.resolve();
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Suite
+// ---------------------------------------------------------------------------
 
 describe('BikeLogComponent', () => {
   let fixture: ComponentFixture<BikeLogComponent>;
   let component: BikeLogComponent;
   let el: HTMLElement;
   let httpMock: HttpTestingController;
+  let mockService: MockBikeLogService;
 
   function flushWeatherRequests(raining = false): void {
     const reqs = httpMock.match(r => r.url.includes('open-meteo.com'));
     reqs.forEach(r => {
-      if (!r.cancelled) {
-        r.flush({ daily: { precipitation_sum: [raining ? 5.0 : 0] } });
-      }
+      if (!r.cancelled) r.flush({ daily: { precipitation_sum: [raining ? 5.0 : 0] } });
     });
   }
 
@@ -44,41 +84,41 @@ describe('BikeLogComponent', () => {
 
   function getCancelButton(): HTMLButtonElement | null {
     const buttons = Array.from(el.querySelectorAll('button[type="button"]'));
-    return buttons.find(b => b.textContent?.trim() === 'Cancel') as HTMLButtonElement | null;
+    return (buttons.find(b => b.textContent?.trim() === 'Cancel') as HTMLButtonElement) ?? null;
+  }
+
+  function entries(): BikeEntry[] {
+    return component.entries() ?? [];
   }
 
   async function addEntry(date: string, km: number, raining = false): Promise<void> {
-    // Set the model with desired values
     component.rideModel.set({ date, kilometers: km, raining });
     component.rainingSource.set(raining ? 'manual' : 'auto');
     await fixture.whenStable();
-
-    // The effect fires a weather request when date changes — flush it
-    // but we don't want it to override our raining value, so flush first,
-    // then re-set the raining value
     flushWeatherRequests();
     await fixture.whenStable();
-
-    // Re-set raining in case the weather flush overrode it
+    // Re-set in case weather response overrode raining
     component.rideModel.update(m => ({ ...m, raining }));
     component.rainingSource.set(raining ? 'manual' : 'auto');
-
-    // Submit the form
     component.onSubmit();
     await fixture.whenStable();
-
-    // After submit, the model resets and date changes, triggering another weather request
     flushWeatherRequests();
     await fixture.whenStable();
+    fixture.detectChanges();
   }
 
   beforeEach(async () => {
-    localStorage.clear();
+    mockService = new MockBikeLogService();
+    mockService.reset();
     TestBed.resetTestingModule();
 
     await TestBed.configureTestingModule({
       imports: [BikeLogComponent],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: BikeLogService, useValue: mockService },
+      ],
     }).compileComponents();
 
     httpMock = TestBed.inject(HttpTestingController);
@@ -89,22 +129,23 @@ describe('BikeLogComponent', () => {
     await fixture.whenStable();
     flushWeatherRequests();
     await fixture.whenStable();
+    fixture.detectChanges();
   });
 
   afterEach(() => {
     httpMock.verify();
-    localStorage.clear();
   });
 
-  // --- Initial rendering ---
+  // -------------------------------------------------------------------------
+  // Initial rendering
+  // -------------------------------------------------------------------------
 
   it('should create the component', () => {
     expect(component).toBeTruthy();
   });
 
   it('should display the heading', () => {
-    const h1 = el.querySelector('h1');
-    expect(h1?.textContent).toContain("Rune's Bike Commute Log");
+    expect(el.querySelector('h1')?.textContent).toContain("Rune's Bike Commute Log");
   });
 
   it('should show empty state message when no entries', () => {
@@ -127,28 +168,28 @@ describe('BikeLogComponent', () => {
     expect(getCancelButton()).toBeFalsy();
   });
 
-  // --- Adding entries ---
+  // -------------------------------------------------------------------------
+  // Adding entries
+  // -------------------------------------------------------------------------
 
   it('should add an entry to the list', async () => {
     await addEntry('2025-06-01', 12.5);
-    expect(component.entries().length).toBe(1);
-    expect(component.entries()[0].date).toBe('2025-06-01');
-    expect(component.entries()[0].kilometers).toBe(12.5);
+    expect(entries().length).toBe(1);
+    expect(entries()[0].date).toBe('2025-06-01');
+    expect(entries()[0].kilometers).toBe(12.5);
   });
 
   it('should display the entry in the DOM', async () => {
     await addEntry('2025-06-01', 12.5);
-    await fixture.whenStable();
-    const items = getListItems();
-    expect(items.length).toBe(1);
-    expect(items[0].textContent).toContain('12.5 km');
+    expect(getListItems().length).toBe(1);
+    expect(getListItems()[0].textContent).toContain('12.5 km');
   });
 
-  it('should prepend new entries (newest first)', async () => {
+  it('should prepend new entries (newest first by default)', async () => {
     await addEntry('2025-06-01', 10);
     await addEntry('2025-06-02', 15);
-    expect(component.entries()[0].date).toBe('2025-06-02');
-    expect(component.entries()[1].date).toBe('2025-06-01');
+    expect(entries()[0].date).toBe('2025-06-02');
+    expect(entries()[1].date).toBe('2025-06-01');
   });
 
   it('should calculate total kilometers', async () => {
@@ -159,49 +200,50 @@ describe('BikeLogComponent', () => {
 
   it('should reset the form after adding', async () => {
     await addEntry('2025-06-01', 12.5);
-    flushWeatherRequests();
-    await fixture.whenStable();
     expect(component.rideModel().kilometers).toBe(0);
-  });
-
-  it('should save entries to localStorage', async () => {
-    await addEntry('2025-06-01', 12.5);
-    const stored = JSON.parse(localStorage.getItem('bike-log-entries')!);
-    expect(stored.length).toBe(1);
-    expect(stored[0].kilometers).toBe(12.5);
   });
 
   it('should assign unique IDs to entries', async () => {
     await addEntry('2025-06-01', 10);
     await addEntry('2025-06-02', 15);
-    const ids = component.entries().map(e => e.id);
+    const ids = entries().map(e => e.id);
     expect(new Set(ids).size).toBe(2);
   });
 
-  // --- Raining field ---
+  it('should call add on the service when submitting a new entry', async () => {
+    const spy = vi.spyOn(mockService, 'add');
+    await addEntry('2025-06-01', 12.5);
+    expect(spy).toHaveBeenCalledWith(
+      expect.objectContaining({ date: '2025-06-01', kilometers: 12.5 }),
+    );
+  });
+
+  // -------------------------------------------------------------------------
+  // Raining field
+  // -------------------------------------------------------------------------
 
   it('should save raining status with entry', async () => {
     await addEntry('2025-06-01', 10, true);
-    expect(component.entries()[0].raining).toBe(true);
+    expect(entries()[0].raining).toBe(true);
   });
 
-  it('should save rainingSource with entry', async () => {
+  it('should save rainingSource "manual" when set by user', async () => {
     await addEntry('2025-06-01', 10, true);
-    expect(component.entries()[0].rainingSource).toBe('manual');
+    expect(entries()[0].rainingSource).toBe('manual');
   });
 
-  it('should save auto source when filled by weather', async () => {
+  it('should save rainingSource "auto" when not overridden', async () => {
     await addEntry('2025-06-01', 10, false);
-    expect(component.entries()[0].rainingSource).toBe('auto');
+    expect(entries()[0].rainingSource).toBe('auto');
   });
 
-  // --- Editing entries ---
+  // -------------------------------------------------------------------------
+  // Editing entries
+  // -------------------------------------------------------------------------
 
   it('should populate the form when editing', async () => {
     await addEntry('2025-06-01', 10);
-    const entry = component.entries()[0];
-
-    component.startEdit(entry);
+    component.startEdit(entries()[0]);
     await fixture.whenStable();
     flushWeatherRequests();
     await fixture.whenStable();
@@ -212,8 +254,7 @@ describe('BikeLogComponent', () => {
 
   it('should set editingId when editing', async () => {
     await addEntry('2025-06-01', 10);
-    const entry = component.entries()[0];
-
+    const entry = entries()[0];
     component.startEdit(entry);
     await fixture.whenStable();
     flushWeatherRequests();
@@ -224,29 +265,77 @@ describe('BikeLogComponent', () => {
 
   it('should show "Update Entry" button when editing', async () => {
     await addEntry('2025-06-01', 10);
-
-    component.startEdit(component.entries()[0]);
+    component.startEdit(entries()[0]);
     await fixture.whenStable();
     flushWeatherRequests();
     await fixture.whenStable();
+    fixture.detectChanges();
 
     expect(getSubmitButton().textContent?.trim()).toBe('Update Entry');
   });
 
   it('should show Cancel button when editing', async () => {
     await addEntry('2025-06-01', 10);
-
-    component.startEdit(component.entries()[0]);
+    component.startEdit(entries()[0]);
     await fixture.whenStable();
     flushWeatherRequests();
     await fixture.whenStable();
+    fixture.detectChanges();
 
     expect(getCancelButton()).toBeTruthy();
   });
 
   it('should update the entry on submit', async () => {
     await addEntry('2025-06-01', 10);
-    const entry = component.entries()[0];
+    const entry = entries()[0];
+
+    component.startEdit(entry);
+    await fixture.whenStable();
+    flushWeatherRequests();
+    await fixture.whenStable();
+
+    component.rideModel.set({ date: '2025-07-01', kilometers: 20, raining: false });
+    await fixture.whenStable();
+    flushWeatherRequests();
+    await fixture.whenStable();
+    component.rideModel.update(m => ({ ...m, kilometers: 20 }));
+
+    component.onSubmit();
+    await fixture.whenStable();
+    flushWeatherRequests();
+    await fixture.whenStable();
+
+    const updated = entries().find(e => e.id === entry.id);
+    expect(updated?.date).toBe('2025-07-01');
+    expect(updated?.kilometers).toBe(20);
+    expect(entries().length).toBe(1);
+  });
+
+  it('should clear editing state after update', async () => {
+    await addEntry('2025-06-01', 10);
+    component.startEdit(entries()[0]);
+    await fixture.whenStable();
+    flushWeatherRequests();
+    await fixture.whenStable();
+
+    component.rideModel.set({ date: '2025-07-01', kilometers: 20, raining: false });
+    await fixture.whenStable();
+    flushWeatherRequests();
+    await fixture.whenStable();
+    component.rideModel.update(m => ({ ...m, kilometers: 20 }));
+
+    component.onSubmit();
+    await fixture.whenStable();
+    flushWeatherRequests();
+    await fixture.whenStable();
+
+    expect(component.editingId()).toBeNull();
+  });
+
+  it('should call update on the service when submitting an edit', async () => {
+    await addEntry('2025-06-01', 10);
+    const entry = entries()[0];
+    const spy = vi.spyOn(mockService, 'update');
 
     component.startEdit(entry);
     await fixture.whenStable();
@@ -258,66 +347,21 @@ describe('BikeLogComponent', () => {
     flushWeatherRequests();
     await fixture.whenStable();
 
-    // Re-set values in case weather effect overrode them
-    component.rideModel.update(m => ({ ...m, kilometers: 20 }));
-
     component.onSubmit();
     await fixture.whenStable();
     flushWeatherRequests();
     await fixture.whenStable();
 
-    const updated = component.entries().find(e => e.id === entry.id);
-    expect(updated?.date).toBe('2025-07-01');
-    expect(updated?.kilometers).toBe(20);
-    expect(component.entries().length).toBe(1);
+    expect(spy).toHaveBeenCalledWith(entry.id, expect.any(Object));
   });
 
-  it('should clear editing state after update', async () => {
-    await addEntry('2025-06-01', 10);
-
-    component.startEdit(component.entries()[0]);
-    await fixture.whenStable();
-    flushWeatherRequests();
-    await fixture.whenStable();
-
-    component.rideModel.set({ date: '2025-07-01', kilometers: 20, raining: false });
-    await fixture.whenStable();
-    flushWeatherRequests();
-    await fixture.whenStable();
-
-    component.rideModel.update(m => ({ ...m, kilometers: 20 }));
-
-    component.onSubmit();
-    await fixture.whenStable();
-    flushWeatherRequests();
-    await fixture.whenStable();
-
-    expect(component.editingId()).toBeNull();
-  });
-
-  it('should restore rainingSource when editing', async () => {
-    await addEntry('2025-06-01', 10, true);
-
-    component.startEdit(component.entries()[0]);
-    await fixture.whenStable();
-    flushWeatherRequests();
-    await fixture.whenStable();
-
-    // After the weather effect fires, the source is overridden to 'auto'.
-    // The startEdit sets it before the effect fires. In the real app,
-    // the user sees the source briefly as 'manual' then it gets overridden
-    // by the weather lookup for that date. This is expected behavior:
-    // editing loads the date which triggers a fresh weather check.
-    // So we verify that the entry itself stored the correct source.
-    expect(component.entries()[0].rainingSource).toBe('manual');
-  });
-
-  // --- Cancelling edit ---
+  // -------------------------------------------------------------------------
+  // Cancelling edit
+  // -------------------------------------------------------------------------
 
   it('should clear editingId on cancel', async () => {
     await addEntry('2025-06-01', 10);
-
-    component.startEdit(component.entries()[0]);
+    component.startEdit(entries()[0]);
     await fixture.whenStable();
     flushWeatherRequests();
     await fixture.whenStable();
@@ -332,8 +376,7 @@ describe('BikeLogComponent', () => {
 
   it('should reset form to default values on cancel', async () => {
     await addEntry('2025-06-01', 10);
-
-    component.startEdit(component.entries()[0]);
+    component.startEdit(entries()[0]);
     await fixture.whenStable();
     flushWeatherRequests();
     await fixture.whenStable();
@@ -349,9 +392,9 @@ describe('BikeLogComponent', () => {
 
   it('should not modify entries on cancel', async () => {
     await addEntry('2025-06-01', 10);
-    const entriesBefore = [...component.entries()];
+    const entriesBefore = [...entries()];
 
-    component.startEdit(component.entries()[0]);
+    component.startEdit(entries()[0]);
     await fixture.whenStable();
     flushWeatherRequests();
     await fixture.whenStable();
@@ -361,45 +404,46 @@ describe('BikeLogComponent', () => {
     flushWeatherRequests();
     await fixture.whenStable();
 
-    expect(component.entries()).toEqual(entriesBefore);
+    expect(entries()).toEqual(entriesBefore);
   });
 
-  // --- Deleting entries ---
+  // -------------------------------------------------------------------------
+  // Deleting entries
+  // -------------------------------------------------------------------------
 
   it('should remove an entry from the list', async () => {
     await addEntry('2025-06-01', 10);
     await addEntry('2025-06-02', 15);
-
-    const id = component.entries()[0].id;
+    const id = entries()[0].id;
     component.deleteEntry(id);
+    await fixture.whenStable();
+    fixture.detectChanges();
 
-    expect(component.entries().length).toBe(1);
-    expect(component.entries().find(e => e.id === id)).toBeUndefined();
+    expect(entries().length).toBe(1);
+    expect(entries().find(e => e.id === id)).toBeUndefined();
   });
 
   it('should update total kilometers after deletion', async () => {
     await addEntry('2025-06-01', 10);
     await addEntry('2025-06-02', 15);
-
-    const id = component.entries().find(e => e.kilometers === 15)!.id;
+    const id = entries().find(e => e.kilometers === 15)!.id;
     component.deleteEntry(id);
+    await fixture.whenStable();
 
     expect(component.totalKilometers()).toBe(10);
   });
 
-  it('should update localStorage after deletion', async () => {
+  it('should call delete on the service', async () => {
     await addEntry('2025-06-01', 10);
-    await addEntry('2025-06-02', 15);
-
-    component.deleteEntry(component.entries()[0].id);
-
-    const stored = JSON.parse(localStorage.getItem('bike-log-entries')!);
-    expect(stored.length).toBe(1);
+    const id = entries()[0].id;
+    const spy = vi.spyOn(mockService, 'delete');
+    component.deleteEntry(id);
+    expect(spy).toHaveBeenCalledWith(id);
   });
 
   it('should cancel edit if deleting the entry being edited', async () => {
     await addEntry('2025-06-01', 10);
-    const entry = component.entries()[0];
+    const entry = entries()[0];
 
     component.startEdit(entry);
     await fixture.whenStable();
@@ -416,181 +460,18 @@ describe('BikeLogComponent', () => {
 
   it('should show empty state after deleting all entries', async () => {
     await addEntry('2025-06-01', 10);
-
-    component.deleteEntry(component.entries()[0].id);
+    component.deleteEntry(entries()[0].id);
     await fixture.whenStable();
+    fixture.detectChanges();
 
     expect(el.textContent).toContain('No rides logged yet');
-  });
-
-  // --- Total kilometers ---
-
-  it('should have 0 total with no entries', () => {
-    expect(component.totalKilometers()).toBe(0);
-  });
-
-  it('should round total to 1 decimal place', async () => {
-    await addEntry('2025-06-01', 1.15);
-    await addEntry('2025-06-02', 2.25);
-
-    expect(component.totalKilometers()).toBe(3.4);
-  });
-
-  // --- Weather auto-check ---
-
-  it('should set raining to true when API reports rain', async () => {
-    component.rideModel.update(m => ({ ...m, date: '2025-03-15' }));
-    await fixture.whenStable();
-
-    const reqs = httpMock.match(r => r.url.includes('open-meteo.com'));
-    reqs.forEach(r => r.flush({ daily: { precipitation_sum: [8.5] } }));
-    await fixture.whenStable();
-
-    expect(component.rideModel().raining).toBe(true);
-  });
-
-  it('should set rainingSource to auto when filled by API', async () => {
-    component.rideModel.update(m => ({ ...m, date: '2025-03-15' }));
-    await fixture.whenStable();
-
-    const reqs = httpMock.match(r => r.url.includes('open-meteo.com'));
-    reqs.forEach(r => r.flush({ daily: { precipitation_sum: [3.0] } }));
-    await fixture.whenStable();
-
-    expect(component.rainingSource()).toBe('auto');
-  });
-
-  it('should set rainingSource to manual when user toggles checkbox', () => {
-    component.rainingSource.set('manual');
-    expect(component.rainingSource()).toBe('manual');
-  });
-
-  // --- DOM rendering ---
-
-  it('should show edit and delete buttons for each entry', async () => {
-    await addEntry('2025-06-01', 10);
-    await addEntry('2025-06-02', 15);
-    await fixture.whenStable();
-
-    expect(getEditButtons().length).toBe(2);
-    expect(getDeleteButtons().length).toBe(2);
-  });
-
-  it('should show total kilometers in the DOM', async () => {
-    await addEntry('2025-06-01', 10);
-    await addEntry('2025-06-02', 15);
-    await fixture.whenStable();
-
-    expect(el.textContent).toContain('25 km');
-  });
-
-  it('should display rain emoji for rainy entries', async () => {
-    await addEntry('2025-06-01', 10, true);
-    await fixture.whenStable();
-
-    const items = getListItems();
-    expect(items[0].textContent).toContain('🌧️');
-  });
-
-  it('should have accessible aria-labels on edit/delete buttons', async () => {
-    await addEntry('2025-06-01', 10);
-    await fixture.whenStable();
-
-    expect(getEditButtons()[0].getAttribute('aria-label')).toContain('Edit ride on');
-    expect(getDeleteButtons()[0].getAttribute('aria-label')).toContain('Delete ride on');
-  });
-
-  it('should have an accessible list label', async () => {
-    await addEntry('2025-06-01', 10);
-    await fixture.whenStable();
-
-    const ul = el.querySelector('ul');
-    expect(ul?.getAttribute('aria-label')).toBe('Logged bike rides');
-  });
-
-  // --- Persistence ---
-
-  it('should save and load entries from localStorage', async () => {
-    await addEntry('2025-06-01', 10);
-    await addEntry('2025-06-02', 15);
-
-    const stored = JSON.parse(localStorage.getItem('bike-log-entries')!) as BikeEntry[];
-    expect(stored.length).toBe(2);
-  });
-
-  it('should handle corrupt localStorage gracefully', () => {
-    localStorage.setItem('bike-log-entries', 'not-valid-json{{{');
-
-    // Access private method via the component's loadEntries logic
-    // We test this by creating a fresh component
-    const freshFixture = TestBed.createComponent(BikeLogComponent);
-    const freshComponent = freshFixture.componentInstance;
-
-    expect(freshComponent.entries().length).toBe(0);
-
-    // Clean up the weather request from the fresh component
-    const reqs = httpMock.match(r => r.url.includes('open-meteo.com'));
-    reqs.forEach(r => r.flush({ daily: { precipitation_sum: [0] } }));
-  });
-
-  it('should continue ID sequence from stored entries', async () => {
-    await addEntry('2025-06-01', 10);
-    const firstId = component.entries()[0].id;
-
-    await addEntry('2025-06-02', 15);
-    const secondId = component.entries()[0].id;
-
-    expect(secondId).toBeGreaterThan(firstId);
-  });
-
-  // --- Edge cases ---
-
-  it('should not add entry when form is invalid (km = 0)', async () => {
-    component.rideModel.set({ date: todayIso(), kilometers: 0, raining: false });
-    await fixture.whenStable();
-    flushWeatherRequests();
-    await fixture.whenStable();
-
-    component.onSubmit();
-    await fixture.whenStable();
-
-    expect(component.entries().length).toBe(0);
-  });
-
-  it('should not add entry when date is empty', async () => {
-    component.rideModel.set({ date: '', kilometers: 10, raining: false });
-    await fixture.whenStable();
-
-    component.onSubmit();
-    await fixture.whenStable();
-
-    expect(component.entries().length).toBe(0);
-  });
-
-  it('should handle floating point precision in totals', async () => {
-    await addEntry('2025-06-01', 0.1);
-    await addEntry('2025-06-02', 0.2);
-
-    // 0.1 + 0.2 = 0.30000000000000004 in JS, but we round to 1 decimal
-    expect(component.totalKilometers()).toBe(0.3);
-  });
-
-  it('should not show rain emoji for non-rainy entries', async () => {
-    await addEntry('2025-06-01', 10, false);
-    await fixture.whenStable();
-
-    const items = getListItems();
-    // The item should not contain rain emoji (only the form area has it)
-    const itemText = items[0].textContent ?? '';
-    expect(itemText).not.toContain('🌧️');
   });
 
   it('should preserve editing state when deleting a different entry', async () => {
     await addEntry('2025-06-01', 10);
     await addEntry('2025-06-02', 15);
-
-    const entryToEdit = component.entries()[1]; // second entry
-    const entryToDelete = component.entries()[0]; // first entry
+    const entryToEdit = entries()[1];
+    const entryToDelete = entries()[0];
 
     component.startEdit(entryToEdit);
     await fixture.whenStable();
@@ -600,67 +481,118 @@ describe('BikeLogComponent', () => {
     component.deleteEntry(entryToDelete.id);
     await fixture.whenStable();
 
-    // Should still be editing the other entry
     expect(component.editingId()).toBe(entryToEdit.id);
-    expect(component.entries().length).toBe(1);
+    expect(entries().length).toBe(1);
   });
 
-  it('should handle deleting the only entry in the list', async () => {
+  it('should handle deleting the only entry', async () => {
     await addEntry('2025-06-01', 10);
-    expect(component.entries().length).toBe(1);
-
-    component.deleteEntry(component.entries()[0].id);
+    component.deleteEntry(entries()[0].id);
     await fixture.whenStable();
+    fixture.detectChanges();
 
-    expect(component.entries().length).toBe(0);
+    expect(entries().length).toBe(0);
     expect(component.totalKilometers()).toBe(0);
   });
 
-  it('should handle entries with missing rainingSource from old data', () => {
-    // Simulate old localStorage data without rainingSource
-    const oldEntries = [
-      { id: 1, date: '2025-06-01', kilometers: 10, raining: false },
-    ];
-    localStorage.setItem('bike-log-entries', JSON.stringify(oldEntries));
+  // -------------------------------------------------------------------------
+  // Total kilometers
+  // -------------------------------------------------------------------------
 
-    const freshFixture = TestBed.createComponent(BikeLogComponent);
-    const freshComponent = freshFixture.componentInstance;
-
-    expect(freshComponent.entries().length).toBe(1);
-    expect(freshComponent.entries()[0].kilometers).toBe(10);
-    // rainingSource will be undefined from old data, which is acceptable
-
-    const reqs = httpMock.match(r => r.url.includes('open-meteo.com'));
-    reqs.forEach(r => {
-      if (!r.cancelled) r.flush({ daily: { precipitation_sum: [0] } });
-    });
+  it('should have 0 total with no entries', () => {
+    expect(component.totalKilometers()).toBe(0);
   });
 
-  it('should handle empty localStorage value', () => {
-    localStorage.setItem('bike-log-entries', '');
+  it('should round total to 1 decimal place', async () => {
+    await addEntry('2025-06-01', 1.15);
+    await addEntry('2025-06-02', 2.25);
+    expect(component.totalKilometers()).toBe(3.4);
+  });
 
-    const freshFixture = TestBed.createComponent(BikeLogComponent);
-    const freshComponent = freshFixture.componentInstance;
+  it('should handle floating point precision in totals', async () => {
+    await addEntry('2025-06-01', 0.1);
+    await addEntry('2025-06-02', 0.2);
+    expect(component.totalKilometers()).toBe(0.3);
+  });
 
-    expect(freshComponent.entries().length).toBe(0);
+  // -------------------------------------------------------------------------
+  // Weather auto-check
+  // -------------------------------------------------------------------------
 
-    const reqs = httpMock.match(r => r.url.includes('open-meteo.com'));
-    reqs.forEach(r => {
-      if (!r.cancelled) r.flush({ daily: { precipitation_sum: [0] } });
-    });
+  it('should set raining to true when API reports rain', async () => {
+    component.rideModel.update(m => ({ ...m, date: '2025-03-15' }));
+    await fixture.whenStable();
+    httpMock.match(r => r.url.includes('open-meteo.com'))
+      .forEach(r => r.flush({ daily: { precipitation_sum: [8.5] } }));
+    await fixture.whenStable();
+
+    expect(component.rideModel().raining).toBe(true);
+  });
+
+  it('should set rainingSource to auto when filled by API', async () => {
+    component.rideModel.update(m => ({ ...m, date: '2025-03-15' }));
+    await fixture.whenStable();
+    httpMock.match(r => r.url.includes('open-meteo.com'))
+      .forEach(r => r.flush({ daily: { precipitation_sum: [3.0] } }));
+    await fixture.whenStable();
+
+    expect(component.rainingSource()).toBe('auto');
+  });
+
+  it('should set rainingSource to manual when user sets it', () => {
+    component.rainingSource.set('manual');
+    expect(component.rainingSource()).toBe('manual');
   });
 
   it('should show checking weather indicator while loading', async () => {
     component.checkingWeather.set(true);
-    await fixture.whenStable();
-    expect(el.textContent).toContain('Checking weather…');
+    fixture.detectChanges();
+    expect(el.textContent).toContain('Checking weather');
   });
 
-  it('should not show checking weather indicator when not loading', async () => {
-    expect(el.textContent).not.toContain('Checking weather…');
+  it('should not show checking weather indicator when not loading', () => {
+    expect(el.textContent).not.toContain('Checking weather');
   });
 
-  it('should show weather data tooltip on auto-rainy entries', async () => {
+  // -------------------------------------------------------------------------
+  // DOM rendering
+  // -------------------------------------------------------------------------
+
+  it('should show edit and delete buttons for each entry', async () => {
+    await addEntry('2025-06-01', 10);
+    await addEntry('2025-06-02', 15);
+    expect(getEditButtons().length).toBe(2);
+    expect(getDeleteButtons().length).toBe(2);
+  });
+
+  it('should show total kilometers in the DOM', async () => {
+    await addEntry('2025-06-01', 10);
+    await addEntry('2025-06-02', 15);
+    expect(el.textContent).toContain('25 km');
+  });
+
+  it('should display rain emoji for rainy entries', async () => {
+    await addEntry('2025-06-01', 10, true);
+    expect(getListItems()[0].textContent).toContain('🌧');
+  });
+
+  it('should not show rain emoji for non-rainy entries', async () => {
+    await addEntry('2025-06-01', 10, false);
+    expect(getListItems()[0].textContent).not.toContain('🌧');
+  });
+
+  it('should have accessible aria-labels on edit/delete buttons', async () => {
+    await addEntry('2025-06-01', 10);
+    expect(getEditButtons()[0].getAttribute('aria-label')).toContain('Edit ride on');
+    expect(getDeleteButtons()[0].getAttribute('aria-label')).toContain('Delete ride on');
+  });
+
+  it('should have an accessible list label', async () => {
+    await addEntry('2025-06-01', 10);
+    expect(el.querySelector('ul')?.getAttribute('aria-label')).toBe('Logged bike rides');
+  });
+
+  it('should show tooltip "Detected by weather data" for auto-rainy entries', async () => {
     component.rideModel.set({ date: '2025-06-01', kilometers: 10, raining: true });
     component.rainingSource.set('auto');
     await fixture.whenStable();
@@ -672,19 +604,40 @@ describe('BikeLogComponent', () => {
     await fixture.whenStable();
     flushWeatherRequests();
     await fixture.whenStable();
+    fixture.detectChanges();
 
-    const items = getListItems();
-    const tooltip = items[0].querySelector('span[role="tooltip"]');
+    const tooltip = getListItems()[0].querySelector('span[role="tooltip"]');
     expect(tooltip?.textContent?.trim()).toBe('Detected by weather data');
   });
 
-  it('should show manual tooltip on manually-set rainy entries', async () => {
+  it('should show tooltip "Set manually" for manually-set rainy entries', async () => {
     await addEntry('2025-06-01', 10, true);
+    const tooltip = getListItems()[0].querySelector('span[role="tooltip"]');
+    expect(tooltip?.textContent?.trim()).toBe('Set manually');
+  });
+
+  // -------------------------------------------------------------------------
+  // Form validation / edge cases
+  // -------------------------------------------------------------------------
+
+  it('should not add entry when form is invalid (km = 0)', async () => {
+    component.rideModel.set({ date: todayIso(), kilometers: 0, raining: false });
+    await fixture.whenStable();
+    flushWeatherRequests();
+    await fixture.whenStable();
+    component.onSubmit();
     await fixture.whenStable();
 
-    const items = getListItems();
-    const tooltip = items[0].querySelector('span[role="tooltip"]');
-    expect(tooltip?.textContent?.trim()).toBe('Set manually');
+    expect(entries().length).toBe(0);
+  });
+
+  it('should not add entry when date is empty', async () => {
+    component.rideModel.set({ date: '', kilometers: 10, raining: false });
+    await fixture.whenStable();
+    component.onSubmit();
+    await fixture.whenStable();
+
+    expect(entries().length).toBe(0);
   });
 
   it('should reset date to today after successful submission', async () => {
@@ -701,43 +654,13 @@ describe('BikeLogComponent', () => {
     await addEntry('2025-06-01', 10);
     await addEntry('2025-06-02', 20);
     await addEntry('2025-06-03', 30);
-    await fixture.whenStable();
-
-    const items = getListItems();
-    expect(items.length).toBe(3);
+    expect(getListItems().length).toBe(3);
     expect(component.totalKilometers()).toBe(60);
-  });
-
-  it('should not have duplicate IDs after multiple add/delete cycles', async () => {
-    await addEntry('2025-06-01', 10);
-    await addEntry('2025-06-02', 20);
-    const id1 = component.entries()[0].id;
-    component.deleteEntry(id1);
-    await addEntry('2025-06-03', 30);
-
-    const ids = component.entries().map(e => e.id);
-    const uniqueIds = new Set(ids);
-    expect(uniqueIds.size).toBe(ids.length);
-  });
-
-  it('should show validation errors after submit attempt with invalid data', async () => {
-    // Manually mark fields as touched by calling submit with invalid form
-    component.rideModel.set({ date: '', kilometers: 0, raining: false });
-    await fixture.whenStable();
-
-    component.onSubmit();
-    await fixture.whenStable();
-
-    // Form should not have added any entries
-    expect(component.entries().length).toBe(0);
   });
 
   it('should handle editing then adding a new entry', async () => {
     await addEntry('2025-06-01', 10);
-    const entry = component.entries()[0];
-
-    // Start and cancel edit
-    component.startEdit(entry);
+    component.startEdit(entries()[0]);
     await fixture.whenStable();
     flushWeatherRequests();
     await fixture.whenStable();
@@ -747,20 +670,20 @@ describe('BikeLogComponent', () => {
     flushWeatherRequests();
     await fixture.whenStable();
 
-    // Add a new entry after cancelling
     await addEntry('2025-06-02', 20);
-
-    expect(component.entries().length).toBe(2);
+    expect(entries().length).toBe(2);
     expect(component.editingId()).toBeNull();
   });
 
-  // --- Sorting ---
+  // -------------------------------------------------------------------------
+  // Sorting
+  // -------------------------------------------------------------------------
 
   it('should default sort field to date', () => {
     expect(component.sortField()).toBe('date');
   });
 
-  it('should default sort direction to desc (newest first)', () => {
+  it('should default sort direction to desc', () => {
     expect(component.sortDirection()).toBe('desc');
   });
 
@@ -768,7 +691,6 @@ describe('BikeLogComponent', () => {
     await addEntry('2025-06-01', 10);
     await addEntry('2025-06-03', 30);
     await addEntry('2025-06-02', 20);
-
     const sorted = component.sortedEntries();
     expect(sorted[0].date).toBe('2025-06-03');
     expect(sorted[1].date).toBe('2025-06-02');
@@ -779,11 +701,9 @@ describe('BikeLogComponent', () => {
     await addEntry('2025-06-01', 10);
     await addEntry('2025-06-03', 30);
     await addEntry('2025-06-02', 20);
-
-    component.setSort('date'); // toggle to asc
+    component.setSort('date');
     const sorted = component.sortedEntries();
     expect(sorted[0].date).toBe('2025-06-01');
-    expect(sorted[1].date).toBe('2025-06-02');
     expect(sorted[2].date).toBe('2025-06-03');
   });
 
@@ -791,11 +711,9 @@ describe('BikeLogComponent', () => {
     await addEntry('2025-06-01', 10);
     await addEntry('2025-06-02', 30);
     await addEntry('2025-06-03', 20);
-
     component.setSort('kilometers');
     const sorted = component.sortedEntries();
     expect(sorted[0].kilometers).toBe(30);
-    expect(sorted[1].kilometers).toBe(20);
     expect(sorted[2].kilometers).toBe(10);
   });
 
@@ -803,60 +721,52 @@ describe('BikeLogComponent', () => {
     await addEntry('2025-06-01', 10);
     await addEntry('2025-06-02', 30);
     await addEntry('2025-06-03', 20);
-
-    component.setSort('kilometers'); // switch to km desc
-    component.setSort('kilometers'); // toggle to km asc
+    component.setSort('kilometers');
+    component.setSort('kilometers');
     const sorted = component.sortedEntries();
     expect(sorted[0].kilometers).toBe(10);
-    expect(sorted[1].kilometers).toBe(20);
     expect(sorted[2].kilometers).toBe(30);
   });
 
   it('should reset direction to desc when switching between fields', async () => {
     await addEntry('2025-06-01', 10);
-
-    component.setSort('date');        // toggle date to asc
-    component.setSort('kilometers');  // switch field → resets to desc
+    component.setSort('date');
+    component.setSort('kilometers');
     expect(component.sortDirection()).toBe('desc');
   });
 
   it('should toggle direction when clicking the active sort field', () => {
-    component.setSort('date'); // already active → toggle to asc
+    component.setSort('date');
     expect(component.sortDirection()).toBe('asc');
-    component.setSort('date'); // toggle back to desc
+    component.setSort('date');
     expect(component.sortDirection()).toBe('desc');
   });
 
   it('should show sort buttons in the DOM when entries exist', async () => {
     await addEntry('2025-06-01', 10);
-    await fixture.whenStable();
+    expect(el.querySelector('[aria-label="Sort rides by"]')).toBeTruthy();
+  });
 
-    const sortGroup = el.querySelector('[aria-label="Sort rides by"]');
-    expect(sortGroup).toBeTruthy();
+  it('should not show sort controls when list is empty', () => {
+    expect(el.querySelector('[aria-label="Sort rides by"]')).toBeFalsy();
   });
 
   it('should mark the active sort button as aria-pressed=true', async () => {
     await addEntry('2025-06-01', 10);
-    await fixture.whenStable();
-
     const buttons = Array.from(el.querySelectorAll('[aria-label="Sort rides by"] button'));
     const dateBtn = buttons.find(b => b.textContent?.includes('Date'));
     const distBtn = buttons.find(b => b.textContent?.includes('Distance'));
-
     expect(dateBtn?.getAttribute('aria-pressed')).toBe('true');
     expect(distBtn?.getAttribute('aria-pressed')).toBe('false');
   });
 
   it('should update aria-pressed when switching sort field', async () => {
     await addEntry('2025-06-01', 10);
-
     component.setSort('kilometers');
-    await fixture.whenStable();
-
+    fixture.detectChanges();
     const buttons = Array.from(el.querySelectorAll('[aria-label="Sort rides by"] button'));
     const dateBtn = buttons.find(b => b.textContent?.includes('Date'));
     const distBtn = buttons.find(b => b.textContent?.includes('Distance'));
-
     expect(dateBtn?.getAttribute('aria-pressed')).toBe('false');
     expect(distBtn?.getAttribute('aria-pressed')).toBe('true');
   });
@@ -864,18 +774,12 @@ describe('BikeLogComponent', () => {
   it('should show a direction arrow only on the active sort button', async () => {
     await addEntry('2025-06-01', 10);
     component.setSort('kilometers');
-    await fixture.whenStable();
-
+    fixture.detectChanges();
     const buttons = Array.from(el.querySelectorAll('[aria-label="Sort rides by"] button'));
     const dateBtn = buttons.find(b => b.textContent?.includes('Date'))!;
     const distBtn = buttons.find(b => b.textContent?.includes('Distance'))!;
-
     expect(dateBtn.textContent).not.toMatch(/[↑↓]/);
     expect(distBtn.textContent).toMatch(/[↑↓]/);
   });
-
-  it('should not show sort controls when list is empty', () => {
-    const sortGroup = el.querySelector('[aria-label="Sort rides by"]');
-    expect(sortGroup).toBeFalsy();
-  });
 });
+

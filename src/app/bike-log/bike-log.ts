@@ -3,8 +3,8 @@ import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-i
 import { form, FormField, submit, required, min } from '@angular/forms/signals';
 import { DatePipe } from '@angular/common';
 import { filter, switchMap, tap } from 'rxjs';
-import { WeatherService } from '../weather.service';
-import { BikeLogService } from '../bike-log.service';
+import { WeatherService } from './weather.service';
+import { BikeLogService } from './bike-log.service';
 
 export type SortField = 'date' | 'kilometers';
 export type SortDirection = 'asc' | 'desc';
