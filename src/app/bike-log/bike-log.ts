@@ -9,6 +9,7 @@ import { BikeLogService } from './bike-log.service';
 import { AuthService } from '../auth.service';
 import { UserProfileService } from '../user-profile.service';
 
+
 export type SortField = 'date' | 'kilometers';
 export type SortDirection = 'asc' | 'desc';
 
@@ -45,7 +46,8 @@ export class BikeLogComponent {
   });
 
   readonly currentUser = this.authService.user;
-  readonly firstName = signal<string | null>(null);
+  /** First name from the profile cached by the auth guard – no extra Firestore read needed. */
+  readonly firstName = computed(() => this.profileService.currentProfile()?.firstName ?? null);
 
   readonly entries = toSignal(this.bikeLogService.entries$);
   readonly loadError = signal(false);
@@ -74,7 +76,7 @@ export class BikeLogComponent {
   });
 
   constructor() {
-    // Load the current user's first name
+    // Redirect to login when the user signs out while on this page
     toObservable(this.currentUser)
       .pipe(
         filter(u => u !== undefined),
@@ -83,14 +85,7 @@ export class BikeLogComponent {
       .subscribe(async user => {
         if (!user) {
           await this.router.navigateByUrl('/login');
-          return;
         }
-        const profile = await this.profileService.getProfile(user.uid);
-        if (!profile) {
-          await this.router.navigateByUrl('/onboarding');
-          return;
-        }
-        this.firstName.set(profile.firstName);
       });
 
     // Auto-check weather whenever the date changes

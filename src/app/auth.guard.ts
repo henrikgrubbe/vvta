@@ -16,6 +16,7 @@ export const authGuard: CanActivateFn = async () => {
   const profile = await profileService.getProfile(user.uid);
   if (!profile) return router.createUrlTree(['/onboarding']);
 
+  profileService.setCurrentProfile(profile);
   return true;
 };
 

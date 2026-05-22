@@ -24,15 +24,57 @@ async function addEntry(page: import('@playwright/test').Page, date: string, km:
 
 test.describe('Bike Log App', () => {
   test.beforeEach(async ({ page }) => {
-    // Wipe all Firestore emulator data between tests for clean isolation
+    // Wipe all Firestore emulator data
     await fetch(
       'http://127.0.0.1:8080/emulator/v1/projects/demo-vvta/databases/(default)/documents',
       { method: 'DELETE' }
     ).catch(() => {});
 
+    // Wipe all Auth emulator users
+    await fetch(
+      'http://127.0.0.1:9099/emulator/v1/projects/demo-vvta/accounts',
+      { method: 'DELETE' }
+    ).catch(() => {});
+
+    // Create a test user in the Auth emulator
+    const signUpRes = await fetch(
+      'http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/accounts:signUp?key=demo-key',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: 'test@test.com', password: 'testpassword123', returnSecureToken: true }),
+      }
+    );
+    const { localId: uid } = await signUpRes.json() as { localId: string };
+
+    // Create the user-profile document (admin bypass header)
+    await fetch(
+      `http://127.0.0.1:8080/v1/projects/demo-vvta/databases/(default)/documents/user-profiles?documentId=${uid}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer owner' },
+        body: JSON.stringify({
+          fields: {
+            uid: { stringValue: uid },
+            firstName: { stringValue: 'TestUser' },
+            email: { stringValue: 'test@test.com' },
+          },
+        }),
+      }
+    ).catch(() => {});
+
+    // Navigate (redirects to /login), wait for __testSignIn helper, then sign in
+    await page.goto('/');
+    await page.waitForFunction(() => typeof (window as unknown as Record<string, unknown>)['__testSignIn'] === 'function');
+    await page.evaluate(() =>
+      (window as unknown as { __testSignIn: (e: string, p: string) => Promise<void> })
+        .__testSignIn('test@test.com', 'testpassword123')
+    );
+
+    // Now navigate to home — auth guard will allow through
     await page.goto('/');
     await page.waitForSelector('h1');
-    // Wait for the Firestore subscription to resolve (loading state clears)
+    // Wait for Firestore subscription to resolve
     await page.waitForFunction(
       () => !document.body.textContent?.includes('Loading rides')
     );
@@ -134,7 +176,7 @@ test.describe('Bike Log App', () => {
       await addEntry(page, '2025-06-01', '10');
       await addEntry(page, '2025-06-02', '15');
 
-      await expect(page.locator('strong')).toContainText('25 km');
+      await expect(page.locator('strong').filter({ hasText: /km/ })).toContainText('25 km');
     });
 
     test('should clear the km field after adding an entry', async ({ page }) => {
@@ -180,7 +222,7 @@ test.describe('Bike Log App', () => {
       await addEntry(page, '2025-06-02', '0.2');
 
       // Total should show 0.3, not 0.30000000000000004
-      await expect(page.locator('strong')).toContainText('0.3 km');
+      await expect(page.locator('strong').filter({ hasText: /km/ })).toContainText('0.3 km');
     });
 
     test('should handle large km values', async ({ page }) => {
@@ -193,7 +235,7 @@ test.describe('Bike Log App', () => {
         await addEntry(page, `2025-06-${String(i).padStart(2, '0')}`, String(i * 10));
       }
       await expect(page.locator('ul li')).toHaveCount(5);
-      await expect(page.locator('strong')).toContainText('150 km');
+      await expect(page.locator('strong').filter({ hasText: /km/ })).toContainText('150 km');
     });
   });
 
@@ -363,7 +405,7 @@ test.describe('Bike Log App', () => {
       await page.locator('button[aria-label*="Delete"]').first().click();
 
       await expect(page.locator('ul li')).toHaveCount(1);
-      await expect(page.locator('strong')).toContainText('10 km');
+      await expect(page.locator('strong').filter({ hasText: /km/ })).toContainText('10 km');
     });
 
     test('should delete a middle entry from a list of three', async ({ page }) => {
@@ -375,7 +417,7 @@ test.describe('Bike Log App', () => {
       await page.locator('button[aria-label*="Delete"]').nth(1).click();
 
       await expect(page.locator('ul li')).toHaveCount(2);
-      await expect(page.locator('strong')).toContainText('40 km');
+      await expect(page.locator('strong').filter({ hasText: /km/ })).toContainText('40 km');
     });
 
     test('should delete all entries one by one', async ({ page }) => {
@@ -452,7 +494,7 @@ test.describe('Bike Log App', () => {
       await page.waitForSelector('ul li');
 
       await expect(page.locator('ul li')).toHaveCount(3);
-      await expect(page.locator('strong')).toContainText('60 km');
+      await expect(page.locator('strong').filter({ hasText: /km/ })).toContainText('60 km');
     });
 
     test('should persist rain status across reload', async ({ page }) => {
@@ -521,7 +563,7 @@ test.describe('Bike Log App', () => {
 
       await expect(page.locator('ul li')).toHaveCount(2);
       await expect(page.locator('ul li').last()).toContainText('15 km');
-      await expect(page.locator('strong')).toContainText('35 km');
+      await expect(page.locator('strong').filter({ hasText: /km/ })).toContainText('35 km');
     });
 
     test('add → delete → add → reload', async ({ page }) => {
@@ -573,7 +615,7 @@ test.describe('Bike Log App', () => {
 
       await expect(page.locator('ul li')).toHaveCount(10);
       // Sum of 1..10 = 55
-      await expect(page.locator('strong')).toContainText('55 km');
+      await expect(page.locator('strong').filter({ hasText: /km/ })).toContainText('55 km');
     });
   });
 

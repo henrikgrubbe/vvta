@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import {
   collection,
   doc,
@@ -18,6 +18,14 @@ export class UserProfileService {
   private readonly firestore = inject(Firestore);
   private readonly profilesRef = collection(this.firestore, 'user-profiles');
 
+  /** Cached profile for the signed-in user. `undefined` = not yet loaded, `null` = no profile. */
+  private readonly _currentProfile = signal<UserProfile | null | undefined>(undefined);
+  readonly currentProfile = this._currentProfile.asReadonly();
+
+  setCurrentProfile(profile: UserProfile | null): void {
+    this._currentProfile.set(profile);
+  }
+
   async getProfile(uid: string): Promise<UserProfile | null> {
     const snap = await getDoc(doc(this.profilesRef, uid));
     return snap.exists() ? (snap.data() as UserProfile) : null;
@@ -25,6 +33,7 @@ export class UserProfileService {
 
   async saveProfile(profile: UserProfile): Promise<void> {
     await setDoc(doc(this.profilesRef, profile.uid), profile);
+    this._currentProfile.set(profile);
   }
 }
 

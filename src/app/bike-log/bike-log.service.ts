@@ -6,12 +6,11 @@ import {
   deleteDoc,
   doc,
   Firestore,
-  orderBy,
   query,
   updateDoc,
   where,
 } from '@angular/fire/firestore';
-import { Observable, of, switchMap } from 'rxjs';
+import { catchError, Observable, of, switchMap } from 'rxjs';
 import { Auth, authState } from '@angular/fire/auth';
 import { BikeEntry } from './bike-log';
 
@@ -21,18 +20,16 @@ export class BikeLogService {
   private readonly auth = inject(Auth);
   private readonly entriesRef = collection(this.firestore, 'bike-entries');
 
-  /** Current user's entries ordered by date descending. */
+  /** Current user's entries. Sorted client-side; errors fall back to empty array. */
   readonly entries$: Observable<BikeEntry[]> = authState(this.auth).pipe(
     switchMap(user => {
       if (!user) return of([]);
-      return collectionData(
-        query(
-          this.entriesRef,
-          where('userId', '==', user.uid),
-          orderBy('date', 'desc'),
-        ),
-        { idField: 'id' },
-      ) as Observable<BikeEntry[]>;
+      return (
+        collectionData(
+          query(this.entriesRef, where('userId', '==', user.uid)),
+          { idField: 'id' },
+        ) as Observable<BikeEntry[]>
+      ).pipe(catchError(() => of([])));
     }),
   );
 
