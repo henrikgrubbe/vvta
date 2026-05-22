@@ -33,7 +33,7 @@
     "@tailwindcss/postcss": "4.3.0",
     "angular-eslint": "21.4.0",
     "eslint": "10.4.0",
-    "firebase-tools": "^14.0.0",
+    "firebase-tools": "14.27.0",
     "jsdom": "29.1.1",
     "postcss": "8.5.15",
     "prettier": "3.8.3",
