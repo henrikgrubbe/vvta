@@ -15,3 +15,10 @@ body {
   min-height: 100dvh;
   background-color: #f9fafb;
 }
+
+button:not([disabled]),
+a[href],
+[role="button"] {
+  cursor: pointer;
+}
+
