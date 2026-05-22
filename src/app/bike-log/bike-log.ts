@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import { afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyRef, ElementRef, inject, signal, ViewChild } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { form, FormField, submit, required, min } from '@angular/forms/signals';
 import { DatePipe } from '@angular/common';
@@ -37,6 +37,8 @@ export class BikeLogComponent {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
+  @ViewChild('datePicker') private datePicker!: ElementRef<HTMLInputElement>;
+
   readonly rideModel = signal({ date: this.todayIso(), kilometers: 0, raining: false });
 
   readonly rideForm = form(this.rideModel, (s) => {
@@ -46,12 +48,14 @@ export class BikeLogComponent {
   });
 
   readonly currentUser = this.authService.user;
-  /** First name from the profile cached by the auth guard – no extra Firestore read needed. */
   readonly firstName = computed(() => this.profileService.currentProfile()?.firstName ?? null);
+  /** ISO date string for today — used as the `max` attribute on the date input. */
+  readonly today = this.todayIso();
 
   readonly entries = toSignal(this.bikeLogService.entries$);
   readonly loadError = signal(false);
   readonly editingId = signal<string | null>(null);
+  readonly confirmDeleteId = signal<string | null>(null);
   readonly checkingWeather = signal(false);
   readonly rainingSource = signal<'auto' | 'manual'>('auto');
   readonly saving = signal(false);
@@ -76,6 +80,11 @@ export class BikeLogComponent {
   });
 
   constructor() {
+    // Set max=today on the date picker so future dates can't be selected
+    afterNextRender(() => {
+      this.datePicker.nativeElement.max = this.today;
+    });
+
     // Redirect to login when the user signs out while on this page
     toObservable(this.currentUser)
       .pipe(
@@ -155,6 +164,15 @@ export class BikeLogComponent {
       this.cancelEdit();
     }
     this.bikeLogService.delete(id);
+    this.confirmDeleteId.set(null);
+  }
+
+  requestDelete(id: string): void {
+    this.confirmDeleteId.set(id);
+  }
+
+  cancelDelete(): void {
+    this.confirmDeleteId.set(null);
   }
 
   setSort(field: SortField): void {

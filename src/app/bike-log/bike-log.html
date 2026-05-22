@@ -166,23 +166,43 @@
               </span>
             }
           </div>
-          <div class="flex gap-1 shrink-0">
-            <button
-              type="button"
-              (click)="startEdit(entry)"
-              class="flex items-center justify-center w-10 h-10 text-blue-600 hover:bg-blue-50 rounded-lg focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
-              [attr.aria-label]="'Edit ride on ' + entry.date"
-            >
-              ✏️
-            </button>
-            <button
-              type="button"
-              (click)="deleteEntry(entry.id)"
-              class="flex items-center justify-center w-10 h-10 text-red-600 hover:bg-red-50 rounded-lg focus:outline-2 focus:outline-offset-2 focus:outline-red-500"
-              [attr.aria-label]="'Delete ride on ' + entry.date"
-            >
-              🗑️
-            </button>
+          <div class="flex items-center gap-1 shrink-0">
+            @if (confirmDeleteId() === entry.id) {
+              <span class="text-xs text-red-600 mr-1 whitespace-nowrap">Delete?</span>
+              <button
+                type="button"
+                (click)="deleteEntry(entry.id)"
+                class="flex items-center justify-center w-10 h-10 text-red-600 hover:bg-red-50 rounded-lg focus:outline-2 focus:outline-offset-2 focus:outline-red-500"
+                aria-label="Confirm delete"
+              >
+                <span class="material-symbols-outlined">check</span>
+              </button>
+              <button
+                type="button"
+                (click)="cancelDelete()"
+                class="flex items-center justify-center w-10 h-10 text-gray-500 hover:bg-gray-100 rounded-lg focus:outline-2 focus:outline-offset-2 focus:outline-gray-400"
+                aria-label="Cancel delete"
+              >
+                <span class="material-symbols-outlined">close</span>
+              </button>
+            } @else {
+              <button
+                type="button"
+                (click)="startEdit(entry)"
+                class="flex items-center justify-center w-10 h-10 text-blue-600 hover:bg-blue-50 rounded-lg focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
+                [attr.aria-label]="'Edit ride on ' + entry.date"
+              >
+                <span class="material-symbols-outlined">edit</span>
+              </button>
+              <button
+                type="button"
+                (click)="requestDelete(entry.id)"
+                class="flex items-center justify-center w-10 h-10 text-red-600 hover:bg-red-50 rounded-lg focus:outline-2 focus:outline-offset-2 focus:outline-red-500"
+                [attr.aria-label]="'Delete ride on ' + entry.date"
+              >
+                <span class="material-symbols-outlined">delete</span>
+              </button>
+            }
           </div>
         </li>
       }

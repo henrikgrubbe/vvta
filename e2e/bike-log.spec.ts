@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
 
+type Page = import('@playwright/test').Page;
+
 // Helper to add an entry quickly
-async function addEntry(page: import('@playwright/test').Page, date: string, km: string, raining = false) {
+async function addEntry(page: Page, date: string, km: string, raining = false) {
   await page.fill('#ride-date', date);
   await page.fill('#ride-km', km);
   if (raining) {
@@ -20,6 +22,12 @@ async function addEntry(page: import('@playwright/test').Page, date: string, km:
   await page.waitForFunction(
     () => (document.querySelector('#ride-km') as HTMLInputElement)?.value === '0'
   );
+}
+
+/** Click the nth delete button for a ride and confirm the inline prompt. */
+async function deleteRide(page: Page, nth = 0) {
+  await page.locator('button[aria-label*="Delete ride"]').nth(nth).click();
+  await page.locator('button[aria-label="Confirm delete"]').click();
 }
 
 test.describe('Bike Log App', () => {
@@ -391,7 +399,7 @@ test.describe('Bike Log App', () => {
   test.describe('Deleting entries', () => {
     test('should delete an entry and show empty state', async ({ page }) => {
       await addEntry(page, '2025-06-01', '10');
-      await page.click('button[aria-label*="Delete"]');
+      await deleteRide(page);
 
       await expect(page.locator('ul li')).toHaveCount(0);
       await expect(page.locator('text=No rides logged yet')).toBeVisible();
@@ -402,7 +410,7 @@ test.describe('Bike Log App', () => {
       await addEntry(page, '2025-06-02', '20');
 
       // Delete the first (newest, 20km)
-      await page.locator('button[aria-label*="Delete"]').first().click();
+      await deleteRide(page);
 
       await expect(page.locator('ul li')).toHaveCount(1);
       await expect(page.locator('strong').filter({ hasText: /km/ })).toContainText('10 km');
@@ -414,7 +422,7 @@ test.describe('Bike Log App', () => {
       await addEntry(page, '2025-06-03', '30');
 
       // Delete the middle entry (20km, index 1)
-      await page.locator('button[aria-label*="Delete"]').nth(1).click();
+      await deleteRide(page, 1);
 
       await expect(page.locator('ul li')).toHaveCount(2);
       await expect(page.locator('strong').filter({ hasText: /km/ })).toContainText('40 km');
@@ -425,14 +433,13 @@ test.describe('Bike Log App', () => {
       await addEntry(page, '2025-06-02', '20');
       await addEntry(page, '2025-06-03', '30');
 
-      // Delete entries from first to last
-      await page.locator('button[aria-label*="Delete"]').first().click();
+      await deleteRide(page);
       await expect(page.locator('ul li')).toHaveCount(2);
 
-      await page.locator('button[aria-label*="Delete"]').first().click();
+      await deleteRide(page);
       await expect(page.locator('ul li')).toHaveCount(1);
 
-      await page.locator('button[aria-label*="Delete"]').first().click();
+      await deleteRide(page);
       await expect(page.locator('ul li')).toHaveCount(0);
       await expect(page.locator('text=No rides logged yet')).toBeVisible();
     });
@@ -442,7 +449,7 @@ test.describe('Bike Log App', () => {
       await page.click('button[aria-label*="Edit"]');
       await expect(page.locator('button[type="submit"]')).toContainText('Update Entry');
 
-      await page.click('button[aria-label*="Delete"]');
+      await deleteRide(page);
 
       await expect(page.locator('button[type="submit"]')).toContainText('Add Entry');
       await expect(page.locator('button:text("Cancel")')).not.toBeVisible();
@@ -456,8 +463,8 @@ test.describe('Bike Log App', () => {
       await page.locator('button[aria-label*="Edit"]').last().click();
       await expect(page.locator('#ride-km')).toHaveValue('10');
 
-      // Delete the first entry (20km)
-      await page.locator('button[aria-label*="Delete"]').first().click();
+      // Request delete on the first entry (20km) — confirm not yet clicked
+      await page.locator('button[aria-label*="Delete ride"]').first().click();
 
       // Should still be in edit mode
       await expect(page.locator('button[type="submit"]')).toContainText('Update Entry');
@@ -465,7 +472,7 @@ test.describe('Bike Log App', () => {
 
     test('should be able to add entries after deleting all', async ({ page }) => {
       await addEntry(page, '2025-06-01', '10');
-      await page.click('button[aria-label*="Delete"]');
+      await deleteRide(page);
       await expect(page.locator('text=No rides logged yet')).toBeVisible();
 
       await addEntry(page, '2025-06-02', '20');
@@ -509,7 +516,7 @@ test.describe('Bike Log App', () => {
     test('should persist deletion across reload', async ({ page }) => {
       await addEntry(page, '2025-06-01', '10');
       await addEntry(page, '2025-06-02', '20');
-      await page.locator('button[aria-label*="Delete"]').first().click();
+      await deleteRide(page);
 
       await page.reload();
       await page.waitForSelector('ul li');
@@ -568,7 +575,7 @@ test.describe('Bike Log App', () => {
 
     test('add → delete → add → reload', async ({ page }) => {
       await addEntry(page, '2025-06-01', '10');
-      await page.click('button[aria-label*="Delete"]');
+      await deleteRide(page);
       await addEntry(page, '2025-06-02', '25');
 
       await page.reload();

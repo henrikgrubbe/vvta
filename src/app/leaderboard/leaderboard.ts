@@ -19,19 +19,21 @@ interface RiderStats {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, DatePipe],
   template: `
-    <div class="max-w-2xl mx-auto p-6">
-      <div class="flex items-center justify-between mb-6">
+    <div class="max-w-lg mx-auto p-6">
+      <header class="flex items-start justify-between mb-6">
         <div>
           <h1 class="text-3xl font-bold text-gray-900">🏆 Leaderboard</h1>
           <p class="text-gray-500 text-sm mt-1">Who's been riding the most?</p>
         </div>
-        <a
-          routerLink="/"
-          class="text-sm text-blue-600 hover:underline focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 rounded"
-        >
-          ← My rides
-        </a>
-      </div>
+        <nav class="flex items-center gap-2 shrink-0 ml-4" aria-label="App navigation">
+          <a
+            routerLink="/"
+            class="text-sm text-blue-600 hover:underline focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 rounded whitespace-nowrap"
+          >
+            ← Mine ture
+          </a>
+        </nav>
+      </header>
 
       @if (allEntries() === undefined) {
         <p class="text-center text-gray-400 py-12">Loading…</p>
