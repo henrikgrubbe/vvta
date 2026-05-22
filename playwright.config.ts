@@ -6,7 +6,7 @@ export default defineConfig({
   retries: 0,
   reporter: [['html', { open: 'never' }]],
   use: {
-    baseURL: 'http://localhost:4200',
+    baseURL: 'http://127.0.0.1:4200',
     trace: 'on-first-retry',
   },
   projects: [
@@ -19,12 +19,12 @@ export default defineConfig({
     {
       command: 'firebase emulators:start --only firestore --project demo-vvta',
       url: 'http://127.0.0.1:4400',
-      reuseExistingServer: !process.env['CI'],
+      reuseExistingServer: false,
       timeout: 120_000,
     },
     {
-      command: 'npx ng serve --configuration e2e --port 4200',
-      url: 'http://localhost:4200',
+      command: 'npx ng serve --configuration e2e --port 4200 --host 127.0.0.1',
+      url: 'http://127.0.0.1:4200',
       reuseExistingServer: !process.env['CI'],
       timeout: 60_000,
     },
