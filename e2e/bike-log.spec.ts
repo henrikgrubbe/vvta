@@ -32,11 +32,11 @@ test.describe('Bike Log App', () => {
 
   test.describe('Initial state', () => {
     test('should show the app heading', async ({ page }) => {
-      await expect(page.locator('h1')).toContainText("Rune's Bike Commute Log");
+      await expect(page.locator('h1')).toContainText("Vi viber til arbejde");
     });
 
     test('should show the subtitle', async ({ page }) => {
-      await expect(page.locator('text=Track your daily bicycle commute')).toBeVisible();
+      await expect(page.locator('text=Log dine daglige cykelture')).toBeVisible();
     });
 
     test('should show empty state message', async ({ page }) => {

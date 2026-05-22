@@ -12,7 +12,7 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 
 ## Project Overview
 
-Bike commute logging app ("Rune's Bike Commute Log") built with Angular 21, Firebase/Firestore, and Tailwind CSS 4. Single-feature app that tracks daily bicycle rides with auto weather detection via Open-Meteo API.
+Bike commute logging app ("Vi viber til arbejde") built with Angular 21, Firebase/Firestore, and Tailwind CSS 4. Single-feature app that tracks daily bicycle rides with auto weather detection via Open-Meteo API.
 
 ## Tech Stack
 

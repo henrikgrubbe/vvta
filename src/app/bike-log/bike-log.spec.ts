@@ -145,7 +145,7 @@ describe('BikeLogComponent', () => {
   });
 
   it('should display the heading', () => {
-    expect(el.querySelector('h1')?.textContent).toContain("Rune's Bike Commute Log");
+    expect(el.querySelector('h1')?.textContent).toContain("Vi viber til arbejde");
   });
 
   it('should show empty state message when no entries', () => {
