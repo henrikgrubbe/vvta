@@ -1,11 +1,10 @@
 export const environment = {
   firebase: {
-    projectId: 'rcta-b2aea',
-    appId: '1:22960451988:web:fed2b7387c56878f019f81',
-    storageBucket: 'rcta-b2aea.firebasestorage.app',
-    apiKey: 'AIzaSyBRiPa1rpKqsZg3g3fVznDfigxld3GVpRw',
-    authDomain: 'rcta-b2aea.firebaseapp.com',
-    messagingSenderId: '22960451988',
+    projectId: 'vvta-bike-log',
+    appId: '1:569496831202:web:ae39160a964a20fe434abb',
+    storageBucket: 'vvta-bike-log.firebasestorage.app',
+    apiKey: 'AIzaSyDkmcVAthOakKQ1V0F-CdeBex6Lx7PdLjw',
+    authDomain: 'vvta-bike-log.firebaseapp.com',
+    messagingSenderId: '569496831202',
   },
 };
-
