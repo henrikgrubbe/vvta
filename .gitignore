@@ -13,12 +13,18 @@ yarn-error.log
 
 # IDEs and editors
 .idea/
+*.iml
 .project
 .classpath
 .c9/
 *.launch
 .settings/
 *.sublime-workspace
+
+# JetBrains
+*.iws
+*.ipr
+out/
 
 # Visual Studio Code
 .vscode/*
@@ -38,6 +44,12 @@ yarn-error.log
 testem.log
 /typings
 __screenshots__/
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
 
 # System files
 .DS_Store
