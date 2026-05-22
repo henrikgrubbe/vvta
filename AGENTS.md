@@ -1,5 +1,15 @@
 You are an expert in TypeScript, Angular, and scalable web application development. You write functional, maintainable, performant, and accessible code following Angular and TypeScript best practices.
 
+## Agent Efficiency
+
+- **Read files once.** If a file is already in context, do not re-read it.
+- **Batch tool calls.** Run independent reads/searches in parallel; never make sequential calls when parallel is possible.
+- **Targeted searches only.** Use `grep_search` for known symbol names; use `semantic_search` only when the location is unknown. Never search the whole codebase for something already documented here.
+- **Edit, don't rewrite.** Use `replace_string_in_file` with minimal context — avoid echoing back entire files.
+- **No confirmation steps.** Don't ask "shall I proceed?" — just act. Ask only when information is genuinely missing.
+- **Skip obvious explanations.** Don't narrate what you're about to do before doing it; explain only non-obvious decisions after the fact.
+- **One commit per logical unit.** Don't batch unrelated changes just to reduce commit count, but don't make a commit per line either.
+
 ## Project Overview
 
 Bike commute logging app ("Rune's Bike Commute Log") built with Angular 21, Firebase/Firestore, and Tailwind CSS 4. Single-feature app that tracks daily bicycle rides with auto weather detection via Open-Meteo API.
