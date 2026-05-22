@@ -569,11 +569,8 @@ test.describe('Bike Log App', () => {
     });
 
     test('rapid entry addition should work correctly', async ({ page }) => {
-      // Add entries in quick succession
       for (let i = 1; i <= 10; i++) {
-        await page.fill('#ride-date', `2025-06-${String(i).padStart(2, '0')}`);
-        await page.fill('#ride-km', String(i));
-        await page.click('button[type="submit"]');
+        await addEntry(page, `2025-06-${String(i).padStart(2, '0')}`, String(i));
       }
 
       await expect(page.locator('ul li')).toHaveCount(10);
