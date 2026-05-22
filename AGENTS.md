@@ -28,6 +28,7 @@ Bike commute logging app ("Vi viber til arbejde") built with Angular 21, Firebas
 
 | Action | Command |
 |---|---|
+| Lint | `npm run lint` |
 | Dev server | `npm start` (port 4200) |
 | Build | `npm run build` |
 | Unit tests | `npm test` |
