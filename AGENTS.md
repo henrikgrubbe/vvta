@@ -41,6 +41,20 @@ src/environments/
   environment.ts          # Firebase config
 ```
 
+## Git Workflow
+
+- **Always commit changes** as you go — after each logical unit of work, not all at once at the end
+- Use [Conventional Commits](https://www.conventionalcommits.org/) format: `type: short summary`
+  - `feat:` — new feature or behaviour
+  - `fix:` — bug fix
+  - `chore:` — tooling, config, deps (no production code change)
+  - `docs:` — documentation only
+  - `refactor:` — code change with no behaviour change
+  - `test:` — adding or updating tests
+- Keep the subject line short (≤72 chars); add a body with bullet points for non-obvious context
+- Stage related files together in a single commit; don't mix unrelated changes
+- Example: `git add src/environments/environment.ts && git commit -m "chore: migrate to vvta-bike-log Firebase project"`
+
 ## Key Patterns
 
 ### File Naming
