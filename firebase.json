@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": "dist/rcta/browser",
+    "public": "dist/vvta/browser",
     "ignore": [
       "firebase.json",
       "**/.*",

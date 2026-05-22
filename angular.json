@@ -6,7 +6,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "rcta": {
+    "vvta": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -56,10 +56,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "rcta:build:production"
+              "buildTarget": "vvta:build:production"
             },
             "development": {
-              "buildTarget": "rcta:build:development"
+              "buildTarget": "vvta:build:development"
             }
           },
           "defaultConfiguration": "development"
