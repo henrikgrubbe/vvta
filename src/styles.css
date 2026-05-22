@@ -18,7 +18,8 @@ body {
 
 button:not([disabled]),
 a[href],
-[role="button"] {
+[role="button"],
+input[type="checkbox"] {
   cursor: pointer;
 }
 
