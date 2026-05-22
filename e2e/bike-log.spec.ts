@@ -31,8 +31,6 @@ test.describe('Bike Log App', () => {
     ).catch(() => {});
 
     await page.goto('/');
-    await page.evaluate(() => localStorage.clear());
-    await page.reload();
     await page.waitForSelector('h1');
     // Wait for the Firestore subscription to resolve (loading state clears)
     await page.waitForFunction(
@@ -680,13 +678,6 @@ test.describe('Bike Log App', () => {
       await expect(items.nth(0)).toContainText('30 km');
     });
 
-    test('should not show sort controls when list is empty', async ({ page }) => {
-      await page.evaluate(() => localStorage.clear());
-      await page.reload();
-      await page.waitForSelector('h1');
-      await expect(page.locator('[aria-label="Sort rides by"]')).not.toBeVisible();
-    });
-
     test('sort should persist correctly after adding a new entry', async ({ page }) => {
       await page.locator('[aria-label="Sort rides by"] button', { hasText: 'Distance' }).click();
       await addEntry(page, '2025-06-04', '5');
@@ -697,6 +688,9 @@ test.describe('Bike Log App', () => {
     });
   });
 
+    test('should not show sort controls when list is empty', async ({ page }) => {
+      await expect(page.locator('[aria-label="Sort rides by"]')).not.toBeVisible();
+    });
 
     test('should have proper aria-label on the ride list', async ({ page }) => {
       await addEntry(page, '2025-06-01', '10');
