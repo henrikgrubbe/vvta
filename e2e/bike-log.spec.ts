@@ -731,5 +731,4 @@ test.describe('Bike Log App', () => {
       await expect(page.locator('span[role="tooltip"]')).toBeAttached();
     });
   });
-});
 
