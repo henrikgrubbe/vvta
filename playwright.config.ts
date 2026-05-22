@@ -4,7 +4,9 @@ export default defineConfig({
   testDir: './e2e',
   fullyParallel: false,
   retries: 0,
-  reporter: [['html', { open: 'never' }]],
+  reporter: process.env['CI']
+    ? [['github'], ['html', { open: 'never' }]]
+    : [['html', { open: 'never' }]],
   use: {
     baseURL: 'http://127.0.0.1:4200',
     trace: 'on-first-retry',
