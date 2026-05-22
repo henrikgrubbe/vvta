@@ -23,7 +23,7 @@ export default defineConfig({
       timeout: 120_000,
     },
     {
-      command: 'npx ng serve --configuration e2e --port 4200 --host 127.0.0.1',
+      command: 'ng serve --configuration e2e --port 4200 --host 127.0.0.1',
       url: 'http://127.0.0.1:4200',
       reuseExistingServer: !process.env['CI'],
       timeout: 60_000,
