@@ -18,7 +18,7 @@ export default defineConfig({
   webServer: [
     {
       command: 'firebase emulators:start --only firestore,auth --project demo-vvta',
-      url: 'http://127.0.0.1:4400',
+      url: 'http://127.0.0.1:9099',
       reuseExistingServer: false,
       timeout: 120_000,
     },
