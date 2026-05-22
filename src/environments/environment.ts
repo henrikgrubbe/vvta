@@ -1,4 +1,5 @@
 export const environment = {
+  useEmulator: false,
   firebase: {
     projectId: 'vvta-bike-log',
     appId: '1:569496831202:web:ae39160a964a20fe434abb',
