@@ -1,15 +1,16 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
-import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { form, FormField, submit, required, min } from '@angular/forms/signals';
 import { DatePipe } from '@angular/common';
 import { filter, switchMap, tap } from 'rxjs';
 import { WeatherService } from '../weather.service';
+import { BikeLogService } from '../bike-log.service';
 
 export type SortField = 'date' | 'kilometers';
 export type SortDirection = 'asc' | 'desc';
 
 export interface BikeEntry {
-  id: number;
+  id: string;
   date: string;
   kilometers: number;
   raining: boolean;
@@ -80,10 +81,14 @@ export interface BikeEntry {
 
         <button
           type="submit"
-          [disabled]="rideForm().invalid()"
+          [disabled]="rideForm().invalid() || saving()"
           class="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {{ editingId() !== null ? 'Update Entry' : 'Add Entry' }}
+          @if (saving()) {
+            Saving…
+          } @else {
+            {{ editingId() !== null ? 'Update Entry' : 'Add Entry' }}
+          }
         </button>
 
         @if (editingId() !== null) {
@@ -97,7 +102,11 @@ export interface BikeEntry {
         }
       </form>
 
-      @if (entries().length > 0) {
+      @if (loadError()) {
+        <p class="text-center text-red-500 py-8">Failed to load rides. Please refresh.</p>
+      } @else if (entries() === undefined) {
+        <p class="text-center text-gray-400 py-8">Loading rides…</p>
+      } @else if (entries()!.length > 0) {
         <div class="mb-3 flex justify-between items-center">
           <h2 class="text-xl font-semibold text-gray-900">Logged Rides</h2>
           <p class="text-sm text-gray-600">
@@ -185,8 +194,8 @@ export interface BikeEntry {
   `,
 })
 export class BikeLogComponent {
-  private nextId = 1;
   private readonly weather = inject(WeatherService);
+  private readonly bikeLogService = inject(BikeLogService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly rideModel = signal({ date: this.todayIso(), kilometers: 0, raining: false });
@@ -197,13 +206,15 @@ export class BikeLogComponent {
     min(s.kilometers, 0.1, { message: 'Must be at least 0.1 km' });
   });
 
-  readonly entries = signal<BikeEntry[]>(this.loadEntries());
-  readonly editingId = signal<number | null>(null);
+  readonly entries = toSignal(this.bikeLogService.entries$);
+  readonly loadError = signal(false);
+  readonly editingId = signal<string | null>(null);
   readonly checkingWeather = signal(false);
   readonly rainingSource = signal<'auto' | 'manual'>('auto');
+  readonly saving = signal(false);
 
   readonly totalKilometers = computed(() =>
-    Math.round(this.entries().reduce((sum, e) => sum + e.kilometers, 0) * 10) / 10
+    Math.round((this.entries() ?? []).reduce((sum, e) => sum + e.kilometers, 0) * 10) / 10
   );
 
   readonly sortField = signal<SortField>('date');
@@ -212,7 +223,7 @@ export class BikeLogComponent {
   readonly sortedEntries = computed(() => {
     const field = this.sortField();
     const dir = this.sortDirection();
-    return [...this.entries()].sort((a, b) => {
+    return [...(this.entries() ?? [])].sort((a, b) => {
       const aVal = field === 'date' ? a.date : a.kilometers;
       const bVal = field === 'date' ? b.date : b.kilometers;
       if (aVal < bVal) return dir === 'asc' ? -1 : 1;
@@ -222,9 +233,6 @@ export class BikeLogComponent {
   });
 
   constructor() {
-    const maxId = this.entries().reduce((max, e) => Math.max(max, e.id), 0);
-    this.nextId = maxId + 1;
-
     // Auto-check weather whenever the date changes
     toObservable(computed(() => this.rideForm.date().value()))
       .pipe(
@@ -248,16 +256,18 @@ export class BikeLogComponent {
       const currentEditId = this.editingId();
       const rainingSource = this.rainingSource();
 
-      if (currentEditId !== null) {
-        this.entries.update(list =>
-          list.map(e => e.id === currentEditId ? { ...e, date, kilometers, raining, rainingSource } : e)
-        );
-        this.editingId.set(null);
-      } else {
-        this.entries.update(list => [{ id: this.nextId++, date, kilometers, raining, rainingSource }, ...list]);
+      this.saving.set(true);
+      try {
+        if (currentEditId !== null) {
+          await this.bikeLogService.update(currentEditId, { date, kilometers, raining, rainingSource });
+          this.editingId.set(null);
+        } else {
+          await this.bikeLogService.add({ date, kilometers, raining, rainingSource });
+        }
+      } finally {
+        this.saving.set(false);
       }
 
-      this.saveEntries();
       this.rideModel.set({ date: this.todayIso(), kilometers: 0, raining: false });
       this.rideForm().reset();
     });
@@ -277,34 +287,11 @@ export class BikeLogComponent {
     this.rideForm().reset();
   }
 
-
-  private todayIso(): string {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }
-
-  deleteEntry(id: number): void {
-    this.entries.update(list => list.filter(e => e.id !== id));
+  deleteEntry(id: string): void {
     if (this.editingId() === id) {
       this.cancelEdit();
     }
-    this.saveEntries();
-  }
-
-  private saveEntries(): void {
-    localStorage.setItem('bike-log-entries', JSON.stringify(this.entries()));
-  }
-
-  private loadEntries(): BikeEntry[] {
-    try {
-      const raw = localStorage.getItem('bike-log-entries');
-      return raw ? JSON.parse(raw) : [];
-    } catch {
-      return [];
-    }
+    this.bikeLogService.delete(id);
   }
 
   setSort(field: SortField): void {
@@ -314,5 +301,13 @@ export class BikeLogComponent {
       this.sortField.set(field);
       this.sortDirection.set('desc');
     }
+  }
+
+  private todayIso(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }
