@@ -90,14 +90,14 @@ interface RiderStats {
           <h2 class="text-lg font-semibold text-gray-900 mb-3">Recent rides</h2>
           <ul class="space-y-2">
             @for (entry of recentEntries(); track entry.id) {
-              <li class="flex items-center justify-between bg-white rounded-lg border border-gray-200 px-4 py-3 text-sm">
+              <li class="flex items-center gap-2 bg-white rounded-lg border border-gray-200 px-4 py-3 text-sm">
                 <span class="text-gray-500 w-28 shrink-0">{{ entry.date | date:'mediumDate' }}</span>
-                <span class="flex-1 font-medium text-gray-800 truncate px-2">{{ entry.userName || 'Unknown' }}</span>
-                <span class="text-gray-900 font-semibold shrink-0">
+                <span class="flex-1 font-medium text-gray-800 truncate">{{ entry.userName || 'Unknown' }}</span>
+                <span class="shrink-0 text-gray-400 w-5 text-center">
+                  @if (entry.raining) {<span aria-label="raining">🌧️</span>}
+                </span>
+                <span class="text-gray-900 font-semibold shrink-0 w-16 text-right">
                   {{ entry.kilometers }} km
-                  @if (entry.raining) {
-                    <span aria-label="raining">🌧️</span>
-                  }
                 </span>
               </li>
             }
