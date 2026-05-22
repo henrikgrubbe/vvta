@@ -24,10 +24,20 @@ async function addEntry(page: import('@playwright/test').Page, date: string, km:
 
 test.describe('Bike Log App', () => {
   test.beforeEach(async ({ page }) => {
+    // Wipe all Firestore emulator data between tests for clean isolation
+    await fetch(
+      'http://127.0.0.1:8080/emulator/v1/projects/demo-vvta/databases/(default)/documents',
+      { method: 'DELETE' }
+    ).catch(() => {});
+
     await page.goto('/');
     await page.evaluate(() => localStorage.clear());
     await page.reload();
     await page.waitForSelector('h1');
+    // Wait for the Firestore subscription to resolve (loading state clears)
+    await page.waitForFunction(
+      () => !document.body.textContent?.includes('Loading rides')
+    );
   });
 
   test.describe('Initial state', () => {

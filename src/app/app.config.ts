@@ -15,7 +15,7 @@ export const appConfig: ApplicationConfig = {
     provideFirestore(() => {
       const firestore = getFirestore();
       if (environment.useEmulator) {
-        connectFirestoreEmulator(firestore, 'localhost', 8080);
+        connectFirestoreEmulator(firestore, '127.0.0.1', 8080);
       }
       return firestore;
     }),
