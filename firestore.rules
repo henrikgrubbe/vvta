@@ -3,7 +3,17 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /bike-entries/{entryId} {
-      allow read, write: if true;
+      // Any authenticated user can read all entries (leaderboard)
+      allow read: if request.auth != null;
+      // Users can only create entries for themselves
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      // Users can only update/delete their own entries
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    match /user-profiles/{uid} {
+      // Users can only read and write their own profile
+      allow read, write: if request.auth != null && request.auth.uid == uid;
     }
   }
 }
