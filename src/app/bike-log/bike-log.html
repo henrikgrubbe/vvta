@@ -112,7 +112,7 @@
       <p class="text-sm text-gray-600" [innerHTML]="'bikeLog.total' | translate:{ km: totalKilometers() }"></p>
     </div>
 
-    <div class="mb-3 flex items-center gap-1" role="group" [attr.aria-label]="'bikeLog.sortBy' | translate">
+    <div class="mb-3 flex items-center gap-1" role="group" aria-label="Sort rides by" data-testid="sort-controls">
       <span class="text-xs text-gray-500 mr-1">{{ 'bikeLog.sortBy' | translate }}</span>
       <button
         type="button"
@@ -121,7 +121,13 @@
           ? 'inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 border border-blue-300 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500'
           : 'inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-white text-gray-600 border border-gray-300 hover:bg-gray-50 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500'"
         [attr.aria-pressed]="sortField() === 'date'"
-        [attr.aria-label]="'bikeLog.sortByDate' | translate"
+<<<<<<< HEAD
+        [attr.aria-label]="'Sort by date ' + (sortField() === 'date' ? (sortDirection() === 'desc' ? ('bikeLog.newestFirst' | translate) : ('bikeLog.oldestFirst' | translate)) : '')"
+        data-testid="sort-date"
+=======
+        [attr.aria-label]="'Sort by date ' + (sortField() === 'date' ? (sortDirection() === 'desc' ? ('bikeLog.newestFirst' | translate) : ('bikeLog.oldestFirst' | translate)) : '')"
+        data-testid="sort-date"
+>>>>>>> b49c51f (test: use data-testid for robust E2E selectors\n\n- Add data-testid attributes to all key interactive elements in bike-log.html\n- Refactor E2E tests to use data-testid selectors instead of ARIA/translated values\n- Improves test reliability and decouples selectors from UI text/ARIA changes)
       >
         {{ 'bikeLog.sortByDate' | translate }}
         @if (sortField() === 'date') {
@@ -135,7 +141,13 @@
           ? 'inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 border border-blue-300 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500'
           : 'inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-white text-gray-600 border border-gray-300 hover:bg-gray-50 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500'"
         [attr.aria-pressed]="sortField() === 'kilometers'"
-        [attr.aria-label]="'bikeLog.sortByDistance' | translate"
+<<<<<<< HEAD
+        [attr.aria-label]="'Sort by distance ' + (sortField() === 'kilometers' ? (sortDirection() === 'desc' ? ('bikeLog.longestFirst' | translate) : ('bikeLog.shortestFirst' | translate)) : '')"
+        data-testid="sort-distance"
+=======
+        [attr.aria-label]="'Sort by distance ' + (sortField() === 'kilometers' ? (sortDirection() === 'desc' ? ('bikeLog.longestFirst' | translate) : ('bikeLog.shortestFirst' | translate)) : '')"
+        data-testid="sort-distance"
+>>>>>>> b49c51f (test: use data-testid for robust E2E selectors\n\n- Add data-testid attributes to all key interactive elements in bike-log.html\n- Refactor E2E tests to use data-testid selectors instead of ARIA/translated values\n- Improves test reliability and decouples selectors from UI text/ARIA changes)
       >
         {{ 'bikeLog.sortByDistance' | translate }}
         @if (sortField() === 'kilometers') {
@@ -144,7 +156,7 @@
       </button>
     </div>
 
-    <ul class="space-y-2" aria-label="Logged bike rides">
+    <ul class="space-y-2" aria-label="Logged bike rides" data-testid="ride-list">
       @for (entry of sortedEntries(); track entry.id) {
         <li class="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3 border border-gray-200 gap-2">
           <div class="flex-1 min-w-0">
@@ -172,6 +184,7 @@
                 (click)="deleteEntry(entry.id)"
                 class="flex items-center justify-center w-10 h-10 text-red-600 hover:bg-red-50 rounded-lg focus:outline-2 focus:outline-offset-2 focus:outline-red-500"
                 [attr.aria-label]="'bikeLog.confirmDelete' | translate"
+                data-testid="confirm-delete"
               >
                 <span class="material-symbols-outlined">check</span>
               </button>
@@ -180,6 +193,7 @@
                 (click)="cancelDelete()"
                 class="flex items-center justify-center w-10 h-10 text-gray-500 hover:bg-gray-100 rounded-lg focus:outline-2 focus:outline-offset-2 focus:outline-gray-400"
                 [attr.aria-label]="'bikeLog.cancelDelete' | translate"
+                data-testid="cancel-delete"
               >
                 <span class="material-symbols-outlined">close</span>
               </button>
@@ -188,7 +202,8 @@
                 type="button"
                 (click)="startEdit(entry)"
                 class="flex items-center justify-center w-10 h-10 text-blue-600 hover:bg-blue-50 rounded-lg focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
-                [attr.aria-label]="'bikeLog.editRide' | translate:{ date: entry.date }"
+                [attr.aria-label]="'Edit ride on ' + entry.date"
+                data-testid="edit-ride"
               >
                 <span class="material-symbols-outlined">edit</span>
               </button>
@@ -196,7 +211,8 @@
                 type="button"
                 (click)="requestDelete(entry.id)"
                 class="flex items-center justify-center w-10 h-10 text-red-600 hover:bg-red-50 rounded-lg focus:outline-2 focus:outline-offset-2 focus:outline-red-500"
-                [attr.aria-label]="'bikeLog.deleteRide' | translate:{ date: entry.date }"
+                [attr.aria-label]="'Delete ride on ' + entry.date"
+                data-testid="delete-ride"
               >
                 <span class="material-symbols-outlined">delete</span>
               </button>
@@ -209,4 +225,3 @@
     <p class="text-center text-gray-500 py-8">{{ 'bikeLog.noRidesLogged' | translate }}</p>
   }
 </div>
-
