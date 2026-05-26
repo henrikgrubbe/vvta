@@ -4,10 +4,12 @@ import { form, FormField, submit, required, min } from '@angular/forms/signals';
 import { DatePipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { filter, switchMap, tap } from 'rxjs';
+import { TranslatePipe } from '@ngx-translate/core';
 import { WeatherService } from './weather.service';
 import { BikeLogService } from './bike-log.service';
 import { AuthService } from '../auth.service';
 import { UserProfileService } from '../user-profile.service';
+import { I18nService } from '../i18n.service';
 
 
 export type SortField = 'date' | 'kilometers';
@@ -26,7 +28,7 @@ export interface BikeEntry {
 @Component({
   selector: 'app-bike-log',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormField, DatePipe, RouterLink],
+  imports: [FormField, DatePipe, RouterLink, TranslatePipe],
   templateUrl: './bike-log.html',
 })
 export class BikeLogComponent {
@@ -34,17 +36,18 @@ export class BikeLogComponent {
   private readonly bikeLogService = inject(BikeLogService);
   private readonly authService = inject(AuthService);
   private readonly profileService = inject(UserProfileService);
+  private readonly i18n = inject(I18nService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
   @ViewChild('datePicker') private datePicker!: ElementRef<HTMLInputElement>;
 
-  readonly rideModel = signal({ date: this.todayIso(), kilometers: 0, raining: false });
+   readonly rideModel = signal({ date: this.todayIso(), kilometers: 0, raining: false });
 
   readonly rideForm = form(this.rideModel, (s) => {
-    required(s.date, { message: 'Date is required' });
-    required(s.kilometers, { message: 'Kilometers is required' });
-    min(s.kilometers, 0.1, { message: 'Must be at least 0.1 km' });
+    required(s.date, { message: this.i18n.get('validation.dateRequired') });
+    required(s.kilometers, { message: this.i18n.get('validation.kilometersRequired') });
+    min(s.kilometers, 0.1, { message: this.i18n.get('validation.minimumKilometers') });
   });
 
   readonly currentUser = this.authService.user;

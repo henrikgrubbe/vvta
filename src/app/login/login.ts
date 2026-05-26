@@ -1,18 +1,21 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../auth.service';
 import { UserProfileService } from '../user-profile.service';
+import { I18nService } from '../i18n.service';
 
 @Component({
   selector: 'app-login',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [TranslatePipe],
   template: `
     <main class="min-h-screen flex items-center justify-center bg-gray-50 p-6">
       <div class="max-w-sm w-full bg-white rounded-2xl shadow-md p-8 text-center space-y-6">
         <div>
           <span class="text-5xl" aria-hidden="true">🚴</span>
-          <h1 class="mt-3 text-2xl font-bold text-gray-900">Vi viber til arbejde</h1>
-          <p class="mt-1 text-gray-500 text-sm">Log dine daglige cykelture til arbejde.</p>
+          <h1 class="mt-3 text-2xl font-bold text-gray-900">{{ 'app.title' | translate }}</h1>
+          <p class="mt-1 text-gray-500 text-sm">{{ 'app.description' | translate }}</p>
         </div>
 
         @if (error()) {
@@ -26,7 +29,7 @@ import { UserProfileService } from '../user-profile.service';
           (click)="signIn()"
           [disabled]="loading()"
           class="w-full flex items-center justify-center gap-3 border border-gray-300 rounded-lg px-4 py-3 text-gray-700 font-medium hover:bg-gray-50 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-          aria-label="Sign in with Google"
+          [attr.aria-label]="'auth.signInWithGoogle' | translate"
         >
           <svg aria-hidden="true" width="18" height="18" viewBox="0 0 18 18">
             <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/>
@@ -34,7 +37,7 @@ import { UserProfileService } from '../user-profile.service';
             <path fill="#FBBC05" d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z"/>
             <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.962L3.964 7.294C4.672 5.163 6.656 3.58 9 3.58z"/>
           </svg>
-          {{ loading() ? 'Signing in…' : 'Sign in with Google' }}
+          {{ loading() ? ('auth.signingIn' | translate) : ('auth.signInWithGoogle' | translate) }}
         </button>
       </div>
     </main>
@@ -43,6 +46,7 @@ import { UserProfileService } from '../user-profile.service';
 export class LoginComponent {
   private readonly authService = inject(AuthService);
   private readonly profileService = inject(UserProfileService);
+  private readonly i18n = inject(I18nService);
   private readonly router = inject(Router);
 
   readonly loading = signal(false);
@@ -56,7 +60,7 @@ export class LoginComponent {
       const profile = await this.profileService.getProfile(user.uid);
       await this.router.navigateByUrl(profile ? '/' : '/onboarding');
     } catch (err: unknown) {
-      this.error.set(err instanceof Error ? err.message : 'Sign-in failed. Please try again.');
+      this.error.set(err instanceof Error ? err.message : this.i18n.get('auth.signInFailed'));
     } finally {
       this.loading.set(false);
     }

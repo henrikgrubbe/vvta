@@ -1,0 +1,78 @@
+{
+  "app": {
+    "title": "🚴 Vi viber til arbejde",
+    "description": "Log dine daglige cykelture til arbejde."
+  },
+  "auth": {
+    "signInWithGoogle": "Sign in with Google",
+    "signingIn": "Signing in…",
+    "signInFailed": "Sign-in failed. Please try again."
+  },
+  "onboarding": {
+    "welcome": "Welcome!",
+    "subtitle": "Just one thing before we start…",
+    "nameLabel": "What's your first name?",
+    "namePlaceholder": "e.g. Anders",
+    "nameError": "Please enter your first name.",
+    "getStarted": "Get started 🚴",
+    "saving": "Saving…",
+    "genericError": "Something went wrong. Please try again."
+  },
+  "bikeLog": {
+    "greeting": "Hej, <strong>{{ firstName }}</strong>! Log dine daglige cykelture.",
+    "fallback": "Log dine daglige cykelture til arbejde.",
+    "dateLabel": "Date",
+    "kilometersLabel": "Kilometers driven",
+    "kilometerPlaceholder": "e.g. 12.5",
+    "rainingLabel": "🌧️ It was raining",
+    "checkingWeather": "Checking weather…",
+    "addEntry": "Add Entry",
+    "updateEntry": "Update Entry",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "failedToLoad": "Failed to load rides. Please refresh.",
+    "loadingRides": "Loading rides…",
+    "noRidesLogged": "No rides logged yet. Start tracking!",
+    "loggedRides": "Logged Rides",
+    "total": "Total: <strong>{{ km }} km</strong>",
+    "sortBy": "Sort:",
+    "sortByDate": "Date",
+    "sortByDistance": "Distance",
+    "newestFirst": "newest first",
+    "oldestFirst": "oldest first",
+    "longestFirst": "longest first",
+    "shortestFirst": "shortest first",
+    "mediumDate": "mediumDate",
+    "km": "km",
+    "detected": "Detected by weather data",
+    "manuallySet": "Set manually",
+    "delete": "Delete?",
+    "confirmDelete": "Confirm delete",
+    "cancelDelete": "Cancel delete",
+    "editRide": "Edit ride on {{ date }}",
+    "deleteRide": "Delete ride on {{ date }}",
+    "leaderboard": "🏆 Leaderboard",
+    "signOut": "Sign out"
+  },
+  "leaderboard": {
+    "title": "🏆 Leaderboard",
+    "subtitle": "Who's been riding the most?",
+    "myRides": "← Mine ture",
+    "loading": "Loading…",
+    "noRides": "No rides logged yet. Be the first!",
+    "riderRankings": "Rider rankings",
+    "recentRides": "Recent rides",
+    "rank": "Rank {{ rank }}",
+    "you": "(you)",
+    "lastRide": "Last ride: {{ date }}",
+    "ride": "ride",
+    "rides": "rides",
+    "unknown": "Unknown"
+  },
+  "validation": {
+    "dateRequired": "Date is required",
+    "kilometersRequired": "Kilometers is required",
+    "minimumKilometers": "Must be at least 0.1 km"
+  }
+}
+

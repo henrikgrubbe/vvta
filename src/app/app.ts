@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { environment } from '../environments/environment';
+import { I18nService } from './i18n.service';
 
 @Component({
   selector: 'app-root',
@@ -10,6 +11,8 @@ import { environment } from '../environments/environment';
   template: '<router-outlet />',
 })
 export class App {
+  private readonly i18n = inject(I18nService);
+
   constructor() {
     if (environment.useEmulator) {
       const auth = getAuth();
