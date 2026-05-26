@@ -1,31 +1,26 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
-import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
-import { connectFirestoreEmulator, getFirestore, provideFirestore } from '@angular/fire/firestore';
-import { connectAuthEmulator, getAuth, provideAuth } from '@angular/fire/auth';
+import { initializeApp } from 'firebase/app';
+import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore';
+import { connectAuthEmulator, getAuth } from 'firebase/auth';
 import { environment } from '../environments/environment';
 import { routes } from './app.routes';
+
+// Initialize Firebase app on module load
+const app = initializeApp(environment.firebase);
+const firestore = getFirestore(app);
+const auth = getAuth(app);
+
+if (environment.useEmulator) {
+  connectFirestoreEmulator(firestore, '127.0.0.1', 8080);
+  connectAuthEmulator(auth, 'http://127.0.0.1:9099');
+}
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideHttpClient(),
     provideRouter(routes),
-    provideFirebaseApp(() => initializeApp(environment.firebase)),
-    provideFirestore(() => {
-      const firestore = getFirestore();
-      if (environment.useEmulator) {
-        connectFirestoreEmulator(firestore, '127.0.0.1', 8080);
-      }
-      return firestore;
-    }),
-    provideAuth(() => {
-      const auth = getAuth();
-      if (environment.useEmulator) {
-        connectAuthEmulator(auth, 'http://127.0.0.1:9099');
-      }
-      return auth;
-    }),
   ]
 };

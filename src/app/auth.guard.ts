@@ -1,16 +1,29 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { Auth, authState } from '@angular/fire/auth';
-import { firstValueFrom } from 'rxjs';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { UserProfileService } from './user-profile.service';
+
+/** Helper to get current auth user as a Promise */
+function getCurrentUser(): Promise<{ uid: string } | null> {
+  return new Promise((resolve, reject) => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(
+      auth,
+      user => {
+        unsubscribe();
+        resolve(user ? { uid: user.uid } : null);
+      },
+      reject
+    );
+  });
+}
 
 /** Requires the user to be signed in and to have a saved profile (first name). */
 export const authGuard: CanActivateFn = async () => {
-  const auth = inject(Auth);
   const router = inject(Router);
   const profileService = inject(UserProfileService);
 
-  const user = await firstValueFrom(authState(auth));
+  const user = await getCurrentUser();
   if (!user) return router.createUrlTree(['/login']);
 
   const profile = await profileService.getProfile(user.uid);
@@ -22,10 +35,9 @@ export const authGuard: CanActivateFn = async () => {
 
 /** Requires the user to be signed in (but profile is not required yet). */
 export const signedInGuard: CanActivateFn = async () => {
-  const auth = inject(Auth);
   const router = inject(Router);
 
-  const user = await firstValueFrom(authState(auth));
+  const user = await getCurrentUser();
   return user ? true : router.createUrlTree(['/login']);
 };
 

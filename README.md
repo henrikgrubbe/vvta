@@ -54,6 +54,10 @@ ng e2e
 
 Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
 
+## Contributing
+
+The **main branch is protected** — all changes must go through pull requests. See [CONTRIBUTING.md](./CONTRIBUTING.md) for the full workflow, branching strategy, and code quality standards.
+
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.

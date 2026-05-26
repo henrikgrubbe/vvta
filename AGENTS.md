@@ -18,7 +18,7 @@ Bike commute logging app ("Vi viber til arbejde") built with Angular 21, Firebas
 
 - **Framework:** Angular 21 (standalone components, signal-based forms)
 - **Styling:** Tailwind CSS 4 (`@import 'tailwindcss'` in `src/styles.css`)
-- **Backend:** Firebase Firestore (`@angular/fire`) — collection: `bike-entries`
+- **Backend:** Firebase Firestore (native SDK `firebase` package) — collection: `bike-entries`
 - **Weather API:** Open-Meteo (archive + forecast endpoints, no API key needed)
 - **Unit Tests:** Vitest via `@angular/build:unit-test`
 - **E2E Tests:** Playwright (Chromium only, `e2e/` directory)
@@ -54,6 +54,8 @@ src/environments/
 
 ## Git Workflow
 
+- **Main branch is protected** — all changes must go through pull requests
+- Create a feature branch: `git checkout -b feature/description`
 - **Always commit changes** as you go — after each logical unit of work, not all at once at the end
 - Use [Conventional Commits](https://www.conventionalcommits.org/) format: `type: short summary`
   - `feat:` — new feature or behaviour
@@ -64,7 +66,8 @@ src/environments/
   - `test:` — adding or updating tests
 - Keep the subject line short (≤72 chars); add a body with bullet points for non-obvious context
 - Stage related files together in a single commit; don't mix unrelated changes
-- Example: `git add src/environments/environment.ts && git commit -m "chore: migrate to vvta-bike-log Firebase project"`
+- Push to remote and open a PR; CI will lint, test, and report status
+- Example: `git add src/environments/environment.ts && git commit -m "chore: update Firebase config"`
 
 ## Key Patterns
 
@@ -90,7 +93,7 @@ Uses `@angular/forms/signals` (`form()`, `FormField`, `submit()`, `required()`, 
 
 ### Service Pattern
 
-Services use `inject()` function, `providedIn: 'root'`, and AngularFire's `collectionData`/`addDoc`/`updateDoc`/`deleteDoc`. See `bike-log.service.ts`.
+Services use `providedIn: 'root'` and Firebase SDK directly: `getFirestore()`, `onSnapshot()`, `getDoc()`/`setDoc()`, `addDoc()`/`updateDoc()`/`deleteDoc()`, and `getAuth()`/`onAuthStateChanged()`. See `bike-log.service.ts`, `auth.service.ts`, `user-profile.service.ts`.
 
 ### Testing
 

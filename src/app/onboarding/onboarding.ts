@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { Auth, authState } from '@angular/fire/auth';
-import { firstValueFrom } from 'rxjs';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { UserProfileService } from '../user-profile.service';
 
 @Component({
@@ -58,7 +57,7 @@ import { UserProfileService } from '../user-profile.service';
   `,
 })
 export class OnboardingComponent {
-  private readonly auth = inject(Auth);
+  private readonly auth = getAuth();
   private readonly profileService = inject(UserProfileService);
   private readonly router = inject(Router);
 
@@ -74,7 +73,7 @@ export class OnboardingComponent {
     this.saving.set(true);
     this.error.set(null);
     try {
-      const user = await firstValueFrom(authState(this.auth));
+      const user = await this.getCurrentUser();
       if (!user) {
         await this.router.navigateByUrl('/login');
         return;
@@ -90,6 +89,19 @@ export class OnboardingComponent {
     } finally {
       this.saving.set(false);
     }
+  }
+
+  private getCurrentUser(): Promise<{ uid: string; email: string | null } | null> {
+    return new Promise((resolve, reject) => {
+      const unsubscribe = onAuthStateChanged(
+        this.auth,
+        user => {
+          unsubscribe();
+          resolve(user ? { uid: user.uid, email: user.email } : null);
+        },
+        reject
+      );
+    });
   }
 }
 
