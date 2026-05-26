@@ -121,7 +121,7 @@
           ? 'inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 border border-blue-300 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500'
           : 'inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-white text-gray-600 border border-gray-300 hover:bg-gray-50 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500'"
         [attr.aria-pressed]="sortField() === 'date'"
-        [attr.aria-label]="'Sort by date ' + (sortField() === 'date' ? (sortDirection() === 'desc' ? ('bikeLog.newestFirst' | translate) : ('bikeLog.oldestFirst' | translate)) : '')"
+        [attr.aria-label]="'bikeLog.sortByDate' | translate"
       >
         {{ 'bikeLog.sortByDate' | translate }}
         @if (sortField() === 'date') {
@@ -135,7 +135,7 @@
           ? 'inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 border border-blue-300 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500'
           : 'inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-white text-gray-600 border border-gray-300 hover:bg-gray-50 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500'"
         [attr.aria-pressed]="sortField() === 'kilometers'"
-        [attr.aria-label]="'Sort by distance ' + (sortField() === 'kilometers' ? (sortDirection() === 'desc' ? ('bikeLog.longestFirst' | translate) : ('bikeLog.shortestFirst' | translate)) : '')"
+        [attr.aria-label]="'bikeLog.sortByDistance' | translate"
       >
         {{ 'bikeLog.sortByDistance' | translate }}
         @if (sortField() === 'kilometers') {
