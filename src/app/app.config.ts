@@ -5,7 +5,7 @@ import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { initializeApp } from 'firebase/app';
 import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore';
 import { connectAuthEmulator, getAuth } from 'firebase/auth';
-import { of, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
 import { routes } from './app.routes';
 
@@ -22,8 +22,8 @@ if (environment.useEmulator) {
 export class CustomTranslateLoader implements TranslateLoader {
   constructor(private http: HttpClient) {}
 
-  getTranslation(lang: string): Observable<any> {
-    return this.http.get(`./i18n/${lang}.json`);
+  getTranslation(lang: string): Observable<Record<string, string>> {
+    return this.http.get<Record<string, string>>(`./i18n/${lang}.json`);
   }
 }
 
