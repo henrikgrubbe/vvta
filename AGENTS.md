@@ -8,6 +8,7 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - **Edit, don't rewrite.** Use `replace_string_in_file` with minimal context — avoid echoing back entire files.
 - **No confirmation steps.** Don't ask "shall I proceed?" — just act. Ask only when information is genuinely missing.
 - **Skip obvious explanations.** Don't narrate what you're about to do before doing it; explain only non-obvious decisions after the fact.
+- **Avoid redundant verification.** If the user has already clarified what needs to be done, don't run verification searches or gather extra context to justify the decision. Trust their direction and execute directly.
 - **One commit per logical unit.** Don't batch unrelated changes just to reduce commit count, but don't make a commit per line either.
 
 ## Project Overview
