@@ -1,39 +1,4 @@
-name: CI
-
-on:
-  pull_request:
-    branches: [ main ]
-  push:
-    branches: [ main ]
-
-jobs:
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-      - name: Install dependencies
-        run: npm ci
-      - name: Run lint
-        run: npm run lint
-
-  test:
-    name: Unit tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-      - name: Install dependencies
-        run: npm ci
-      - name: Run unit tests
-        run: npm test --silent
-
+## Disabled workflow
+# This file intentionally left as comments so GitHub Actions won't run it.
+# CI work is consolidated in `.github/workflows/deploy.yml`.
+# To restore, re-create a valid workflow YAML with desired jobs.

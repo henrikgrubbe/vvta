@@ -6,8 +6,8 @@ on:
   pull_request:
 
 jobs:
-  lint-and-test:
-    name: Lint & Unit Tests
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -19,6 +19,19 @@ jobs:
 
       - run: npm ci
       - run: npm run lint
+
+  unit-tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - run: npm ci
       - run: npm test
 
   e2e:
@@ -69,7 +82,7 @@ jobs:
 
   deploy:
     name: Deploy to Firebase Hosting
-    needs: [lint-and-test, e2e]
+    needs: [lint, unit-tests, e2e]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
