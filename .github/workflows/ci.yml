@@ -1,4 +1,0 @@
-## Disabled workflow
-# This file intentionally left as comments so GitHub Actions won't run it.
-# CI work is consolidated in `.github/workflows/deploy.yml`.
-# To restore, re-create a valid workflow YAML with desired jobs.
