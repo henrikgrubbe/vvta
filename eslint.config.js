@@ -3,20 +3,22 @@ const eslint = require('@eslint/js');
 const { defineConfig } = require('eslint/config');
 const tseslint = require('typescript-eslint');
 const angular = require('angular-eslint');
+const simpleImportSort = require('eslint-plugin-simple-import-sort');
+const eslintPluginPrettierRecommended = require('eslint-plugin-prettier/recommended');
 
 module.exports = defineConfig([
   {
     files: ['**/*.ts'],
+    plugins: {
+      'simple-import-sort': simpleImportSort,
+    },
     extends: [
       eslint.configs.recommended,
-      tseslint.configs.recommended,
-      tseslint.configs.stylistic,
-      angular.configs.tsRecommended,
-      // Sort imports consistently and run Prettier as part of ESLint so teams can use a single lint entrypoint
-      'plugin:simple-import-sort/recommended',
-      'plugin:prettier/recommended',
+      ...tseslint.configs.recommended,
+      ...tseslint.configs.stylistic,
+      ...angular.configs.tsRecommended,
+      eslintPluginPrettierRecommended,
     ],
-    plugins: ['simple-import-sort', 'prettier'],
     processor: angular.processInlineTemplates,
     rules: {
       '@angular-eslint/directive-selector': [
@@ -37,17 +39,15 @@ module.exports = defineConfig([
       ],
       // Enforce import sorting
       'simple-import-sort/imports': 'error',
-      'simple-import-sort/exports': 'error',
-      // Surface Prettier formatting issues as ESLint errors so CI/lint is a single entrypoint
-      'prettier/prettier': 'error',
     },
   },
   {
     files: ['**/*.html'],
-    extends: [angular.configs.templateRecommended, angular.configs.templateAccessibility],
-    rules: {
-      // Surface Prettier format issues in templates as ESLint errors as well
-      'prettier/prettier': 'error',
-    },
+    extends: [
+      ...angular.configs.templateRecommended,
+      ...angular.configs.templateAccessibility,
+      eslintPluginPrettierRecommended,
+    ],
+    rules: {},
   },
 ]);
