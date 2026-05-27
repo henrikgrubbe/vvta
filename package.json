@@ -9,7 +9,9 @@
     "pree2e": "lsof -ti:8080,4400,9099 | xargs kill -9 2>/dev/null; true",
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "format": "prettier --write .",
+    "lint:fix": "eslint --ext .ts,.html --fix . || ng lint --fix"
   },
   "private": true,
   "packageManager": "npm@11.15.0",
@@ -40,6 +42,11 @@
     "tailwindcss": "4.3.0",
     "typescript": "5.9.3",
     "typescript-eslint": "8.60.0",
-    "vitest": "4.1.7"
+    "vitest": "4.1.7",
+    "eslint-plugin-simple-import-sort": "^10.0.0",
+    "eslint-plugin-prettier": "^5.1.0",
+    "eslint-config-prettier": "^9.0.0",
+    "prettier-plugin-tailwindcss": "^0.5.0",
+    "prettier-plugin-organize-attributes": "^2.0.0"
   }
 }
