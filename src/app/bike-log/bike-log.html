@@ -1,63 +1,66 @@
-<div class="max-w-lg mx-auto p-6">
-  <header class="flex items-start justify-between mb-6">
+<div class="mx-auto max-w-lg p-6">
+  <header class="mb-6 flex items-start justify-between">
     <div>
       <h1 class="text-3xl font-bold text-gray-900">🚴 Vi viber til arbejde</h1>
       @if (firstName()) {
-        <p class="text-gray-600 mt-1">Hej, <strong>{{ firstName() }}</strong>! Log dine daglige cykelture.</p>
+        <p class="mt-1 text-gray-600">
+          Hej, <strong>{{ firstName() }}</strong
+          >! Log dine daglige cykelture.
+        </p>
       } @else {
-        <p class="text-gray-600 mt-1">Log dine daglige cykelture til arbejde.</p>
+        <p class="mt-1 text-gray-600">Log dine daglige cykelture til arbejde.</p>
       }
     </div>
-    <nav class="flex items-center gap-2 shrink-0 ml-4" aria-label="App navigation">
+    <nav class="ml-4 flex shrink-0 items-center gap-2" aria-label="App navigation">
       <a
+        class="rounded text-sm whitespace-nowrap text-blue-600 hover:underline focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
         routerLink="/leaderboard"
-        class="text-sm text-blue-600 hover:underline focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 rounded whitespace-nowrap"
       >
         🏆 Leaderboard
       </a>
       <span class="text-gray-300" aria-hidden="true">|</span>
       <button
-        type="button"
+        class="rounded text-sm whitespace-nowrap text-gray-500 hover:text-gray-700 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
         (click)="signOut()"
-        class="text-sm text-gray-500 hover:text-gray-700 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 rounded whitespace-nowrap"
+        type="button"
       >
         Sign out
       </button>
     </nav>
   </header>
 
-  <form (submit)="onSubmit(); $event.preventDefault()" class="mb-8 space-y-4">
+  <form class="mb-8 space-y-4" (submit)="onSubmit(); $event.preventDefault()">
     <div>
-      <label for="ride-date" class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+      <label class="mb-1 block text-sm font-medium text-gray-700" for="ride-date">Date</label>
       <input
-        #datePicker
+        class="w-full cursor-pointer rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:outline-2 focus:outline-blue-500"
         id="ride-date"
-        type="date"
+        #datePicker
         [formField]="rideForm.date"
         (click)="datePicker.showPicker()"
-        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 cursor-pointer focus:outline-2 focus:outline-blue-500"
+        type="date"
       />
       @if (rideForm.date().touched() && rideForm.date().errors().length) {
-        <p class="text-red-600 text-sm mt-1" role="alert">
+        <p class="mt-1 text-sm text-red-600" role="alert">
           {{ rideForm.date().errors()[0].message }}
         </p>
       }
     </div>
 
     <div>
-      <label for="ride-km" class="block text-sm font-medium text-gray-700 mb-1">
+      <label class="mb-1 block text-sm font-medium text-gray-700" for="ride-km">
         Kilometers driven
       </label>
       <input
+        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:outline-2 focus:outline-blue-500"
         id="ride-km"
+        [formField]="rideForm.kilometers"
         type="number"
         step="0.1"
         placeholder="e.g. 12.5"
-        [formField]="rideForm.kilometers"
-        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-2 focus:outline-blue-500"
       />
       @if (rideForm.kilometers().touched() && rideForm.kilometers().errors().length) {
-        <p class="text-red-600 text-sm mt-1" role="alert">
+        <p class="mt-1 text-sm text-red-600" role="alert">
           {{ rideForm.kilometers().errors()[0].message }}
         </p>
       }
@@ -65,13 +68,13 @@
 
     <div class="flex items-center gap-2">
       <input
+        class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
         id="ride-raining"
-        type="checkbox"
         [formField]="rideForm.raining"
         (click)="rainingSource.set('manual')"
-        class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
+        type="checkbox"
       />
-      <label for="ride-raining" class="text-sm font-medium text-gray-700">
+      <label class="text-sm font-medium text-gray-700" for="ride-raining">
         🌧️ It was raining
       </label>
       @if (checkingWeather()) {
@@ -80,9 +83,9 @@
     </div>
 
     <button
-      type="submit"
+      class="w-full rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
       [disabled]="rideForm().invalid() || saving()"
-      class="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+      type="submit"
     >
       @if (saving()) {
         Saving…
@@ -93,9 +96,9 @@
 
     @if (editingId() !== null) {
       <button
-        type="button"
+        class="w-full rounded-lg border border-gray-300 px-4 py-2 font-semibold text-gray-700 hover:bg-gray-100 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
         (click)="cancelEdit()"
-        class="w-full border border-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-100 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
+        type="button"
       >
         Cancel
       </button>
@@ -103,11 +106,11 @@
   </form>
 
   @if (loadError()) {
-    <p class="text-center text-red-500 py-8">Failed to load rides. Please refresh.</p>
+    <p class="py-8 text-center text-red-500">Failed to load rides. Please refresh.</p>
   } @else if (entries() === undefined) {
-    <p class="text-center text-gray-400 py-8">Loading rides…</p>
+    <p class="py-8 text-center text-gray-400">Loading rides…</p>
   } @else if (entries()!.length > 0) {
-    <div class="mb-3 flex justify-between items-center">
+    <div class="mb-3 flex items-center justify-between">
       <h2 class="text-xl font-semibold text-gray-900">Logged Rides</h2>
       <p class="text-sm text-gray-600">
         Total: <strong>{{ totalKilometers() }} km</strong>
@@ -115,15 +118,24 @@
     </div>
 
     <div class="mb-3 flex items-center gap-1" role="group" aria-label="Sort rides by">
-      <span class="text-xs text-gray-500 mr-1">Sort:</span>
+      <span class="mr-1 text-xs text-gray-500">Sort:</span>
       <button
-        type="button"
-        (click)="setSort('date')"
-        [class]="sortField() === 'date'
-          ? 'inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 border border-blue-300 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500'
-          : 'inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-white text-gray-600 border border-gray-300 hover:bg-gray-50 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500'"
+        [class]="
+          sortField() === 'date'
+            ? 'inline-flex items-center gap-1 rounded-full border border-blue-300 bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500'
+            : 'inline-flex items-center gap-1 rounded-full border border-gray-300 bg-white px-3 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500'
+        "
         [attr.aria-pressed]="sortField() === 'date'"
-        [attr.aria-label]="'Sort by date ' + (sortField() === 'date' ? (sortDirection() === 'desc' ? 'newest first' : 'oldest first') : '')"
+        [attr.aria-label]="
+          'Sort by date ' +
+          (sortField() === 'date'
+            ? sortDirection() === 'desc'
+              ? 'newest first'
+              : 'oldest first'
+            : '')
+        "
+        (click)="setSort('date')"
+        type="button"
       >
         Date
         @if (sortField() === 'date') {
@@ -131,13 +143,22 @@
         }
       </button>
       <button
-        type="button"
-        (click)="setSort('kilometers')"
-        [class]="sortField() === 'kilometers'
-          ? 'inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 border border-blue-300 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500'
-          : 'inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-white text-gray-600 border border-gray-300 hover:bg-gray-50 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500'"
+        [class]="
+          sortField() === 'kilometers'
+            ? 'inline-flex items-center gap-1 rounded-full border border-blue-300 bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500'
+            : 'inline-flex items-center gap-1 rounded-full border border-gray-300 bg-white px-3 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500'
+        "
         [attr.aria-pressed]="sortField() === 'kilometers'"
-        [attr.aria-label]="'Sort by distance ' + (sortField() === 'kilometers' ? (sortDirection() === 'desc' ? 'longest first' : 'shortest first') : '')"
+        [attr.aria-label]="
+          'Sort by distance ' +
+          (sortField() === 'kilometers'
+            ? sortDirection() === 'desc'
+              ? 'longest first'
+              : 'shortest first'
+            : '')
+        "
+        (click)="setSort('kilometers')"
+        type="button"
       >
         Distance
         @if (sortField() === 'kilometers') {
@@ -148,17 +169,19 @@
 
     <ul class="space-y-2" aria-label="Logged bike rides">
       @for (entry of sortedEntries(); track entry.id) {
-        <li class="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3 border border-gray-200 gap-2">
-          <div class="flex-1 min-w-0">
-            <span class="text-gray-700">{{ entry.date | date:'mediumDate' }}</span>
+        <li
+          class="flex items-center justify-between gap-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3"
+        >
+          <div class="min-w-0 flex-1">
+            <span class="text-gray-700">{{ entry.date | date: 'mediumDate' }}</span>
             <span class="mx-2 text-gray-400" aria-hidden="true">·</span>
             <span class="font-semibold text-gray-900">{{ entry.kilometers }} km</span>
             @if (entry.raining) {
               <span class="mx-2 text-gray-400" aria-hidden="true">·</span>
-              <span class="relative group cursor-default">
+              <span class="group relative cursor-default">
                 🌧️
                 <span
-                  class="pointer-events-none invisible absolute bottom-full left-1/2 -translate-x-1/2 mb-1 whitespace-nowrap rounded bg-gray-800 px-2 py-1 text-xs text-white group-hover:visible"
+                  class="pointer-events-none invisible absolute bottom-full left-1/2 mb-1 -translate-x-1/2 rounded bg-gray-800 px-2 py-1 text-xs whitespace-nowrap text-white group-hover:visible"
                   role="tooltip"
                 >
                   {{ entry.rainingSource === 'auto' ? 'Detected by weather data' : 'Set manually' }}
@@ -166,39 +189,39 @@
               </span>
             }
           </div>
-          <div class="flex items-center gap-1 shrink-0">
+          <div class="flex shrink-0 items-center gap-1">
             @if (confirmDeleteId() === entry.id) {
-              <span class="text-xs text-red-600 mr-1 whitespace-nowrap">Delete?</span>
+              <span class="mr-1 text-xs whitespace-nowrap text-red-600">Delete?</span>
               <button
-                type="button"
+                class="flex h-10 w-10 items-center justify-center rounded-lg text-red-600 hover:bg-red-50 focus:outline-2 focus:outline-offset-2 focus:outline-red-500"
                 (click)="deleteEntry(entry.id)"
-                class="flex items-center justify-center w-10 h-10 text-red-600 hover:bg-red-50 rounded-lg focus:outline-2 focus:outline-offset-2 focus:outline-red-500"
+                type="button"
                 aria-label="Confirm delete"
               >
                 <span class="material-symbols-outlined">check</span>
               </button>
               <button
-                type="button"
+                class="flex h-10 w-10 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 focus:outline-2 focus:outline-offset-2 focus:outline-gray-400"
                 (click)="cancelDelete()"
-                class="flex items-center justify-center w-10 h-10 text-gray-500 hover:bg-gray-100 rounded-lg focus:outline-2 focus:outline-offset-2 focus:outline-gray-400"
+                type="button"
                 aria-label="Cancel delete"
               >
                 <span class="material-symbols-outlined">close</span>
               </button>
             } @else {
               <button
-                type="button"
-                (click)="startEdit(entry)"
-                class="flex items-center justify-center w-10 h-10 text-blue-600 hover:bg-blue-50 rounded-lg focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
+                class="flex h-10 w-10 items-center justify-center rounded-lg text-blue-600 hover:bg-blue-50 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
                 [attr.aria-label]="'Edit ride on ' + entry.date"
+                (click)="startEdit(entry)"
+                type="button"
               >
                 <span class="material-symbols-outlined">edit</span>
               </button>
               <button
-                type="button"
-                (click)="requestDelete(entry.id)"
-                class="flex items-center justify-center w-10 h-10 text-red-600 hover:bg-red-50 rounded-lg focus:outline-2 focus:outline-offset-2 focus:outline-red-500"
+                class="flex h-10 w-10 items-center justify-center rounded-lg text-red-600 hover:bg-red-50 focus:outline-2 focus:outline-offset-2 focus:outline-red-500"
                 [attr.aria-label]="'Delete ride on ' + entry.date"
+                (click)="requestDelete(entry.id)"
+                type="button"
               >
                 <span class="material-symbols-outlined">delete</span>
               </button>
@@ -208,7 +231,6 @@
       }
     </ul>
   } @else {
-    <p class="text-center text-gray-500 py-8">No rides logged yet. Start tracking!</p>
+    <p class="py-8 text-center text-gray-500">No rides logged yet. Start tracking!</p>
   }
 </div>
-

@@ -1,6 +1,6 @@
-import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map, catchError, of } from 'rxjs';
+import { inject, Injectable } from '@angular/core';
+import { catchError, map, of } from 'rxjs';
 
 interface OpenMeteoResponse {
   daily?: {
@@ -34,7 +34,7 @@ export class WeatherService {
     const url = `${baseUrl}?latitude=${this.AARHUS_LAT}&longitude=${this.AARHUS_LON}&start_date=${date}&end_date=${date}&daily=precipitation_sum&timezone=Europe/Copenhagen`;
 
     return this.http.get<OpenMeteoResponse>(url).pipe(
-      map(res => {
+      map((res) => {
         const precip = res.daily?.precipitation_sum?.[0];
         return precip != null ? precip > 0 : null;
       }),
@@ -42,4 +42,3 @@ export class WeatherService {
     );
   }
 }
-

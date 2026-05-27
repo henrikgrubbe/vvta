@@ -3,15 +3,21 @@ const eslint = require('@eslint/js');
 const { defineConfig } = require('eslint/config');
 const tseslint = require('typescript-eslint');
 const angular = require('angular-eslint');
+const simpleImportSort = require('eslint-plugin-simple-import-sort');
+const eslintPluginPrettierRecommended = require('eslint-plugin-prettier/recommended');
 
 module.exports = defineConfig([
   {
     files: ['**/*.ts'],
+    plugins: {
+      'simple-import-sort': simpleImportSort,
+    },
     extends: [
       eslint.configs.recommended,
-      tseslint.configs.recommended,
-      tseslint.configs.stylistic,
-      angular.configs.tsRecommended,
+      ...tseslint.configs.recommended,
+      ...tseslint.configs.stylistic,
+      ...angular.configs.tsRecommended,
+      eslintPluginPrettierRecommended,
     ],
     processor: angular.processInlineTemplates,
     rules: {
@@ -31,11 +37,17 @@ module.exports = defineConfig([
           style: 'kebab-case',
         },
       ],
+      // Enforce import sorting
+      'simple-import-sort/imports': 'error',
     },
   },
   {
     files: ['**/*.html'],
-    extends: [angular.configs.templateRecommended, angular.configs.templateAccessibility],
+    extends: [
+      ...angular.configs.templateRecommended,
+      ...angular.configs.templateAccessibility,
+      eslintPluginPrettierRecommended,
+    ],
     rules: {},
   },
 ]);

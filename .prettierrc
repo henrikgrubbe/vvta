@@ -1,4 +1,8 @@
 {
+  "plugins": [
+    "prettier-plugin-organize-attributes",
+    "prettier-plugin-tailwindcss"
+  ],
   "printWidth": 100,
   "singleQuote": true,
   "overrides": [
