@@ -9,6 +9,7 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - **No confirmation steps.** Don't ask "shall I proceed?" — just act. Ask only when information is genuinely missing.
 - **Skip obvious explanations.** Don't narrate what you're about to do before doing it; explain only non-obvious decisions after the fact.
 - **One commit per logical unit.** Don't batch unrelated changes just to reduce commit count, but don't make a commit per line either.
+ - **Load repo-local skill files.** On startup, prefer loading skill files from `.ai-skills/` (if present) into agent memory so onboarding is reproducible for new agents. If both repo-local and user-home skills exist, prefer the repo-local copy.
 
 ## Project Overview
 
@@ -33,6 +34,7 @@ Bike commute logging app ("Vi viber til arbejde") built with Angular 21, Firebas
 | Build | `npm run build` |
 | Unit tests | `npm test` |
 | E2E tests | `npm run e2e` (auto-starts dev server) |
+| Pre-e2e | `npm run pree2e` (kills common ports used by emulators/servers before running e2e) |
 | Deploy | `firebase deploy` (builds to `dist/vvta/browser`) |
 
 ## Project Structure
@@ -51,6 +53,8 @@ src/app/
 src/environments/
   environment.ts          # Firebase config
 ```
+
+Note: `src/app/app.config.ts` initializes Firebase on module load and conditionally connects to the local emulators when `environment.useEmulator` is true (see `src/environments/environment*.ts`). It also registers a custom TranslateLoader (see `CustomTranslateLoader` in `src/app/app.config.ts`) that loads translation JSON from the `i18n` assets folder (served from `src/assets/i18n` and mapped by `angular.json`).
 
 ## Git Workflow
 
@@ -99,6 +103,8 @@ Services use `providedIn: 'root'` and Firebase SDK directly: `getFirestore()`, `
 
 - **Unit tests** (`*.spec.ts` alongside source): Use Vitest (`vi.spyOn`), `TestBed`, `provideHttpClientTesting`. Mock Firestore services with `BehaviorSubject`. Flush weather HTTP requests with `httpMock.match()`. See `bike-log.spec.ts` for the full pattern.
 - **E2E tests** (`e2e/*.spec.ts`): Playwright tests with helper functions. Dev server auto-starts via `playwright.config.ts`. Target `localhost:4200`.
+
+Note: Playwright's `playwright.config.ts` starts two web servers for e2e runs: the Firebase emulators (Firestore + Auth) and `ng serve` for the app. The emulator command and ports are configured there (emulator auth on port 9099, firestore on the emulator defaults). The project provides a `pree2e` npm script that kills common ports before starting e2e to avoid stale processes (`npm run pree2e`). Also see the `e2e` build configuration in `angular.json` which replaces `environment.ts` with `environment.e2e.ts` during e2e runs.
 
 ## TypeScript Best Practices
 
