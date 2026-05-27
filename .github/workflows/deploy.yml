@@ -7,7 +7,6 @@ on:
 
 permissions:
   contents: read
-  actions: write
 
 jobs:
   lint:
@@ -84,25 +83,3 @@ jobs:
           echo "## 🎭 Playwright Results" >> $GITHUB_STEP_SUMMARY
           echo "Report uploaded as artifact **playwright-report** — download and open \`index.html\` to browse." >> $GITHUB_STEP_SUMMARY
 
-  deploy:
-    name: Deploy to Firebase Hosting
-    needs: [lint, unit-tests, e2e]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '24'
-          cache: 'npm'
-
-      - run: npm ci
-
-      - name: Build
-        run: npm run build
-
-      - name: Deploy to Firebase
-        run: npx firebase deploy --only hosting --token "$FIREBASE_TOKEN"
-        env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
