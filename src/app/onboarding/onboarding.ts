@@ -16,24 +16,24 @@ import { UserProfileService } from '../user-profile.service';
           <p class="mt-1 text-sm text-gray-500">Just one thing before we start…</p>
         </div>
 
-        <form (submit)="save(); $event.preventDefault()" novalidate class="space-y-4">
+        <form class="space-y-4" (submit)="save(); $event.preventDefault()" novalidate>
           <div>
-            <label for="first-name" class="mb-1 block text-sm font-medium text-gray-700">
+            <label class="mb-1 block text-sm font-medium text-gray-700" for="first-name">
               What's your first name?
             </label>
             <input
-              id="first-name"
-              type="text"
-              autocomplete="given-name"
-              [value]="firstName()"
-              (input)="firstName.set($any($event.target).value)"
-              placeholder="e.g. Anders"
               class="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:outline-2 focus:outline-blue-500"
+              id="first-name"
+              [value]="firstName()"
               [attr.aria-invalid]="touched() && !firstName().trim() ? 'true' : null"
               [attr.aria-describedby]="touched() && !firstName().trim() ? 'name-error' : null"
+              (input)="firstName.set($any($event.target).value)"
+              type="text"
+              autocomplete="given-name"
+              placeholder="e.g. Anders"
             />
             @if (touched() && !firstName().trim()) {
-              <p id="name-error" class="mt-1 text-sm text-red-600" role="alert">
+              <p class="mt-1 text-sm text-red-600" id="name-error" role="alert">
                 Please enter your first name.
               </p>
             }
@@ -46,9 +46,9 @@ import { UserProfileService } from '../user-profile.service';
           }
 
           <button
-            type="submit"
-            [disabled]="saving()"
             class="w-full rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+            [disabled]="saving()"
+            type="submit"
           >
             {{ saving() ? 'Saving…' : 'Get started 🚴' }}
           </button>

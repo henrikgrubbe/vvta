@@ -23,10 +23,10 @@ import { UserProfileService } from '../user-profile.service';
         }
 
         <button
-          type="button"
-          (click)="signIn()"
-          [disabled]="loading()"
           class="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 px-4 py-3 font-medium text-gray-700 hover:bg-gray-50 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+          [disabled]="loading()"
+          (click)="signIn()"
+          type="button"
           aria-label="Sign in with Google"
         >
           <svg aria-hidden="true" width="18" height="18" viewBox="0 0 18 18">

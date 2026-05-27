@@ -28,8 +28,8 @@ interface RiderStats {
         </div>
         <nav class="ml-4 flex shrink-0 items-center gap-2" aria-label="App navigation">
           <a
-            routerLink="/"
             class="rounded text-sm whitespace-nowrap text-blue-600 hover:underline focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
+            routerLink="/"
           >
             ← Mine ture
           </a>
@@ -89,7 +89,7 @@ interface RiderStats {
         </section>
 
         <!-- Recent activity -->
-        <section aria-label="Recent rides" class="mt-10">
+        <section class="mt-10" aria-label="Recent rides">
           <h2 class="mb-3 text-lg font-semibold text-gray-900">Recent rides</h2>
           <ul class="space-y-2">
             @for (entry of recentEntries(); track entry.id) {
