@@ -1,11 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import {
-  collection,
-  doc,
-  getFirestore,
-  getDoc,
-  setDoc,
-} from 'firebase/firestore';
+import { collection, doc, getDoc, getFirestore, setDoc } from 'firebase/firestore';
 
 export interface UserProfile {
   uid: string;
@@ -36,4 +30,3 @@ export class UserProfileService {
     this._currentProfile.set(profile);
   }
 }
-

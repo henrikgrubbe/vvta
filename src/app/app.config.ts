@@ -1,9 +1,10 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
+import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { initializeApp } from 'firebase/app';
-import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore';
 import { connectAuthEmulator, getAuth } from 'firebase/auth';
+import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore';
+
 import { environment } from '../environments/environment';
 import { routes } from './app.routes';
 
@@ -18,9 +19,5 @@ if (environment.useEmulator) {
 }
 
 export const appConfig: ApplicationConfig = {
-  providers: [
-    provideBrowserGlobalErrorListeners(),
-    provideHttpClient(),
-    provideRouter(routes),
-  ]
+  providers: [provideBrowserGlobalErrorListeners(), provideHttpClient(), provideRouter(routes)],
 };

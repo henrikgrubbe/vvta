@@ -1,14 +1,15 @@
-import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { provideHttpClient } from "@angular/common/http";
-import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
-import { provideRouter } from "@angular/router";
-import { signal } from "@angular/core";
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { signal } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { vi } from 'vitest';
-import { BikeLogComponent, BikeEntry } from './bike-log';
-import { BikeLogService } from './bike-log.service';
+
 import { AuthService } from '../auth.service';
 import { UserProfileService } from '../user-profile.service';
+import { BikeEntry, BikeLogComponent } from './bike-log';
+import { BikeLogService } from './bike-log.service';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -17,8 +18,8 @@ import { UserProfileService } from '../user-profile.service';
 function todayIso(): string {
   const now = new Date();
   const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
 
@@ -40,14 +41,12 @@ class MockBikeLogService {
   }
 
   update(id: string, changes: Partial<Omit<BikeEntry, 'id'>>): Promise<void> {
-    this.subject.next(
-      this.subject.value.map(e => (e.id === id ? { ...e, ...changes } : e)),
-    );
+    this.subject.next(this.subject.value.map((e) => (e.id === id ? { ...e, ...changes } : e)));
     return Promise.resolve();
   }
 
   delete(id: string): Promise<void> {
-    this.subject.next(this.subject.value.filter(e => e.id !== id));
+    this.subject.next(this.subject.value.filter((e) => e.id !== id));
     return Promise.resolve();
   }
 }
@@ -64,8 +63,8 @@ describe('BikeLogComponent', () => {
   let mockService: MockBikeLogService;
 
   function flushWeatherRequests(raining = false): void {
-    const reqs = httpMock.match(r => r.url.includes('open-meteo.com'));
-    reqs.forEach(r => {
+    const reqs = httpMock.match((r) => r.url.includes('open-meteo.com'));
+    reqs.forEach((r) => {
       if (!r.cancelled) r.flush({ daily: { precipitation_sum: [raining ? 5.0 : 0] } });
     });
   }
@@ -88,7 +87,7 @@ describe('BikeLogComponent', () => {
 
   function getCancelButton(): HTMLButtonElement | null {
     const buttons = Array.from(el.querySelectorAll('button[type="button"]'));
-    return (buttons.find(b => b.textContent?.trim() === 'Cancel') as HTMLButtonElement) ?? null;
+    return (buttons.find((b) => b.textContent?.trim() === 'Cancel') as HTMLButtonElement) ?? null;
   }
 
   function entries(): BikeEntry[] {
@@ -102,7 +101,7 @@ describe('BikeLogComponent', () => {
     flushWeatherRequests();
     await fixture.whenStable();
     // Re-set in case weather response overrode raining
-    component.rideModel.update(m => ({ ...m, raining }));
+    component.rideModel.update((m) => ({ ...m, raining }));
     component.rainingSource.set(raining ? 'manual' : 'auto');
     component.onSubmit();
     await fixture.whenStable();
@@ -166,7 +165,7 @@ describe('BikeLogComponent', () => {
   });
 
   it('should display the heading', () => {
-    expect(el.querySelector('h1')?.textContent).toContain("Vi viber til arbejde");
+    expect(el.querySelector('h1')?.textContent).toContain('Vi viber til arbejde');
   });
 
   it('should show empty state message when no entries', () => {
@@ -227,7 +226,7 @@ describe('BikeLogComponent', () => {
   it('should assign unique IDs to entries', async () => {
     await addEntry('2025-06-01', 10);
     await addEntry('2025-06-02', 15);
-    const ids = entries().map(e => e.id);
+    const ids = entries().map((e) => e.id);
     expect(new Set(ids).size).toBe(2);
   });
 
@@ -319,14 +318,14 @@ describe('BikeLogComponent', () => {
     await fixture.whenStable();
     flushWeatherRequests();
     await fixture.whenStable();
-    component.rideModel.update(m => ({ ...m, kilometers: 20 }));
+    component.rideModel.update((m) => ({ ...m, kilometers: 20 }));
 
     component.onSubmit();
     await fixture.whenStable();
     flushWeatherRequests();
     await fixture.whenStable();
 
-    const updated = entries().find(e => e.id === entry.id);
+    const updated = entries().find((e) => e.id === entry.id);
     expect(updated?.date).toBe('2025-07-01');
     expect(updated?.kilometers).toBe(20);
     expect(entries().length).toBe(1);
@@ -343,7 +342,7 @@ describe('BikeLogComponent', () => {
     await fixture.whenStable();
     flushWeatherRequests();
     await fixture.whenStable();
-    component.rideModel.update(m => ({ ...m, kilometers: 20 }));
+    component.rideModel.update((m) => ({ ...m, kilometers: 20 }));
 
     component.onSubmit();
     await fixture.whenStable();
@@ -441,13 +440,13 @@ describe('BikeLogComponent', () => {
     fixture.detectChanges();
 
     expect(entries().length).toBe(1);
-    expect(entries().find(e => e.id === id)).toBeUndefined();
+    expect(entries().find((e) => e.id === id)).toBeUndefined();
   });
 
   it('should update total kilometers after deletion', async () => {
     await addEntry('2025-06-01', 10);
     await addEntry('2025-06-02', 15);
-    const id = entries().find(e => e.kilometers === 15)!.id;
+    const id = entries().find((e) => e.kilometers === 15)!.id;
     component.deleteEntry(id);
     await fixture.whenStable();
 
@@ -541,20 +540,22 @@ describe('BikeLogComponent', () => {
   // -------------------------------------------------------------------------
 
   it('should set raining to true when API reports rain', async () => {
-    component.rideModel.update(m => ({ ...m, date: '2025-03-15' }));
+    component.rideModel.update((m) => ({ ...m, date: '2025-03-15' }));
     await fixture.whenStable();
-    httpMock.match(r => r.url.includes('open-meteo.com'))
-      .forEach(r => r.flush({ daily: { precipitation_sum: [8.5] } }));
+    httpMock
+      .match((r) => r.url.includes('open-meteo.com'))
+      .forEach((r) => r.flush({ daily: { precipitation_sum: [8.5] } }));
     await fixture.whenStable();
 
     expect(component.rideModel().raining).toBe(true);
   });
 
   it('should set rainingSource to auto when filled by API', async () => {
-    component.rideModel.update(m => ({ ...m, date: '2025-03-15' }));
+    component.rideModel.update((m) => ({ ...m, date: '2025-03-15' }));
     await fixture.whenStable();
-    httpMock.match(r => r.url.includes('open-meteo.com'))
-      .forEach(r => r.flush({ daily: { precipitation_sum: [3.0] } }));
+    httpMock
+      .match((r) => r.url.includes('open-meteo.com'))
+      .forEach((r) => r.flush({ daily: { precipitation_sum: [3.0] } }));
     await fixture.whenStable();
 
     expect(component.rainingSource()).toBe('auto');
@@ -619,7 +620,7 @@ describe('BikeLogComponent', () => {
     await fixture.whenStable();
     flushWeatherRequests();
     await fixture.whenStable();
-    component.rideModel.update(m => ({ ...m, raining: true }));
+    component.rideModel.update((m) => ({ ...m, raining: true }));
     component.rainingSource.set('auto');
     component.onSubmit();
     await fixture.whenStable();
@@ -775,8 +776,8 @@ describe('BikeLogComponent', () => {
   it('should mark the active sort button as aria-pressed=true', async () => {
     await addEntry('2025-06-01', 10);
     const buttons = Array.from(el.querySelectorAll('[aria-label="Sort rides by"] button'));
-    const dateBtn = buttons.find(b => b.textContent?.includes('Date'));
-    const distBtn = buttons.find(b => b.textContent?.includes('Distance'));
+    const dateBtn = buttons.find((b) => b.textContent?.includes('Date'));
+    const distBtn = buttons.find((b) => b.textContent?.includes('Distance'));
     expect(dateBtn?.getAttribute('aria-pressed')).toBe('true');
     expect(distBtn?.getAttribute('aria-pressed')).toBe('false');
   });
@@ -786,8 +787,8 @@ describe('BikeLogComponent', () => {
     component.setSort('kilometers');
     fixture.detectChanges();
     const buttons = Array.from(el.querySelectorAll('[aria-label="Sort rides by"] button'));
-    const dateBtn = buttons.find(b => b.textContent?.includes('Date'));
-    const distBtn = buttons.find(b => b.textContent?.includes('Distance'));
+    const dateBtn = buttons.find((b) => b.textContent?.includes('Date'));
+    const distBtn = buttons.find((b) => b.textContent?.includes('Distance'));
     expect(dateBtn?.getAttribute('aria-pressed')).toBe('false');
     expect(distBtn?.getAttribute('aria-pressed')).toBe('true');
   });
@@ -797,10 +798,9 @@ describe('BikeLogComponent', () => {
     component.setSort('kilometers');
     fixture.detectChanges();
     const buttons = Array.from(el.querySelectorAll('[aria-label="Sort rides by"] button'));
-    const dateBtn = buttons.find(b => b.textContent?.includes('Date'))!;
-    const distBtn = buttons.find(b => b.textContent?.includes('Distance'))!;
+    const dateBtn = buttons.find((b) => b.textContent?.includes('Date'))!;
+    const distBtn = buttons.find((b) => b.textContent?.includes('Distance'))!;
     expect(dateBtn.textContent).not.toMatch(/[↑↓]/);
     expect(distBtn.textContent).toMatch(/[↑↓]/);
   });
 });
-

@@ -1,9 +1,10 @@
+import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { DatePipe } from '@angular/common';
-import { LeaderboardService } from './leaderboard.service';
+
 import { AuthService } from '../auth.service';
+import { LeaderboardService } from './leaderboard.service';
 
 interface RiderStats {
   userId: string;
@@ -19,16 +20,16 @@ interface RiderStats {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, DatePipe],
   template: `
-    <div class="max-w-lg mx-auto p-6">
-      <header class="flex items-start justify-between mb-6">
+    <div class="mx-auto max-w-lg p-6">
+      <header class="mb-6 flex items-start justify-between">
         <div>
           <h1 class="text-3xl font-bold text-gray-900">🏆 Leaderboard</h1>
-          <p class="text-gray-500 text-sm mt-1">Who's been riding the most?</p>
+          <p class="mt-1 text-sm text-gray-500">Who's been riding the most?</p>
         </div>
-        <nav class="flex items-center gap-2 shrink-0 ml-4" aria-label="App navigation">
+        <nav class="ml-4 flex shrink-0 items-center gap-2" aria-label="App navigation">
           <a
             routerLink="/"
-            class="text-sm text-blue-600 hover:underline focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 rounded whitespace-nowrap"
+            class="rounded text-sm whitespace-nowrap text-blue-600 hover:underline focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
           >
             ← Mine ture
           </a>
@@ -36,42 +37,44 @@ interface RiderStats {
       </header>
 
       @if (allEntries() === undefined) {
-        <p class="text-center text-gray-400 py-12">Loading…</p>
+        <p class="py-12 text-center text-gray-400">Loading…</p>
       } @else if (riderStats().length === 0) {
-        <p class="text-center text-gray-500 py-12">No rides logged yet. Be the first!</p>
+        <p class="py-12 text-center text-gray-500">No rides logged yet. Be the first!</p>
       } @else {
         <!-- Podium / rankings -->
         <section aria-label="Rider rankings">
           <ol class="space-y-3">
             @for (rider of riderStats(); track rider.userId; let rank = $index) {
               <li
-                class="flex items-center gap-4 bg-white rounded-xl border px-5 py-4 shadow-sm"
-                [class]="rank === 0
-                  ? 'border-yellow-300 bg-yellow-50'
-                  : rank === 1
-                    ? 'border-gray-300 bg-gray-50'
-                    : rank === 2
-                      ? 'border-orange-200 bg-orange-50'
-                      : 'border-gray-200'"
+                class="flex items-center gap-4 rounded-xl border bg-white px-5 py-4 shadow-sm"
+                [class]="
+                  rank === 0
+                    ? 'border-yellow-300 bg-yellow-50'
+                    : rank === 1
+                      ? 'border-gray-300 bg-gray-50'
+                      : rank === 2
+                        ? 'border-orange-200 bg-orange-50'
+                        : 'border-gray-200'
+                "
               >
                 <span
-                  class="text-2xl font-bold w-8 text-center shrink-0"
+                  class="w-8 shrink-0 text-center text-2xl font-bold"
                   aria-label="Rank {{ rank + 1 }}"
                 >
-                  {{ rank === 0 ? '🥇' : rank === 1 ? '🥈' : rank === 2 ? '🥉' : (rank + 1) + '.' }}
+                  {{ rank === 0 ? '🥇' : rank === 1 ? '🥈' : rank === 2 ? '🥉' : rank + 1 + '.' }}
                 </span>
-                <div class="flex-1 min-w-0">
-                  <p class="font-semibold text-gray-900 truncate">
+                <div class="min-w-0 flex-1">
+                  <p class="truncate font-semibold text-gray-900">
                     {{ rider.userName }}
                     @if (currentUserId() === rider.userId) {
-                      <span class="ml-1 text-xs text-blue-600 font-normal">(you)</span>
+                      <span class="ml-1 text-xs font-normal text-blue-600">(you)</span>
                     }
                   </p>
-                  <p class="text-xs text-gray-500 mt-0.5">
-                    Last ride: {{ rider.lastRideDate | date:'mediumDate' }}
+                  <p class="mt-0.5 text-xs text-gray-500">
+                    Last ride: {{ rider.lastRideDate | date: 'mediumDate' }}
                   </p>
                 </div>
-                <div class="text-right shrink-0">
+                <div class="shrink-0 text-right">
                   <p class="text-lg font-bold text-gray-900">{{ rider.totalKm }} km</p>
                   <p class="text-xs text-gray-500">
                     {{ rider.rideCount }} {{ rider.rideCount === 1 ? 'ride' : 'rides' }}
@@ -87,16 +90,24 @@ interface RiderStats {
 
         <!-- Recent activity -->
         <section aria-label="Recent rides" class="mt-10">
-          <h2 class="text-lg font-semibold text-gray-900 mb-3">Recent rides</h2>
+          <h2 class="mb-3 text-lg font-semibold text-gray-900">Recent rides</h2>
           <ul class="space-y-2">
             @for (entry of recentEntries(); track entry.id) {
-              <li class="flex items-center gap-2 bg-white rounded-lg border border-gray-200 px-4 py-3 text-sm">
-                <span class="text-gray-500 w-28 shrink-0">{{ entry.date | date:'mediumDate' }}</span>
-                <span class="flex-1 font-medium text-gray-800 truncate">{{ entry.userName || 'Unknown' }}</span>
-                <span class="shrink-0 text-gray-400 w-5 text-center">
-                  @if (entry.raining) {<span aria-label="raining">🌧️</span>}
+              <li
+                class="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm"
+              >
+                <span class="w-28 shrink-0 text-gray-500">{{
+                  entry.date | date: 'mediumDate'
+                }}</span>
+                <span class="flex-1 truncate font-medium text-gray-800">{{
+                  entry.userName || 'Unknown'
+                }}</span>
+                <span class="w-5 shrink-0 text-center text-gray-400">
+                  @if (entry.raining) {
+                    <span aria-label="raining">🌧️</span>
+                  }
                 </span>
-                <span class="text-gray-900 font-semibold shrink-0 w-16 text-right">
+                <span class="w-16 shrink-0 text-right font-semibold text-gray-900">
                   {{ entry.kilometers }} km
                 </span>
               </li>
@@ -141,7 +152,6 @@ export class LeaderboardComponent {
   });
 
   readonly recentEntries = computed(() =>
-    (this.allEntries() ?? []).filter(e => !!e.userId).slice(0, 10)
+    (this.allEntries() ?? []).filter((e) => !!e.userId).slice(0, 10),
   );
 }
-

@@ -1,14 +1,24 @@
-import { afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyRef, ElementRef, inject, signal, ViewChild } from '@angular/core';
-import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { form, FormField, submit, required, min } from '@angular/forms/signals';
 import { DatePipe } from '@angular/common';
+import {
+  afterNextRender,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  ElementRef,
+  inject,
+  signal,
+  ViewChild,
+} from '@angular/core';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { form, FormField, min, required, submit } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
 import { filter, switchMap, tap } from 'rxjs';
-import { WeatherService } from './weather.service';
-import { BikeLogService } from './bike-log.service';
+
 import { AuthService } from '../auth.service';
 import { UserProfileService } from '../user-profile.service';
-
+import { BikeLogService } from './bike-log.service';
+import { WeatherService } from './weather.service';
 
 export type SortField = 'date' | 'kilometers';
 export type SortDirection = 'asc' | 'desc';
@@ -60,8 +70,8 @@ export class BikeLogComponent {
   readonly rainingSource = signal<'auto' | 'manual'>('auto');
   readonly saving = signal(false);
 
-  readonly totalKilometers = computed(() =>
-    Math.round((this.entries() ?? []).reduce((sum, e) => sum + e.kilometers, 0) * 10) / 10
+  readonly totalKilometers = computed(
+    () => Math.round((this.entries() ?? []).reduce((sum, e) => sum + e.kilometers, 0) * 10) / 10,
   );
 
   readonly sortField = signal<SortField>('date');
@@ -88,10 +98,10 @@ export class BikeLogComponent {
     // Redirect to login when the user signs out while on this page
     toObservable(this.currentUser)
       .pipe(
-        filter(u => u !== undefined),
+        filter((u) => u !== undefined),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe(async user => {
+      .subscribe(async (user) => {
         if (!user) {
           await this.router.navigateByUrl('/login');
         }
@@ -102,14 +112,14 @@ export class BikeLogComponent {
       .pipe(
         filter(Boolean),
         tap(() => this.checkingWeather.set(true)),
-        switchMap(date => this.weather.wasRaining(date)),
+        switchMap((date) => this.weather.wasRaining(date)),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe(raining => {
+      .subscribe((raining) => {
         this.checkingWeather.set(false);
         if (raining !== null) {
           this.rainingSource.set('auto');
-          this.rideModel.update(m => ({ ...m, raining }));
+          this.rideModel.update((m) => ({ ...m, raining }));
         }
       });
   }
@@ -127,11 +137,19 @@ export class BikeLogComponent {
       this.saving.set(true);
       try {
         if (currentEditId !== null) {
-          await this.bikeLogService.update(currentEditId, { date, kilometers, raining, rainingSource });
+          await this.bikeLogService.update(currentEditId, {
+            date,
+            kilometers,
+            raining,
+            rainingSource,
+          });
           this.editingId.set(null);
         } else {
           await this.bikeLogService.add({
-            date, kilometers, raining, rainingSource,
+            date,
+            kilometers,
+            raining,
+            rainingSource,
             userId: user.uid,
             userName,
           });
@@ -177,7 +195,7 @@ export class BikeLogComponent {
 
   setSort(field: SortField): void {
     if (this.sortField() === field) {
-      this.sortDirection.update(d => d === 'desc' ? 'asc' : 'desc');
+      this.sortDirection.update((d) => (d === 'desc' ? 'asc' : 'desc'));
     } else {
       this.sortField.set(field);
       this.sortDirection.set('desc');

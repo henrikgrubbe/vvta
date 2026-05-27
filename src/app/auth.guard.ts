@@ -1,6 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+
 import { UserProfileService } from './user-profile.service';
 
 /** Helper to get current auth user as a Promise */
@@ -9,11 +10,11 @@ function getCurrentUser(): Promise<{ uid: string } | null> {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(
       auth,
-      user => {
+      (user) => {
         unsubscribe();
         resolve(user ? { uid: user.uid } : null);
       },
-      reject
+      reject,
     );
   });
 }
@@ -40,4 +41,3 @@ export const signedInGuard: CanActivateFn = async () => {
   const user = await getCurrentUser();
   return user ? true : router.createUrlTree(['/login']);
 };
-
