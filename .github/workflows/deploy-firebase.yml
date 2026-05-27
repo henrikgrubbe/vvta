@@ -26,7 +26,7 @@ jobs:
 
       - name: Create GitHub Deployment
         id: create_deployment
-        uses: actions/github-script@v6
+        uses: actions/github-script@v9
         with:
           script: |
             const deployment = await github.rest.repos.createDeployment({
@@ -43,7 +43,7 @@ jobs:
 
       - name: Mark deployment in_progress
         id: in_progress
-        uses: actions/github-script@v6
+        uses: actions/github-script@v9
         with:
           script: |
             await github.rest.repos.createDeploymentStatus({
@@ -67,7 +67,7 @@ jobs:
 
       - name: Mark deployment success
         if: ${{ success() }}
-        uses: actions/github-script@v6
+        uses: actions/github-script@v9
         with:
           script: |
             await github.rest.repos.createDeploymentStatus({
@@ -80,7 +80,7 @@ jobs:
 
       - name: Mark deployment failure
         if: ${{ failure() }}
-        uses: actions/github-script@v6
+        uses: actions/github-script@v9
         with:
           script: |
             await github.rest.repos.createDeploymentStatus({
