@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 type Page = import('@playwright/test').Page;
 
@@ -20,8 +20,10 @@ async function addEntry(page: Page, date: string, km: string, raining = false) {
   await page.click('button[type="submit"]');
   // Wait for the form to reset (km returns to 0), confirming the entry was saved
   await page.waitForFunction(
-    () => (document.querySelector('#ride-km') as HTMLInputElement)?.value === '0'
+    () => (document.querySelector('#ride-km') as HTMLInputElement)?.value === '0',
   );
+  // Wait for weather check to clear if it triggered
+  await page.waitForFunction(() => !document.body.textContent?.includes('Checking weather'));
 }
 
 /** Click the nth delete button for a ride and confirm the inline prompt. */
@@ -35,14 +37,17 @@ test.describe('Bike Log App', () => {
     // Wipe all Firestore emulator data
     await fetch(
       'http://127.0.0.1:8080/emulator/v1/projects/demo-vvta/databases/(default)/documents',
-      { method: 'DELETE' }
-    ).catch(() => {});
+      { method: 'DELETE' },
+    ).catch(() => {
+      /* ignore */
+    });
 
     // Wipe all Auth emulator users
-    await fetch(
-      'http://127.0.0.1:9099/emulator/v1/projects/demo-vvta/accounts',
-      { method: 'DELETE' }
-    ).catch(() => {});
+    await fetch('http://127.0.0.1:9099/emulator/v1/projects/demo-vvta/accounts', {
+      method: 'DELETE',
+    }).catch(() => {
+      /* ignore */
+    });
 
     // Create a test user in the Auth emulator
     const signUpRes = await fetch(
@@ -50,17 +55,21 @@ test.describe('Bike Log App', () => {
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: 'test@test.com', password: 'testpassword123', returnSecureToken: true }),
-      }
+        body: JSON.stringify({
+          email: 'test@test.com',
+          password: 'testpassword123',
+          returnSecureToken: true,
+        }),
+      },
     );
-    const { localId: uid } = await signUpRes.json() as { localId: string };
+    const { localId: uid } = (await signUpRes.json()) as { localId: string };
 
     // Create the user-profile document (admin bypass header)
     await fetch(
       `http://127.0.0.1:8080/v1/projects/demo-vvta/databases/(default)/documents/user-profiles?documentId=${uid}`,
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer owner' },
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer owner' },
         body: JSON.stringify({
           fields: {
             uid: { stringValue: uid },
@@ -68,29 +77,37 @@ test.describe('Bike Log App', () => {
             email: { stringValue: 'test@test.com' },
           },
         }),
-      }
-    ).catch(() => {});
+      },
+    ).catch(() => {
+      /* ignore */
+    });
 
     // Navigate (redirects to /login), wait for __testSignIn helper, then sign in
     await page.goto('/');
-    await page.waitForFunction(() => typeof (window as unknown as Record<string, unknown>)['__testSignIn'] === 'function');
+    await page.waitForFunction(
+      () => typeof (window as unknown as Record<string, unknown>)['__testSignIn'] === 'function',
+    );
     await page.evaluate(() =>
-      (window as unknown as { __testSignIn: (e: string, p: string) => Promise<void> })
-        .__testSignIn('test@test.com', 'testpassword123')
+      (window as unknown as { __testSignIn: (e: string, p: string) => Promise<void> }).__testSignIn(
+        'test@test.com',
+        'testpassword123',
+      ),
     );
 
     // Now navigate to home — auth guard will allow through
     await page.goto('/');
     await page.waitForSelector('h1');
-    // Wait for Firestore subscription to resolve
+    // Wait for Firestore subscription to resolve and weather check to finish
     await page.waitForFunction(
-      () => !document.body.textContent?.includes('Loading rides')
+      () =>
+        !document.body.textContent?.includes('Loading rides') &&
+        !document.body.textContent?.includes('Checking weather'),
     );
   });
 
   test.describe('Initial state', () => {
     test('should show the app heading', async ({ page }) => {
-      await expect(page.locator('h1')).toContainText("Vi viber til arbejde");
+      await expect(page.locator('h1')).toContainText('Vi viber til arbejde');
     });
 
     test('should show the subtitle', async ({ page }) => {
@@ -325,6 +342,11 @@ test.describe('Bike Log App', () => {
       await page.fill('#ride-km', '25');
       await page.click('button[type="submit"]');
 
+      // Wait for form to reset
+      await page.waitForFunction(
+        () => (document.querySelector('#ride-km') as HTMLInputElement)?.value === '0',
+      );
+
       await expect(page.locator('ul li')).toHaveCount(1);
       await expect(page.locator('ul li').first()).toContainText('25 km');
     });
@@ -333,6 +355,11 @@ test.describe('Bike Log App', () => {
       await page.click('button[aria-label*="Edit"]');
       await page.fill('#ride-date', '2025-07-15');
       await page.click('button[type="submit"]');
+
+      // Wait for form to reset
+      await page.waitForFunction(
+        () => (document.querySelector('#ride-km') as HTMLInputElement)?.value === '0',
+      );
 
       await expect(page.locator('ul li')).toHaveCount(1);
       await expect(page.locator('ul li').first()).toContainText('Jul');
@@ -343,13 +370,27 @@ test.describe('Bike Log App', () => {
       await page.check('#ride-raining');
       await page.click('button[type="submit"]');
 
+      // Wait for form to reset
+      await page.waitForFunction(
+        () => (document.querySelector('#ride-km') as HTMLInputElement)?.value === '0',
+      );
+
       await expect(page.locator('ul li').first()).toContainText('🌧️');
     });
 
     test('should return to Add Entry mode after update', async ({ page }) => {
       await page.click('button[aria-label*="Edit"]');
+      // Wait for weather check to clear if it triggered
+      await page.waitForFunction(() => !document.body.textContent?.includes('Checking weather'));
       await page.fill('#ride-km', '25');
       await page.click('button[type="submit"]');
+
+      // Wait for form to reset
+      await page.waitForFunction(
+        () => (document.querySelector('#ride-km') as HTMLInputElement)?.value === '0',
+      );
+      // And wait for weather check after submit too
+      await page.waitForFunction(() => !document.body.textContent?.includes('Checking weather'));
 
       await expect(page.locator('button[type="submit"]')).toContainText('Add Entry');
       await expect(page.locator('button:text("Cancel")')).not.toBeVisible();
@@ -568,6 +609,11 @@ test.describe('Bike Log App', () => {
       await page.fill('#ride-km', '15');
       await page.click('button[type="submit"]');
 
+      // Wait for form to reset
+      await page.waitForFunction(
+        () => (document.querySelector('#ride-km') as HTMLInputElement)?.value === '0',
+      );
+
       await expect(page.locator('ul li')).toHaveCount(2);
       await expect(page.locator('ul li').last()).toContainText('15 km');
       await expect(page.locator('strong').filter({ hasText: /km/ })).toContainText('35 km');
@@ -591,9 +637,7 @@ test.describe('Bike Log App', () => {
 
       await page.click('button[aria-label*="Edit"]');
       // Wait for weather auto-check to complete (checking weather indicator disappears)
-      await page.waitForFunction(
-        () => !document.body.textContent?.includes('Checking weather')
-      );
+      await page.waitForFunction(() => !document.body.textContent?.includes('Checking weather'));
 
       // Explicitly uncheck the rain checkbox
       await page.uncheck('#ride-raining');
@@ -612,6 +656,11 @@ test.describe('Bike Log App', () => {
       await page.click('button[aria-label*="Edit"]');
       await page.check('#ride-raining');
       await page.click('button[type="submit"]');
+
+      // Wait for form to reset
+      await page.waitForFunction(
+        () => (document.querySelector('#ride-km') as HTMLInputElement)?.value === '0',
+      );
 
       await expect(page.locator('ul li').first()).toContainText('🌧️');
     });
@@ -632,6 +681,11 @@ test.describe('Bike Log App', () => {
       await page.fill('#ride-date', '2025-06-01');
       await page.fill('#ride-km', '10');
       await page.locator('#ride-km').press('Enter');
+
+      // Wait for form to reset
+      await page.waitForFunction(
+        () => (document.querySelector('#ride-km') as HTMLInputElement)?.value === '0',
+      );
 
       await expect(page.locator('ul li')).toHaveCount(1);
     });
@@ -732,54 +786,56 @@ test.describe('Bike Log App', () => {
       await page.locator('[aria-label="Sort rides by"] button', { hasText: 'Distance' }).click();
       await addEntry(page, '2025-06-04', '5');
 
+      // Wait for list to update and include the new entry
+      await expect(page.locator('ul li')).toHaveCount(4);
+
       const items = page.locator('ul li');
       await expect(items.nth(0)).toContainText('30 km');
       await expect(items.last()).toContainText('5 km');
     });
   });
 
-    test('should not show sort controls when list is empty', async ({ page }) => {
-      await expect(page.locator('[aria-label="Sort rides by"]')).not.toBeVisible();
-    });
-
-    test('should have proper aria-label on the ride list', async ({ page }) => {
-      await addEntry(page, '2025-06-01', '10');
-      await expect(page.locator('ul[aria-label="Logged bike rides"]')).toBeVisible();
-    });
-
-    test('should have aria-labels on edit and delete buttons', async ({ page }) => {
-      await addEntry(page, '2025-06-01', '10');
-      await expect(page.locator('button[aria-label*="Edit ride on"]')).toBeVisible();
-      await expect(page.locator('button[aria-label*="Delete ride on"]')).toBeVisible();
-    });
-
-    test('should include the date in button aria-labels', async ({ page }) => {
-      await addEntry(page, '2025-06-01', '10');
-      await expect(page.locator('button[aria-label="Edit ride on 2025-06-01"]')).toBeVisible();
-      await expect(page.locator('button[aria-label="Delete ride on 2025-06-01"]')).toBeVisible();
-    });
-
-    test('should have labels for all form inputs', async ({ page }) => {
-      await expect(page.locator('label[for="ride-date"]')).toBeVisible();
-      await expect(page.locator('label[for="ride-km"]')).toBeVisible();
-      await expect(page.locator('label[for="ride-raining"]')).toBeVisible();
-    });
-
-    test('should keep submit button disabled when form is invalid', async ({ page }) => {
-      await page.fill('#ride-date', '');
-      await page.fill('#ride-km', '');
-      await expect(page.locator('button[type="submit"]')).toBeDisabled();
-    });
-
-    test('should have aria-hidden on decorative separators', async ({ page }) => {
-      await addEntry(page, '2025-06-01', '10');
-      const separators = page.locator('span[aria-hidden="true"]');
-      expect(await separators.count()).toBeGreaterThan(0);
-    });
-
-    test('tooltip should have role=tooltip', async ({ page }) => {
-      await addEntry(page, '2025-06-01', '10', true);
-      await expect(page.locator('span[role="tooltip"]')).toBeAttached();
-    });
+  test('should not show sort controls when list is empty', async ({ page }) => {
+    await expect(page.locator('[aria-label="Sort rides by"]')).not.toBeVisible();
   });
 
+  test('should have proper aria-label on the ride list', async ({ page }) => {
+    await addEntry(page, '2025-06-01', '10');
+    await expect(page.locator('ul[aria-label="Logged bike rides"]')).toBeVisible();
+  });
+
+  test('should have aria-labels on edit and delete buttons', async ({ page }) => {
+    await addEntry(page, '2025-06-01', '10');
+    await expect(page.locator('button[aria-label*="Edit ride on"]')).toBeVisible();
+    await expect(page.locator('button[aria-label*="Delete ride on"]')).toBeVisible();
+  });
+
+  test('should include the date in button aria-labels', async ({ page }) => {
+    await addEntry(page, '2025-06-01', '10');
+    await expect(page.locator('button[aria-label="Edit ride on 2025-06-01"]')).toBeVisible();
+    await expect(page.locator('button[aria-label="Delete ride on 2025-06-01"]')).toBeVisible();
+  });
+
+  test('should have labels for all form inputs', async ({ page }) => {
+    await expect(page.locator('label[for="ride-date"]')).toBeVisible();
+    await expect(page.locator('label[for="ride-km"]')).toBeVisible();
+    await expect(page.locator('label[for="ride-raining"]')).toBeVisible();
+  });
+
+  test('should keep submit button disabled when form is invalid', async ({ page }) => {
+    await page.fill('#ride-date', '');
+    await page.fill('#ride-km', '');
+    await expect(page.locator('button[type="submit"]')).toBeDisabled();
+  });
+
+  test('should have aria-hidden on decorative separators', async ({ page }) => {
+    await addEntry(page, '2025-06-01', '10');
+    const separators = page.locator('span[aria-hidden="true"]');
+    expect(await separators.count()).toBeGreaterThan(0);
+  });
+
+  test('tooltip should have role=tooltip', async ({ page }) => {
+    await addEntry(page, '2025-06-01', '10', true);
+    await expect(page.locator('span[role="tooltip"]')).toBeAttached();
+  });
+});
