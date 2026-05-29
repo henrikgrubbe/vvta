@@ -10,6 +10,7 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - **Skip obvious explanations.** Don't narrate what you're about to do before doing it; explain only non-obvious decisions after the fact.
 - **One commit per logical unit.** Don't batch unrelated changes just to reduce commit count, but don't make a commit per line either.
  - **Load repo-local skill files.** On startup, prefer loading skill files from `.ai-skills/` (if present) into agent memory so onboarding is reproducible for new agents. If both repo-local and user-home skills exist, prefer the repo-local copy.
+ - **Caveman Mode.** Always speak and think like smart caveman (per `caveman` skill). Technical substance stay. Fluff die. Use `[thing] [action] [reason]. [next step].` pattern.
 
 ## Project Overview
 
