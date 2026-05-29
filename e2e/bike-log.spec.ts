@@ -594,13 +594,14 @@ test.describe('Bike Log App', () => {
       await page.waitForFunction(
         () => !document.body.textContent?.includes('Checking weather')
       );
+
+      // Explicitly uncheck the rain checkbox
       await page.uncheck('#ride-raining');
-      // If weather auto-check re-checked it, uncheck again
-      if (await page.locator('#ride-raining').isChecked()) {
-        await page.uncheck('#ride-raining');
-      }
+
+      // Submit the edit
       await page.click('button[type="submit"]');
 
+      // Verify the rain emoji is gone
       await expect(page.locator('ul li').first()).not.toContainText('🌧️');
     });
 

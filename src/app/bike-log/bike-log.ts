@@ -111,14 +111,15 @@ export class BikeLogComponent {
     toObservable(computed(() => this.rideForm.date().value()))
       .pipe(
         filter(Boolean),
+        // Only auto-check if we're not currently editing an entry that was set manually
+        filter(() => this.rainingSource() === 'auto'),
         tap(() => this.checkingWeather.set(true)),
         switchMap((date) => this.weather.wasRaining(date)),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((raining) => {
         this.checkingWeather.set(false);
-        if (raining !== null) {
-          this.rainingSource.set('auto');
+        if (raining !== null && this.rainingSource() === 'auto') {
           this.rideModel.update((m) => ({ ...m, raining }));
         }
       });
