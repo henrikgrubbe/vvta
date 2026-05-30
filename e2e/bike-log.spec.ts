@@ -534,7 +534,7 @@ test.describe('Bike Log App', () => {
     });
 
     test('should switch to editing a different entry', async ({ page }) => {
-      await addEntry(page, '2025-06-02', '20');
+      await seedEntries(sharedAuth!.uid, 'TestUser', [{ date: '2025-06-02', kilometers: 20 }]);
       await expect(page.locator('ul li')).toHaveCount(2);
 
       // Edit first entry (20 km - June 2, the newest)
@@ -557,7 +557,8 @@ test.describe('Bike Log App', () => {
 
   test.describe('Deleting entries', () => {
     test('should delete an entry and show empty state', async ({ page }) => {
-      await addEntry(page, '2025-06-01', '10');
+      await seedEntries(sharedAuth!.uid, 'TestUser', [{ date: '2025-06-01', kilometers: 10 }]);
+      await expect(page.locator('ul li')).toHaveCount(1);
       await deleteRide(page);
 
       await expect(page.locator('ul li')).toHaveCount(0);
@@ -565,8 +566,11 @@ test.describe('Bike Log App', () => {
     });
 
     test('should update total after deleting', async ({ page }) => {
-      await addEntry(page, '2025-06-01', '10');
-      await addEntry(page, '2025-06-02', '20');
+      await seedEntries(sharedAuth!.uid, 'TestUser', [
+        { date: '2025-06-01', kilometers: 10 },
+        { date: '2025-06-02', kilometers: 20 },
+      ]);
+      await expect(page.locator('ul li')).toHaveCount(2);
 
       // Delete the first (newest, 20km)
       await deleteRide(page);
@@ -576,9 +580,12 @@ test.describe('Bike Log App', () => {
     });
 
     test('should delete a middle entry from a list of three', async ({ page }) => {
-      await addEntry(page, '2025-06-01', '10');
-      await addEntry(page, '2025-06-02', '20');
-      await addEntry(page, '2025-06-03', '30');
+      await seedEntries(sharedAuth!.uid, 'TestUser', [
+        { date: '2025-06-01', kilometers: 10 },
+        { date: '2025-06-02', kilometers: 20 },
+        { date: '2025-06-03', kilometers: 30 },
+      ]);
+      await expect(page.locator('ul li')).toHaveCount(3);
 
       // Delete the middle entry (20km, index 1)
       await deleteRide(page, 1);
@@ -588,9 +595,12 @@ test.describe('Bike Log App', () => {
     });
 
     test('should delete all entries one by one', async ({ page }) => {
-      await addEntry(page, '2025-06-01', '10');
-      await addEntry(page, '2025-06-02', '20');
-      await addEntry(page, '2025-06-03', '30');
+      await seedEntries(sharedAuth!.uid, 'TestUser', [
+        { date: '2025-06-01', kilometers: 10 },
+        { date: '2025-06-02', kilometers: 20 },
+        { date: '2025-06-03', kilometers: 30 },
+      ]);
+      await expect(page.locator('ul li')).toHaveCount(3);
 
       await deleteRide(page);
       await expect(page.locator('ul li')).toHaveCount(2);
@@ -604,7 +614,8 @@ test.describe('Bike Log App', () => {
     });
 
     test('should cancel edit when deleting the entry being edited', async ({ page }) => {
-      await addEntry(page, '2025-06-01', '10');
+      await seedEntries(sharedAuth!.uid, 'TestUser', [{ date: '2025-06-01', kilometers: 10 }]);
+      await expect(page.locator('ul li')).toHaveCount(1);
       await page.click('button[aria-label*="Edit"]');
       await expect(page.locator('button[type="submit"]')).toContainText('Update Entry');
 
@@ -615,8 +626,11 @@ test.describe('Bike Log App', () => {
     });
 
     test('should keep editing state when deleting a different entry', async ({ page }) => {
-      await addEntry(page, '2025-06-01', '10');
-      await addEntry(page, '2025-06-02', '20');
+      await seedEntries(sharedAuth!.uid, 'TestUser', [
+        { date: '2025-06-01', kilometers: 10 },
+        { date: '2025-06-02', kilometers: 20 },
+      ]);
+      await expect(page.locator('ul li')).toHaveCount(2);
 
       // Edit the second entry (10km)
       await page.locator('button[aria-label*="Edit"]').last().click();
