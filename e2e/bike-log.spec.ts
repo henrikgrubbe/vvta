@@ -2,6 +2,142 @@ import { expect, test } from '@playwright/test';
 
 type Page = import('@playwright/test').Page;
 
+// Shared auth state per worker — created once in beforeAll, reused across all tests
+let sharedAuth: {
+  uid: string;
+  email: string;
+  idToken: string;
+  refreshToken: string;
+} | null = null;
+
+/** Seed bike-entries for a specific userId via the Firestore emulator REST API. */
+async function seedEntries(
+  uid: string,
+  userName: string,
+  entries: { date: string; kilometers: number; raining?: boolean }[],
+): Promise<void> {
+  await Promise.all(
+    entries.map((e) =>
+      fetch(
+        'http://127.0.0.1:8080/v1/projects/demo-vvta/databases/(default)/documents/bike-entries',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: 'Bearer owner' },
+          body: JSON.stringify({
+            fields: {
+              userId: { stringValue: uid },
+              date: { stringValue: e.date },
+              kilometers: { doubleValue: e.kilometers },
+              raining: { booleanValue: e.raining ?? false },
+              rainingSource: { stringValue: 'manual' },
+              userName: { stringValue: userName },
+            },
+          }),
+        },
+      ).catch(() => {
+        /* ignore */
+      }),
+    ),
+  );
+}
+
+/** Delete all bike-entries for a specific userId via the Firestore emulator REST API. */
+async function wipeUserEntries(uid: string): Promise<void> {
+  // Run a structured query to find all docs with userId == uid
+  const queryRes = await fetch(
+    'http://127.0.0.1:8080/v1/projects/demo-vvta/databases/(default)/documents:runQuery',
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer owner' },
+      body: JSON.stringify({
+        structuredQuery: {
+          from: [{ collectionId: 'bike-entries' }],
+          where: {
+            fieldFilter: {
+              field: { fieldPath: 'userId' },
+              op: 'EQUAL',
+              value: { stringValue: uid },
+            },
+          },
+          select: { fields: [{ fieldPath: '__name__' }] },
+        },
+      }),
+    },
+  ).catch(() => null);
+
+  if (!queryRes?.ok) return;
+
+  const results = (await queryRes.json()) as { document?: { name?: string } }[];
+  const deletePromises = results
+    .filter((r) => r.document?.name)
+    .map((r) =>
+      fetch(`http://127.0.0.1:8080/v1/${r.document!.name!}`, {
+        method: 'DELETE',
+        headers: { Authorization: 'Bearer owner' },
+      }).catch(() => {
+        /* ignore */
+      }),
+    );
+  await Promise.all(deletePromises);
+}
+
+/**
+ * Inject Firebase auth into IndexedDB before the page scripts run.
+ * Firebase Web SDK reads `firebaseLocalStorageDb` / `firebaseLocalStorage`
+ * on startup — writing it here means no sign-in round-trip is needed.
+ */
+async function injectAuthState(page: Page, auth: NonNullable<typeof sharedAuth>): Promise<void> {
+  await page.addInitScript(
+    ({ uid, email, idToken, refreshToken }) => {
+      const DB_NAME = 'firebaseLocalStorageDb';
+      const STORE = 'firebaseLocalStorage';
+      const KEY = 'firebase:authUser:demo-key:[DEFAULT]';
+
+      const record = {
+        fbase_key: KEY,
+        value: {
+          uid,
+          email,
+          emailVerified: false,
+          isAnonymous: false,
+          providerData: [
+            {
+              providerId: 'password',
+              uid: email,
+              email,
+              displayName: null,
+              photoURL: null,
+              phoneNumber: null,
+            },
+          ],
+          stsTokenManager: {
+            refreshToken,
+            accessToken: idToken,
+            expirationTime: Date.now() + 3600 * 1000,
+          },
+          createdAt: String(Date.now()),
+          lastLoginAt: String(Date.now()),
+          apiKey: 'demo-key',
+          appName: '[DEFAULT]',
+        },
+      };
+
+      const req = indexedDB.open(DB_NAME, 1);
+      req.onupgradeneeded = () => {
+        req.result.createObjectStore(STORE, { keyPath: 'fbase_key' });
+      };
+      req.onsuccess = () => {
+        const db = req.result;
+        // Ensure object store exists (may already exist)
+        if (!db.objectStoreNames.contains(STORE)) return;
+        const tx = db.transaction(STORE, 'readwrite');
+        tx.objectStore(STORE).put(record);
+      };
+    },
+    { uid: auth.uid, email: auth.email, idToken: auth.idToken, refreshToken: auth.refreshToken },
+  );
+}
+
 // Helper to add an entry quickly
 async function addEntry(page: Page, date: string, km: string, raining = false) {
   await page.fill('#ride-date', date);
@@ -32,51 +168,30 @@ async function deleteRide(page: Page, nth = 0) {
 
 test.describe('Bike Log App', () => {
   test.beforeAll(async () => {
-    // Wipe all Firestore emulator data
-    await fetch(
-      'http://127.0.0.1:8080/emulator/v1/projects/demo-vvta/databases/(default)/documents',
-      { method: 'DELETE' },
-    ).catch(() => {
-      /* ignore */
-    });
-
-    // Wipe all Auth emulator users
-    await fetch('http://127.0.0.1:9099/emulator/v1/projects/demo-vvta/accounts', {
-      method: 'DELETE',
-    }).catch(() => {
-      /* ignore */
-    });
-  });
-
-  test.beforeEach(async ({ page }, testInfo) => {
-    // Mock Weather API
-    await page.route(/api\.open-meteo\.com/, async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ daily: { precipitation_sum: [0] } }),
-      });
-    });
-
-    const email = `test-${testInfo.testId}@test.com`;
+    // Create one shared user per worker — reused across all tests in this worker
+    // (Initial full wipe is handled by global setup in e2e/global-setup.ts)
+    const email = `worker-${process.pid}@test.com`;
     const password = 'testpassword123';
 
-    // Create a test user in the Auth emulator
     const signUpRes = await fetch(
       'http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/accounts:signUp?key=demo-key',
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email,
-          password,
-          returnSecureToken: true,
-        }),
+        body: JSON.stringify({ email, password, returnSecureToken: true }),
       },
     );
-    const { localId: uid } = (await signUpRes.json()) as { localId: string };
+    const {
+      localId: uid,
+      idToken,
+      refreshToken,
+    } = (await signUpRes.json()) as {
+      localId: string;
+      idToken: string;
+      refreshToken: string;
+    };
 
-    // Create the user-profile document (admin bypass header)
+    // Create the user-profile document
     await fetch(
       `http://127.0.0.1:8080/v1/projects/demo-vvta/databases/(default)/documents/user-profiles?documentId=${uid}`,
       {
@@ -94,22 +209,22 @@ test.describe('Bike Log App', () => {
       /* ignore */
     });
 
-    // Navigate (redirects to /login), wait for __testSignIn helper, then sign in
-    await page.goto('/');
-    await page.waitForFunction(
-      () => typeof (window as unknown as Record<string, unknown>)['__testSignIn'] === 'function',
-    );
-    await page.evaluate(
-      ([e, p]) =>
-        (
-          window as unknown as { __testSignIn: (e: string, p: string) => Promise<void> }
-        ).__testSignIn(e, p),
-      [email, password],
-    );
+    sharedAuth = { uid, email, idToken, refreshToken };
+  });
 
-    // Now navigate to home — auth guard will allow through
-    await page.goto('/');
-    await page.waitForSelector('h1');
+  test.beforeEach(async ({ page }) => {
+    // Set up route mock and auth injection before navigation (these are synchronous registrations)
+    await page.route(/api\.open-meteo\.com/, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ daily: { precipitation_sum: [0] } }),
+      });
+    });
+    await injectAuthState(page, sharedAuth!);
+
+    // Wipe entries and navigate in parallel — wipe is a REST call, goto is a browser navigation
+    await Promise.all([wipeUserEntries(sharedAuth!.uid), page.goto('/')]);
     // Wait for Firestore subscription to resolve and weather check to finish
     await expect(page.locator('text=Loading rides')).not.toBeVisible();
     await expect(page.locator('text=Checking weather')).not.toBeVisible();
@@ -327,7 +442,8 @@ test.describe('Bike Log App', () => {
 
   test.describe('Editing entries', () => {
     test.beforeEach(async ({ page }) => {
-      await addEntry(page, '2025-06-01', '10');
+      // Seed via REST — Firestore onSnapshot pushes update to already-loaded page
+      await seedEntries(sharedAuth!.uid, 'TestUser', [{ date: '2025-06-01', kilometers: 10 }]);
       await expect(page.locator('ul li')).toHaveCount(1);
     });
 
@@ -418,7 +534,7 @@ test.describe('Bike Log App', () => {
     });
 
     test('should switch to editing a different entry', async ({ page }) => {
-      await addEntry(page, '2025-06-02', '20');
+      await seedEntries(sharedAuth!.uid, 'TestUser', [{ date: '2025-06-02', kilometers: 20 }]);
       await expect(page.locator('ul li')).toHaveCount(2);
 
       // Edit first entry (20 km - June 2, the newest)
@@ -441,7 +557,8 @@ test.describe('Bike Log App', () => {
 
   test.describe('Deleting entries', () => {
     test('should delete an entry and show empty state', async ({ page }) => {
-      await addEntry(page, '2025-06-01', '10');
+      await seedEntries(sharedAuth!.uid, 'TestUser', [{ date: '2025-06-01', kilometers: 10 }]);
+      await expect(page.locator('ul li')).toHaveCount(1);
       await deleteRide(page);
 
       await expect(page.locator('ul li')).toHaveCount(0);
@@ -449,8 +566,11 @@ test.describe('Bike Log App', () => {
     });
 
     test('should update total after deleting', async ({ page }) => {
-      await addEntry(page, '2025-06-01', '10');
-      await addEntry(page, '2025-06-02', '20');
+      await seedEntries(sharedAuth!.uid, 'TestUser', [
+        { date: '2025-06-01', kilometers: 10 },
+        { date: '2025-06-02', kilometers: 20 },
+      ]);
+      await expect(page.locator('ul li')).toHaveCount(2);
 
       // Delete the first (newest, 20km)
       await deleteRide(page);
@@ -460,9 +580,12 @@ test.describe('Bike Log App', () => {
     });
 
     test('should delete a middle entry from a list of three', async ({ page }) => {
-      await addEntry(page, '2025-06-01', '10');
-      await addEntry(page, '2025-06-02', '20');
-      await addEntry(page, '2025-06-03', '30');
+      await seedEntries(sharedAuth!.uid, 'TestUser', [
+        { date: '2025-06-01', kilometers: 10 },
+        { date: '2025-06-02', kilometers: 20 },
+        { date: '2025-06-03', kilometers: 30 },
+      ]);
+      await expect(page.locator('ul li')).toHaveCount(3);
 
       // Delete the middle entry (20km, index 1)
       await deleteRide(page, 1);
@@ -472,9 +595,12 @@ test.describe('Bike Log App', () => {
     });
 
     test('should delete all entries one by one', async ({ page }) => {
-      await addEntry(page, '2025-06-01', '10');
-      await addEntry(page, '2025-06-02', '20');
-      await addEntry(page, '2025-06-03', '30');
+      await seedEntries(sharedAuth!.uid, 'TestUser', [
+        { date: '2025-06-01', kilometers: 10 },
+        { date: '2025-06-02', kilometers: 20 },
+        { date: '2025-06-03', kilometers: 30 },
+      ]);
+      await expect(page.locator('ul li')).toHaveCount(3);
 
       await deleteRide(page);
       await expect(page.locator('ul li')).toHaveCount(2);
@@ -488,7 +614,8 @@ test.describe('Bike Log App', () => {
     });
 
     test('should cancel edit when deleting the entry being edited', async ({ page }) => {
-      await addEntry(page, '2025-06-01', '10');
+      await seedEntries(sharedAuth!.uid, 'TestUser', [{ date: '2025-06-01', kilometers: 10 }]);
+      await expect(page.locator('ul li')).toHaveCount(1);
       await page.click('button[aria-label*="Edit"]');
       await expect(page.locator('button[type="submit"]')).toContainText('Update Entry');
 
@@ -499,8 +626,11 @@ test.describe('Bike Log App', () => {
     });
 
     test('should keep editing state when deleting a different entry', async ({ page }) => {
-      await addEntry(page, '2025-06-01', '10');
-      await addEntry(page, '2025-06-02', '20');
+      await seedEntries(sharedAuth!.uid, 'TestUser', [
+        { date: '2025-06-01', kilometers: 10 },
+        { date: '2025-06-02', kilometers: 20 },
+      ]);
+      await expect(page.locator('ul li')).toHaveCount(2);
 
       // Edit the second entry (10km)
       await page.locator('button[aria-label*="Edit"]').last().click();
@@ -699,9 +829,12 @@ test.describe('Bike Log App', () => {
 
   test.describe('Sorting', () => {
     test.beforeEach(async ({ page }) => {
-      await addEntry(page, '2025-06-01', '10');
-      await addEntry(page, '2025-06-03', '30');
-      await addEntry(page, '2025-06-02', '20');
+      // Seed via REST — Firestore onSnapshot pushes update to already-loaded page
+      await seedEntries(sharedAuth!.uid, 'TestUser', [
+        { date: '2025-06-01', kilometers: 10 },
+        { date: '2025-06-03', kilometers: 30 },
+        { date: '2025-06-02', kilometers: 20 },
+      ]);
       await expect(page.locator('ul li')).toHaveCount(3);
     });
 
