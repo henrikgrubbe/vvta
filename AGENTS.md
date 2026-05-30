@@ -28,15 +28,15 @@ Bike commute logging app ("Vi viber til arbejde") built with Angular 21, Firebas
 
 ## Commands
 
-| Action     | Command                                                                            |
-|------------|------------------------------------------------------------------------------------|
-| Lint       | `npm run lint`                                                                     |
-| Dev server | `npm start` (port 4200)                                                            |
-| Build      | `npm run build`                                                                    |
-| Unit tests | `npm test`                                                                         |
-| E2E tests  | `npm run e2e` (auto-starts dev server)                                             |
-| Pre-e2e    | `npm run pree2e` (kills common ports used by emulators/servers before running e2e) |
-| Deploy     | `firebase deploy` (builds to `dist/vvta/browser`)                                  |
+| Action     | Command                                           |
+|------------|---------------------------------------------------|
+| Lint       | `npm run lint`                                    |
+| Format     | `npm run lint:fix`                                |
+| Dev server | `npm start` (port 4200)                           |
+| Build      | `npm run build`                                   |
+| Unit tests | `npm test`                                        |
+| E2E tests  | `npm run e2e` (auto-starts dev server)            |
+| Deploy     | `firebase deploy` (builds to `dist/vvta/browser`) |
 
 ## Project Structure
 
