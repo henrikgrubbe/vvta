@@ -1,0 +1,231 @@
+Command finished with exit code 0.
+Command output:
+diff --git a/AGENTS.md b/AGENTS.md
+index 6696403..0ae94e6 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -2,6 +2,8 @@ You are an expert in TypeScript, Angular, and scalable web application developme
+ 
+ ## Agent Efficiency
+ 
++- **Load repo-local skill files.** On startup, prefer loading skill files from `.ai-skills/` (if present) into agent memory so onboarding is reproducible for new agents. If both repo-local and user-home skills exist, prefer the repo-local copy.
++- **Caveman Mode.** On startup after loading skill files, make sure to always use the caveman skill (/caveman full) so that you both think and speak like a caveman.
+ - **Read files once.** If a file is already in context, do not re-read it.
+ - **Batch tool calls.** Run independent reads/searches in parallel; never make sequential calls when parallel is possible.
+ - **Targeted searches only.** Use `grep_search` for known symbol names; use `semantic_search` only when the location is unknown. Never search the whole codebase for something already documented here.
+@@ -9,8 +11,6 @@ You are an expert in TypeScript, Angular, and scalable web application developme
+ - **No confirmation steps.** Don't ask "shall I proceed?" — just act. Ask only when information is genuinely missing.
+ - **Skip obvious explanations.** Don't narrate what you're about to do before doing it; explain only non-obvious decisions after the fact.
+ - **One commit per logical unit.** Don't batch unrelated changes just to reduce commit count, but don't make a commit per line either.
+- - **Load repo-local skill files.** On startup, prefer loading skill files from `.ai-skills/` (if present) into agent memory so onboarding is reproducible for new agents. If both repo-local and user-home skills exist, prefer the repo-local copy.
+- - **Caveman Mode.** Always speak and think like smart caveman (per `caveman` skill). Technical substance stay. Fluff die. Use `[thing] [action] [reason]. [next step].` pattern.
+ 
+ ## Project Overview
+ 
+@@ -28,15 +28,15 @@ Bike commute logging app ("Vi viber til arbejde") built with Angular 21, Firebas
+ 
+ ## Commands
+ 
+-| Action | Command |
+-|---|---|
+-| Lint | `npm run lint` |
+-| Dev server | `npm start` (port 4200) |
+-| Build | `npm run build` |
+-| Unit tests | `npm test` |
+-| E2E tests | `npm run e2e` (auto-starts dev server) |
+-| Pre-e2e | `npm run pree2e` (kills common ports used by emulators/servers before running e2e) |
+-| Deploy | `firebase deploy` (builds to `dist/vvta/browser`) |
++| Action     | Command                                                                            |
++|------------|------------------------------------------------------------------------------------|
++| Lint       | `npm run lint`                                                                     |
++| Dev server | `npm start` (port 4200)                                                            |
++| Build      | `npm run build`                                                                    |
++| Unit tests | `npm test`                                                                         |
++| E2E tests  | `npm run e2e` (auto-starts dev server)                                             |
++| Pre-e2e    | `npm run pree2e` (kills common ports used by emulators/servers before running e2e) |
++| Deploy     | `firebase deploy` (builds to `dist/vvta/browser`)                                  |
+ 
+ ## Project Structure
+ 
+@@ -83,12 +83,21 @@ Components use short `.ts` filenames (not `.component.ts`): `bike-log.ts` contai
+ ### Feature Routing
+ 
+ Features are lazy-loaded at two levels — `loadChildren` in `app.routes.ts`, then `loadComponent` in feature routes:
++
+ ```typescript
+ // app.routes.ts
+-{ path: '', loadChildren: () => import('./bike-log/bike-log.routes') }
++{
++  path: '', loadChildren
++:
++  () => import('./bike-log/bike-log.routes')
++}
+ 
+ // bike-log/bike-log.routes.ts
+-{ path: '', loadComponent: () => import('./bike-log').then(m => m.BikeLogComponent) }
++{
++  path: '', loadComponent
++:
++  () => import('./bike-log').then(m => m.BikeLogComponent)
++}
+ export default routes;
+ ```
+ 
+diff --git a/e2e/bike-log.spec.ts b/e2e/bike-log.spec.ts
+index 14529db..fdd227a 100644
+--- a/e2e/bike-log.spec.ts
++++ b/e2e/bike-log.spec.ts
+@@ -19,11 +19,9 @@ async function addEntry(page: Page, date: string, km: string, raining = false) {
+   }
+   await page.click('button[type="submit"]');
+   // Wait for the form to reset (km returns to 0), confirming the entry was saved
+-  await page.waitForFunction(
+-    () => (document.querySelector('#ride-km') as HTMLInputElement)?.value === '0',
+-  );
++  await expect(page.locator('#ride-km')).toHaveValue('0');
+   // Wait for weather check to clear if it triggered
+-  await page.waitForFunction(() => !document.body.textContent?.includes('Checking weather'));
++  await expect(page.locator('text=Checking weather')).not.toBeVisible();
+ }
+ 
+ /** Click the nth delete button for a ride and confirm the inline prompt. */
+@@ -34,6 +32,15 @@ async function deleteRide(page: Page, nth = 0) {
+ 
+ test.describe('Bike Log App', () => {
+   test.beforeEach(async ({ page }) => {
++    // Mock Weather API
++    await page.route(/api.open-meteo.com/, async (route) => {
++      await route.fulfill({
++        status: 200,
++        contentType: 'application/json',
++        body: JSON.stringify({ daily: { precipitation_sum: [0] } }),
++      });
++    });
++
+     // Wipe all Firestore emulator data
+     await fetch(
+       'http://127.0.0.1:8080/emulator/v1/projects/demo-vvta/databases/(default)/documents',
+@@ -98,11 +105,8 @@ test.describe('Bike Log App', () => {
+     await page.goto('/');
+     await page.waitForSelector('h1');
+     // Wait for Firestore subscription to resolve and weather check to finish
+-    await page.waitForFunction(
+-      () =>
+-        !document.body.textContent?.includes('Loading rides') &&
+-        !document.body.textContent?.includes('Checking weather'),
+-    );
++    await expect(page.locator('text=Loading rides')).not.toBeVisible();
++    await expect(page.locator('text=Checking weather')).not.toBeVisible();
+   });
+ 
+   test.describe('Initial state', () => {
+@@ -343,9 +347,7 @@ test.describe('Bike Log App', () => {
+       await page.click('button[type="submit"]');
+ 
+       // Wait for form to reset
+-      await page.waitForFunction(
+-        () => (document.querySelector('#ride-km') as HTMLInputElement)?.value === '0',
+-      );
++      await expect(page.locator('#ride-km')).toHaveValue('0');
+ 
+       await expect(page.locator('ul li')).toHaveCount(1);
+       await expect(page.locator('ul li').first()).toContainText('25 km');
+@@ -357,9 +359,7 @@ test.describe('Bike Log App', () => {
+       await page.click('button[type="submit"]');
+ 
+       // Wait for form to reset
+-      await page.waitForFunction(
+-        () => (document.querySelector('#ride-km') as HTMLInputElement)?.value === '0',
+-      );
++      await expect(page.locator('#ride-km')).toHaveValue('0');
+ 
+       await expect(page.locator('ul li')).toHaveCount(1);
+       await expect(page.locator('ul li').first()).toContainText('Jul');
+@@ -371,9 +371,7 @@ test.describe('Bike Log App', () => {
+       await page.click('button[type="submit"]');
+ 
+       // Wait for form to reset
+-      await page.waitForFunction(
+-        () => (document.querySelector('#ride-km') as HTMLInputElement)?.value === '0',
+-      );
++      await expect(page.locator('#ride-km')).toHaveValue('0');
+ 
+       await expect(page.locator('ul li').first()).toContainText('🌧️');
+     });
+@@ -381,16 +379,14 @@ test.describe('Bike Log App', () => {
+     test('should return to Add Entry mode after update', async ({ page }) => {
+       await page.click('button[aria-label*="Edit"]');
+       // Wait for weather check to clear if it triggered
+-      await page.waitForFunction(() => !document.body.textContent?.includes('Checking weather'));
++      await expect(page.locator('text=Checking weather')).not.toBeVisible();
+       await page.fill('#ride-km', '25');
+       await page.click('button[type="submit"]');
+ 
+       // Wait for form to reset
+-      await page.waitForFunction(
+-        () => (document.querySelector('#ride-km') as HTMLInputElement)?.value === '0',
+-      );
++      await expect(page.locator('#ride-km')).toHaveValue('0');
+       // And wait for weather check after submit too
+-      await page.waitForFunction(() => !document.body.textContent?.includes('Checking weather'));
++      await expect(page.locator('text=Checking weather')).not.toBeVisible();
+ 
+       await expect(page.locator('button[type="submit"]')).toContainText('Add Entry');
+       await expect(page.locator('button:text("Cancel")')).not.toBeVisible();
+@@ -610,9 +606,7 @@ test.describe('Bike Log App', () => {
+       await page.click('button[type="submit"]');
+ 
+       // Wait for form to reset
+-      await page.waitForFunction(
+-        () => (document.querySelector('#ride-km') as HTMLInputElement)?.value === '0',
+-      );
++      await expect(page.locator('#ride-km')).toHaveValue('0');
+ 
+       await expect(page.locator('ul li')).toHaveCount(2);
+       await expect(page.locator('ul li').last()).toContainText('15 km');
+@@ -636,8 +630,9 @@ test.describe('Bike Log App', () => {
+       await expect(page.locator('ul li').first()).toContainText('🌧️');
+ 
+       await page.click('button[aria-label*="Edit"]');
++      await expect(page.locator('button[type="submit"]')).toContainText('Update Entry');
+       // Wait for weather auto-check to complete (checking weather indicator disappears)
+-      await page.waitForFunction(() => !document.body.textContent?.includes('Checking weather'));
++      await expect(page.locator('text=Checking weather')).not.toBeVisible();
+ 
+       // Explicitly uncheck the rain checkbox
+       await page.uncheck('#ride-raining');
+@@ -658,9 +653,7 @@ test.describe('Bike Log App', () => {
+       await page.click('button[type="submit"]');
+ 
+       // Wait for form to reset
+-      await page.waitForFunction(
+-        () => (document.querySelector('#ride-km') as HTMLInputElement)?.value === '0',
+-      );
++      await expect(page.locator('#ride-km')).toHaveValue('0');
+ 
+       await expect(page.locator('ul li').first()).toContainText('🌧️');
+     });
+@@ -683,9 +676,7 @@ test.describe('Bike Log App', () => {
+       await page.locator('#ride-km').press('Enter');
+ 
+       // Wait for form to reset
+-      await page.waitForFunction(
+-        () => (document.querySelector('#ride-km') as HTMLInputElement)?.value === '0',
+-      );
++      await expect(page.locator('#ride-km')).toHaveValue('0');
+ 
+       await expect(page.locator('ul li')).toHaveCount(1);
+     });
+diff --git a/package.json b/package.json
+index a0481e5..6fb06bb 100644
+--- a/package.json
++++ b/package.json
+@@ -8,7 +8,7 @@
+     "test": "ng test",
+     "pree2e": "lsof -ti:8080,4400,9099 | xargs kill -9 2>/dev/null; true",
+     "e2e": "playwright test",
+-    "e2e:ui": "playwright test --ui",
++    "e2e:ui": "npm run e2e -- --ui",
+     "lint": "ng lint",
+     "lint:fix": "npm run lint -- --fix",
+     "prepare": "simple-git-hooks"

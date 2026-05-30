@@ -19,11 +19,9 @@ async function addEntry(page: Page, date: string, km: string, raining = false) {
   }
   await page.click('button[type="submit"]');
   // Wait for the form to reset (km returns to 0), confirming the entry was saved
-  await page.waitForFunction(
-    () => (document.querySelector('#ride-km') as HTMLInputElement)?.value === '0',
-  );
+  await expect(page.locator('#ride-km')).toHaveValue('0');
   // Wait for weather check to clear if it triggered
-  await page.waitForFunction(() => !document.body.textContent?.includes('Checking weather'));
+  await expect(page.locator('text=Checking weather')).not.toBeVisible();
 }
 
 /** Click the nth delete button for a ride and confirm the inline prompt. */
@@ -34,6 +32,15 @@ async function deleteRide(page: Page, nth = 0) {
 
 test.describe('Bike Log App', () => {
   test.beforeEach(async ({ page }) => {
+    // Mock Weather API
+    await page.route(/api.open-meteo.com/, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ daily: { precipitation_sum: [0] } }),
+      });
+    });
+
     // Wipe all Firestore emulator data
     await fetch(
       'http://127.0.0.1:8080/emulator/v1/projects/demo-vvta/databases/(default)/documents',
@@ -98,11 +105,8 @@ test.describe('Bike Log App', () => {
     await page.goto('/');
     await page.waitForSelector('h1');
     // Wait for Firestore subscription to resolve and weather check to finish
-    await page.waitForFunction(
-      () =>
-        !document.body.textContent?.includes('Loading rides') &&
-        !document.body.textContent?.includes('Checking weather'),
-    );
+    await expect(page.locator('text=Loading rides')).not.toBeVisible();
+    await expect(page.locator('text=Checking weather')).not.toBeVisible();
   });
 
   test.describe('Initial state', () => {
@@ -343,9 +347,7 @@ test.describe('Bike Log App', () => {
       await page.click('button[type="submit"]');
 
       // Wait for form to reset
-      await page.waitForFunction(
-        () => (document.querySelector('#ride-km') as HTMLInputElement)?.value === '0',
-      );
+      await expect(page.locator('#ride-km')).toHaveValue('0');
 
       await expect(page.locator('ul li')).toHaveCount(1);
       await expect(page.locator('ul li').first()).toContainText('25 km');
@@ -357,9 +359,7 @@ test.describe('Bike Log App', () => {
       await page.click('button[type="submit"]');
 
       // Wait for form to reset
-      await page.waitForFunction(
-        () => (document.querySelector('#ride-km') as HTMLInputElement)?.value === '0',
-      );
+      await expect(page.locator('#ride-km')).toHaveValue('0');
 
       await expect(page.locator('ul li')).toHaveCount(1);
       await expect(page.locator('ul li').first()).toContainText('Jul');
@@ -371,9 +371,7 @@ test.describe('Bike Log App', () => {
       await page.click('button[type="submit"]');
 
       // Wait for form to reset
-      await page.waitForFunction(
-        () => (document.querySelector('#ride-km') as HTMLInputElement)?.value === '0',
-      );
+      await expect(page.locator('#ride-km')).toHaveValue('0');
 
       await expect(page.locator('ul li').first()).toContainText('🌧️');
     });
@@ -381,16 +379,14 @@ test.describe('Bike Log App', () => {
     test('should return to Add Entry mode after update', async ({ page }) => {
       await page.click('button[aria-label*="Edit"]');
       // Wait for weather check to clear if it triggered
-      await page.waitForFunction(() => !document.body.textContent?.includes('Checking weather'));
+      await expect(page.locator('text=Checking weather')).not.toBeVisible();
       await page.fill('#ride-km', '25');
       await page.click('button[type="submit"]');
 
       // Wait for form to reset
-      await page.waitForFunction(
-        () => (document.querySelector('#ride-km') as HTMLInputElement)?.value === '0',
-      );
+      await expect(page.locator('#ride-km')).toHaveValue('0');
       // And wait for weather check after submit too
-      await page.waitForFunction(() => !document.body.textContent?.includes('Checking weather'));
+      await expect(page.locator('text=Checking weather')).not.toBeVisible();
 
       await expect(page.locator('button[type="submit"]')).toContainText('Add Entry');
       await expect(page.locator('button:text("Cancel")')).not.toBeVisible();
@@ -610,9 +606,7 @@ test.describe('Bike Log App', () => {
       await page.click('button[type="submit"]');
 
       // Wait for form to reset
-      await page.waitForFunction(
-        () => (document.querySelector('#ride-km') as HTMLInputElement)?.value === '0',
-      );
+      await expect(page.locator('#ride-km')).toHaveValue('0');
 
       await expect(page.locator('ul li')).toHaveCount(2);
       await expect(page.locator('ul li').last()).toContainText('15 km');
@@ -636,8 +630,9 @@ test.describe('Bike Log App', () => {
       await expect(page.locator('ul li').first()).toContainText('🌧️');
 
       await page.click('button[aria-label*="Edit"]');
+      await expect(page.locator('button[type="submit"]')).toContainText('Update Entry');
       // Wait for weather auto-check to complete (checking weather indicator disappears)
-      await page.waitForFunction(() => !document.body.textContent?.includes('Checking weather'));
+      await expect(page.locator('text=Checking weather')).not.toBeVisible();
 
       // Explicitly uncheck the rain checkbox
       await page.uncheck('#ride-raining');
@@ -658,9 +653,7 @@ test.describe('Bike Log App', () => {
       await page.click('button[type="submit"]');
 
       // Wait for form to reset
-      await page.waitForFunction(
-        () => (document.querySelector('#ride-km') as HTMLInputElement)?.value === '0',
-      );
+      await expect(page.locator('#ride-km')).toHaveValue('0');
 
       await expect(page.locator('ul li').first()).toContainText('🌧️');
     });
@@ -683,9 +676,7 @@ test.describe('Bike Log App', () => {
       await page.locator('#ride-km').press('Enter');
 
       // Wait for form to reset
-      await page.waitForFunction(
-        () => (document.querySelector('#ride-km') as HTMLInputElement)?.value === '0',
-      );
+      await expect(page.locator('#ride-km')).toHaveValue('0');
 
       await expect(page.locator('ul li')).toHaveCount(1);
     });
