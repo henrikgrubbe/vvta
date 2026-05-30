@@ -2,6 +2,8 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 
 ## Agent Efficiency
 
+- **Load repo-local skill files.** On startup, prefer loading skill files from `.ai-skills/` (if present) into agent memory so onboarding is reproducible for new agents. If both repo-local and user-home skills exist, prefer the repo-local copy.
+- **Caveman Mode.** On startup after loading skill files, make sure to always use the caveman skill (/caveman full) so that you both think and speak like a caveman.
 - **Read files once.** If a file is already in context, do not re-read it.
 - **Batch tool calls.** Run independent reads/searches in parallel; never make sequential calls when parallel is possible.
 - **Targeted searches only.** Use `grep_search` for known symbol names; use `semantic_search` only when the location is unknown. Never search the whole codebase for something already documented here.
@@ -9,7 +11,6 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - **No confirmation steps.** Don't ask "shall I proceed?" — just act. Ask only when information is genuinely missing.
 - **Skip obvious explanations.** Don't narrate what you're about to do before doing it; explain only non-obvious decisions after the fact.
 - **One commit per logical unit.** Don't batch unrelated changes just to reduce commit count, but don't make a commit per line either.
- - **Load repo-local skill files.** On startup, prefer loading skill files from `.ai-skills/` (if present) into agent memory so onboarding is reproducible for new agents. If both repo-local and user-home skills exist, prefer the repo-local copy.
 
 ## Project Overview
 
@@ -27,15 +28,15 @@ Bike commute logging app ("Vi viber til arbejde") built with Angular 21, Firebas
 
 ## Commands
 
-| Action | Command |
-|---|---|
-| Lint | `npm run lint` |
-| Dev server | `npm start` (port 4200) |
-| Build | `npm run build` |
-| Unit tests | `npm test` |
-| E2E tests | `npm run e2e` (auto-starts dev server) |
-| Pre-e2e | `npm run pree2e` (kills common ports used by emulators/servers before running e2e) |
-| Deploy | `firebase deploy` (builds to `dist/vvta/browser`) |
+| Action     | Command                                           |
+|------------|---------------------------------------------------|
+| Lint       | `npm run lint`                                    |
+| Format     | `npm run lint:fix`                                |
+| Dev server | `npm start` (port 4200)                           |
+| Build      | `npm run build`                                   |
+| Unit tests | `npm test`                                        |
+| E2E tests  | `npm run e2e` (auto-starts dev server)            |
+| Deploy     | `firebase deploy` (builds to `dist/vvta/browser`) |
 
 ## Project Structure
 
@@ -82,12 +83,21 @@ Components use short `.ts` filenames (not `.component.ts`): `bike-log.ts` contai
 ### Feature Routing
 
 Features are lazy-loaded at two levels — `loadChildren` in `app.routes.ts`, then `loadComponent` in feature routes:
+
 ```typescript
 // app.routes.ts
-{ path: '', loadChildren: () => import('./bike-log/bike-log.routes') }
+{
+  path: '', loadChildren
+:
+  () => import('./bike-log/bike-log.routes')
+}
 
 // bike-log/bike-log.routes.ts
-{ path: '', loadComponent: () => import('./bike-log').then(m => m.BikeLogComponent) }
+{
+  path: '', loadComponent
+:
+  () => import('./bike-log').then(m => m.BikeLogComponent)
+}
 export default routes;
 ```
 
