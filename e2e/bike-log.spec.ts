@@ -50,7 +50,7 @@ test.describe('Bike Log App', () => {
 
   test.beforeEach(async ({ page }, testInfo) => {
     // Mock Weather API
-    await page.route(/api.open-meteo.com/, async (route) => {
+    await page.route(/api\.open-meteo\.com/, async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
