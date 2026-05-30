@@ -2,6 +2,111 @@ import { expect, test } from '@playwright/test';
 
 type Page = import('@playwright/test').Page;
 
+// Shared auth state per worker — created once in beforeAll, reused across all tests
+let sharedAuth: {
+  uid: string;
+  email: string;
+  idToken: string;
+  refreshToken: string;
+} | null = null;
+
+/** Delete all bike-entries for a specific userId via the Firestore emulator REST API. */
+async function wipeUserEntries(uid: string): Promise<void> {
+  // Run a structured query to find all docs with userId == uid
+  const queryRes = await fetch(
+    'http://127.0.0.1:8080/v1/projects/demo-vvta/databases/(default)/documents:runQuery',
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer owner' },
+      body: JSON.stringify({
+        structuredQuery: {
+          from: [{ collectionId: 'bike-entries' }],
+          where: {
+            fieldFilter: {
+              field: { fieldPath: 'userId' },
+              op: 'EQUAL',
+              value: { stringValue: uid },
+            },
+          },
+          select: { fields: [{ fieldPath: '__name__' }] },
+        },
+      }),
+    },
+  ).catch(() => null);
+
+  if (!queryRes?.ok) return;
+
+  const results = (await queryRes.json()) as { document?: { name?: string } }[];
+  const deletePromises = results
+    .filter((r) => r.document?.name)
+    .map((r) =>
+      fetch(`http://127.0.0.1:8080/v1/${r.document!.name!}`, {
+        method: 'DELETE',
+        headers: { Authorization: 'Bearer owner' },
+      }).catch(() => {
+        /* ignore */
+      }),
+    );
+  await Promise.all(deletePromises);
+}
+
+/**
+ * Inject Firebase auth into IndexedDB before the page scripts run.
+ * Firebase Web SDK reads `firebaseLocalStorageDb` / `firebaseLocalStorage`
+ * on startup — writing it here means no sign-in round-trip is needed.
+ */
+async function injectAuthState(page: Page, auth: NonNullable<typeof sharedAuth>): Promise<void> {
+  await page.addInitScript(
+    ({ uid, email, idToken, refreshToken }) => {
+      const DB_NAME = 'firebaseLocalStorageDb';
+      const STORE = 'firebaseLocalStorage';
+      const KEY = 'firebase:authUser:demo-key:[DEFAULT]';
+
+      const record = {
+        fbase_key: KEY,
+        value: {
+          uid,
+          email,
+          emailVerified: false,
+          isAnonymous: false,
+          providerData: [
+            {
+              providerId: 'password',
+              uid: email,
+              email,
+              displayName: null,
+              photoURL: null,
+              phoneNumber: null,
+            },
+          ],
+          stsTokenManager: {
+            refreshToken,
+            accessToken: idToken,
+            expirationTime: Date.now() + 3600 * 1000,
+          },
+          createdAt: String(Date.now()),
+          lastLoginAt: String(Date.now()),
+          apiKey: 'demo-key',
+          appName: '[DEFAULT]',
+        },
+      };
+
+      const req = indexedDB.open(DB_NAME, 1);
+      req.onupgradeneeded = () => {
+        req.result.createObjectStore(STORE, { keyPath: 'fbase_key' });
+      };
+      req.onsuccess = () => {
+        const db = req.result;
+        // Ensure object store exists (may already exist)
+        if (!db.objectStoreNames.contains(STORE)) return;
+        const tx = db.transaction(STORE, 'readwrite');
+        tx.objectStore(STORE).put(record);
+      };
+    },
+    { uid: auth.uid, email: auth.email, idToken: auth.idToken, refreshToken: auth.refreshToken },
+  );
+}
+
 // Helper to add an entry quickly
 async function addEntry(page: Page, date: string, km: string, raining = false) {
   await page.fill('#ride-date', date);
@@ -32,51 +137,30 @@ async function deleteRide(page: Page, nth = 0) {
 
 test.describe('Bike Log App', () => {
   test.beforeAll(async () => {
-    // Wipe all Firestore emulator data
-    await fetch(
-      'http://127.0.0.1:8080/emulator/v1/projects/demo-vvta/databases/(default)/documents',
-      { method: 'DELETE' },
-    ).catch(() => {
-      /* ignore */
-    });
-
-    // Wipe all Auth emulator users
-    await fetch('http://127.0.0.1:9099/emulator/v1/projects/demo-vvta/accounts', {
-      method: 'DELETE',
-    }).catch(() => {
-      /* ignore */
-    });
-  });
-
-  test.beforeEach(async ({ page }, testInfo) => {
-    // Mock Weather API
-    await page.route(/api\.open-meteo\.com/, async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ daily: { precipitation_sum: [0] } }),
-      });
-    });
-
-    const email = `test-${testInfo.testId}@test.com`;
+    // Create one shared user per worker — reused across all tests in this worker
+    // (Initial full wipe is handled by global setup in e2e/global-setup.ts)
+    const email = `worker-${process.pid}@test.com`;
     const password = 'testpassword123';
 
-    // Create a test user in the Auth emulator
     const signUpRes = await fetch(
       'http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/accounts:signUp?key=demo-key',
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email,
-          password,
-          returnSecureToken: true,
-        }),
+        body: JSON.stringify({ email, password, returnSecureToken: true }),
       },
     );
-    const { localId: uid } = (await signUpRes.json()) as { localId: string };
+    const {
+      localId: uid,
+      idToken,
+      refreshToken,
+    } = (await signUpRes.json()) as {
+      localId: string;
+      idToken: string;
+      refreshToken: string;
+    };
 
-    // Create the user-profile document (admin bypass header)
+    // Create the user-profile document
     await fetch(
       `http://127.0.0.1:8080/v1/projects/demo-vvta/databases/(default)/documents/user-profiles?documentId=${uid}`,
       {
@@ -94,20 +178,28 @@ test.describe('Bike Log App', () => {
       /* ignore */
     });
 
-    // Navigate (redirects to /login), wait for __testSignIn helper, then sign in
-    await page.goto('/');
-    await page.waitForFunction(
-      () => typeof (window as unknown as Record<string, unknown>)['__testSignIn'] === 'function',
-    );
-    await page.evaluate(
-      ([e, p]) =>
-        (
-          window as unknown as { __testSignIn: (e: string, p: string) => Promise<void> }
-        ).__testSignIn(e, p),
-      [email, password],
-    );
+    sharedAuth = { uid, email, idToken, refreshToken };
+  });
 
-    // Now navigate to home — auth guard will allow through
+  test.beforeEach(async ({ page }) => {
+    // Wipe only this worker's ride entries (scoped by userId — safe for parallel workers)
+    if (sharedAuth) {
+      await wipeUserEntries(sharedAuth.uid);
+    }
+
+    // Mock Weather API
+    await page.route(/api\.open-meteo\.com/, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ daily: { precipitation_sum: [0] } }),
+      });
+    });
+
+    // Inject Firebase auth into IndexedDB — no sign-in round-trip needed
+    await injectAuthState(page, sharedAuth!);
+
+    // Single navigation — auth guard passes immediately
     await page.goto('/');
     await page.waitForSelector('h1');
     // Wait for Firestore subscription to resolve and weather check to finish
