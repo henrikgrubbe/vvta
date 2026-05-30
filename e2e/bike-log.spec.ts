@@ -31,16 +31,7 @@ async function deleteRide(page: Page, nth = 0) {
 }
 
 test.describe('Bike Log App', () => {
-  test.beforeEach(async ({ page }) => {
-    // Mock Weather API
-    await page.route(/api.open-meteo.com/, async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ daily: { precipitation_sum: [0] } }),
-      });
-    });
-
+  test.beforeAll(async () => {
     // Wipe all Firestore emulator data
     await fetch(
       'http://127.0.0.1:8080/emulator/v1/projects/demo-vvta/databases/(default)/documents',
@@ -55,6 +46,20 @@ test.describe('Bike Log App', () => {
     }).catch(() => {
       /* ignore */
     });
+  });
+
+  test.beforeEach(async ({ page }, testInfo) => {
+    // Mock Weather API
+    await page.route(/api.open-meteo.com/, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ daily: { precipitation_sum: [0] } }),
+      });
+    });
+
+    const email = `test-${testInfo.testId}@test.com`;
+    const password = 'testpassword123';
 
     // Create a test user in the Auth emulator
     const signUpRes = await fetch(
@@ -63,8 +68,8 @@ test.describe('Bike Log App', () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: 'test@test.com',
-          password: 'testpassword123',
+          email,
+          password,
           returnSecureToken: true,
         }),
       },
@@ -81,7 +86,7 @@ test.describe('Bike Log App', () => {
           fields: {
             uid: { stringValue: uid },
             firstName: { stringValue: 'TestUser' },
-            email: { stringValue: 'test@test.com' },
+            email: { stringValue: email },
           },
         }),
       },
@@ -94,11 +99,12 @@ test.describe('Bike Log App', () => {
     await page.waitForFunction(
       () => typeof (window as unknown as Record<string, unknown>)['__testSignIn'] === 'function',
     );
-    await page.evaluate(() =>
-      (window as unknown as { __testSignIn: (e: string, p: string) => Promise<void> }).__testSignIn(
-        'test@test.com',
-        'testpassword123',
-      ),
+    await page.evaluate(
+      ([e, p]) =>
+        (
+          window as unknown as { __testSignIn: (e: string, p: string) => Promise<void> }
+        ).__testSignIn(e, p),
+      [email, password],
     );
 
     // Now navigate to home — auth guard will allow through
