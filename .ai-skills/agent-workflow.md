@@ -3,6 +3,8 @@ Agent workflow: branching, commits, and PRs
 Purpose: keep a short, unambiguous checklist that automated agents and humans can follow when making changes to this repository.
 
 Rule summary
+- Always start by understanding the skills present.
+- Activate caveman mode.
 - Always create a feature branch off `main` for a single logical feature or bugfix. Branch name format: `feature/<short-desc>` or `fix/<short-desc>`.
 - Make small, focused commits. One logical unit per commit. Use Conventional Commits (e.g., `feat:`, `fix:`, `chore:`).
 - Run formatting and linting locally before pushing. The repo exposes `npm run format` and `npm run lint` (see `package.json`).
@@ -43,8 +45,7 @@ git rebase origin/main
 
 ```bash
 npm install        # if package.json changed
-npm run format     # runs Prettier (Tailwind/class sorting + attribute ordering)
-npm run lint:fix   # eslint --fix
+npm run lint:fix   # Runs Prettier + ESLint fix (use this for all formatting)
 npm run lint        # final check (CI will also run this)
 ```
 
