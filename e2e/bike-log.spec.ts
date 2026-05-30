@@ -10,6 +10,37 @@ let sharedAuth: {
   refreshToken: string;
 } | null = null;
 
+/** Seed bike-entries for a specific userId via the Firestore emulator REST API. */
+async function seedEntries(
+  uid: string,
+  userName: string,
+  entries: { date: string; kilometers: number; raining?: boolean }[],
+): Promise<void> {
+  await Promise.all(
+    entries.map((e) =>
+      fetch(
+        'http://127.0.0.1:8080/v1/projects/demo-vvta/databases/(default)/documents/bike-entries',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: 'Bearer owner' },
+          body: JSON.stringify({
+            fields: {
+              userId: { stringValue: uid },
+              date: { stringValue: e.date },
+              kilometers: { doubleValue: e.kilometers },
+              raining: { booleanValue: e.raining ?? false },
+              rainingSource: { stringValue: 'manual' },
+              userName: { stringValue: userName },
+            },
+          }),
+        },
+      ).catch(() => {
+        /* ignore */
+      }),
+    ),
+  );
+}
+
 /** Delete all bike-entries for a specific userId via the Firestore emulator REST API. */
 async function wipeUserEntries(uid: string): Promise<void> {
   // Run a structured query to find all docs with userId == uid
@@ -182,12 +213,7 @@ test.describe('Bike Log App', () => {
   });
 
   test.beforeEach(async ({ page }) => {
-    // Wipe only this worker's ride entries (scoped by userId — safe for parallel workers)
-    if (sharedAuth) {
-      await wipeUserEntries(sharedAuth.uid);
-    }
-
-    // Mock Weather API
+    // Set up route mock and auth injection before navigation (these are synchronous registrations)
     await page.route(/api\.open-meteo\.com/, async (route) => {
       await route.fulfill({
         status: 200,
@@ -195,13 +221,10 @@ test.describe('Bike Log App', () => {
         body: JSON.stringify({ daily: { precipitation_sum: [0] } }),
       });
     });
-
-    // Inject Firebase auth into IndexedDB — no sign-in round-trip needed
     await injectAuthState(page, sharedAuth!);
 
-    // Single navigation — auth guard passes immediately
-    await page.goto('/');
-    await page.waitForSelector('h1');
+    // Wipe entries and navigate in parallel — wipe is a REST call, goto is a browser navigation
+    await Promise.all([wipeUserEntries(sharedAuth!.uid), page.goto('/')]);
     // Wait for Firestore subscription to resolve and weather check to finish
     await expect(page.locator('text=Loading rides')).not.toBeVisible();
     await expect(page.locator('text=Checking weather')).not.toBeVisible();
@@ -419,7 +442,8 @@ test.describe('Bike Log App', () => {
 
   test.describe('Editing entries', () => {
     test.beforeEach(async ({ page }) => {
-      await addEntry(page, '2025-06-01', '10');
+      // Seed via REST — Firestore onSnapshot pushes update to already-loaded page
+      await seedEntries(sharedAuth!.uid, 'TestUser', [{ date: '2025-06-01', kilometers: 10 }]);
       await expect(page.locator('ul li')).toHaveCount(1);
     });
 
@@ -791,9 +815,12 @@ test.describe('Bike Log App', () => {
 
   test.describe('Sorting', () => {
     test.beforeEach(async ({ page }) => {
-      await addEntry(page, '2025-06-01', '10');
-      await addEntry(page, '2025-06-03', '30');
-      await addEntry(page, '2025-06-02', '20');
+      // Seed via REST — Firestore onSnapshot pushes update to already-loaded page
+      await seedEntries(sharedAuth!.uid, 'TestUser', [
+        { date: '2025-06-01', kilometers: 10 },
+        { date: '2025-06-03', kilometers: 30 },
+        { date: '2025-06-02', kilometers: 20 },
+      ]);
       await expect(page.locator('ul li')).toHaveCount(3);
     });
 
