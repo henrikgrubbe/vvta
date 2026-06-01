@@ -18,7 +18,7 @@ export class OnboardingComponent {
   private readonly router = inject(Router);
   private readonly translate = inject(TranslateService);
 
-  readonly firstName = signal('');
+  readonly firstName = signal(this.auth.currentUser?.displayName?.split(' ')[0] ?? '');
   readonly touched = signal(false);
   readonly saving = signal(false);
   readonly error = signal<string | null>(null);
