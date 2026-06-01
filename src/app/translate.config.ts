@@ -5,14 +5,15 @@ import {
   makeEnvironmentProviders,
   provideAppInitializer,
 } from '@angular/core';
-import { Title } from '@angular/platform-browser';
 import {
   TranslateLoader,
   TranslateModule,
   TranslateService,
   TranslationObject,
 } from '@ngx-translate/core';
-import { firstValueFrom, Observable, tap } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
+
+import { LanguageService } from './language.service';
 
 class HttpTranslateLoader implements TranslateLoader {
   private readonly http = inject(HttpClient);
@@ -30,12 +31,8 @@ export function provideTranslate(): EnvironmentProviders {
     }).providers ?? [],
     provideAppInitializer(() => {
       const translate = inject(TranslateService);
-      const title = inject(Title);
-      return firstValueFrom(
-        translate
-          .use(navigator.language.split('-')[0])
-          .pipe(tap(() => title.setTitle(translate.instant('APP.TITLE')))),
-      );
+      inject(LanguageService); // eagerly instantiate to wire onLangChange → title + storage
+      return firstValueFrom(translate.use(LanguageService.getPersistedLang()));
     }),
   ]);
 }

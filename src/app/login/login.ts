@@ -3,12 +3,13 @@ import { Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { AuthService } from '../auth.service';
+import { LanguageSwitcherComponent } from '../language-switcher';
 import { UserProfileService } from '../user-profile.service';
 
 @Component({
   selector: 'app-login',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslateModule],
+  imports: [TranslateModule, LanguageSwitcherComponent],
   templateUrl: './login.html',
 })
 export class LoginComponent {

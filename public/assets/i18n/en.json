@@ -5,7 +5,8 @@
   "NAV": {
     "LEADERBOARD": "🏆 Leaderboard",
     "MY_RIDES": "← My rides",
-    "SIGN_OUT": "Sign out"
+    "SIGN_OUT": "Sign out",
+    "SWITCH_LANG": "Switch language"
   },
   "THEME": {
     "SWITCH_LIGHT": "Switch to light mode",

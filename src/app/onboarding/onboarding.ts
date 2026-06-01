@@ -3,12 +3,13 @@ import { Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
+import { LanguageSwitcherComponent } from '../language-switcher';
 import { UserProfileService } from '../user-profile.service';
 
 @Component({
   selector: 'app-onboarding',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslateModule],
+  imports: [TranslateModule, LanguageSwitcherComponent],
   templateUrl: './onboarding.html',
 })
 export class OnboardingComponent {

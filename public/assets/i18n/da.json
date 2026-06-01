@@ -5,7 +5,8 @@
   "NAV": {
     "LEADERBOARD": "🏆 Rangliste",
     "MY_RIDES": "← Mine ture",
-    "SIGN_OUT": "Log ud"
+    "SIGN_OUT": "Log ud",
+    "SWITCH_LANG": "Skift sprog"
   },
   "THEME": {
     "SWITCH_LIGHT": "Skift til lys tilstand",

@@ -17,6 +17,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { filter, switchMap, tap } from 'rxjs';
 
 import { AuthService } from '../auth.service';
+import { LanguageSwitcherComponent } from '../language-switcher';
 import { ThemeService } from '../theme.service';
 import { UserProfileService } from '../user-profile.service';
 import { BikeLogService } from './bike-log.service';
@@ -38,7 +39,7 @@ export interface BikeEntry {
 @Component({
   selector: 'app-bike-log',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormField, DatePipe, RouterLink, TranslateModule],
+  imports: [FormField, DatePipe, RouterLink, TranslateModule, LanguageSwitcherComponent],
   templateUrl: './bike-log.html',
 })
 export class BikeLogComponent {

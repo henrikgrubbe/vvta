@@ -5,6 +5,7 @@ import { RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 
 import { AuthService } from '../auth.service';
+import { LanguageSwitcherComponent } from '../language-switcher';
 import { ThemeService } from '../theme.service';
 import { LeaderboardService } from './leaderboard.service';
 
@@ -20,7 +21,7 @@ interface RiderStats {
 @Component({
   selector: 'app-leaderboard',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, DatePipe, TranslateModule],
+  imports: [RouterLink, DatePipe, TranslateModule, LanguageSwitcherComponent],
   templateUrl: './leaderboard.html',
 })
 export class LeaderboardComponent {
