@@ -71,7 +71,7 @@ test.describe('Bike Log App', () => {
 
   test.describe('Initial state', () => {
     test('should show the app heading', async ({ page }) => {
-      await expect(page.locator('h1')).toContainText('We bike to work');
+      await expect(page.locator('h1')).toContainText('We Vibe to Work');
     });
 
     test('should show the subtitle', async ({ page }) => {
