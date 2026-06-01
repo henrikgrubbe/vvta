@@ -1,19 +1,26 @@
-<main class="flex min-h-screen items-center justify-center bg-gray-50 p-6">
-  <div class="w-full max-w-sm space-y-6 rounded-2xl bg-white p-8 text-center shadow-md">
+<main class="flex min-h-screen items-center justify-center bg-gray-50 p-6 dark:bg-gray-900">
+  <div
+    class="w-full max-w-sm space-y-6 rounded-2xl bg-white p-8 text-center shadow-md dark:bg-gray-800"
+  >
     <div>
       <span class="text-5xl" aria-hidden="true">🚴</span>
-      <h1 class="mt-3 text-2xl font-bold text-gray-900">Vi viber til arbejde</h1>
-      <p class="mt-1 text-sm text-gray-500">Log dine daglige cykelture til arbejde.</p>
+      <h1 class="mt-3 text-2xl font-bold text-gray-900 dark:text-gray-100">Vi viber til arbejde</h1>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        Log dine daglige cykelture til arbejde.
+      </p>
     </div>
 
     @if (error()) {
-      <p class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600" role="alert">
+      <p
+        class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-900/30 dark:text-red-400"
+        role="alert"
+      >
         {{ error() }}
       </p>
     }
 
     <button
-      class="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 px-4 py-3 font-medium text-gray-700 hover:bg-gray-50 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+      class="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 px-4 py-3 font-medium text-gray-700 hover:bg-gray-50 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
       [disabled]="loading()"
       (click)="signIn()"
       type="button"

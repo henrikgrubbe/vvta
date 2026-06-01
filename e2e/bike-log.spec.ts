@@ -1,125 +1,16 @@
 import { expect, test } from '@playwright/test';
 
-type Page = import('@playwright/test').Page;
+import {
+  type AuthState,
+  createUserProfile,
+  injectAuthState,
+  seedEntries,
+  signUpUser,
+  wipeUserEntries,
+} from './test-utils';
 
 // Shared auth state per worker — created once in beforeAll, reused across all tests
-let sharedAuth: {
-  uid: string;
-  email: string;
-  idToken: string;
-  refreshToken: string;
-} | null = null;
-
-/** Seed bike-entries for a specific userId via the Firestore emulator REST API. */
-async function seedEntries(
-  uid: string,
-  userName: string,
-  entries: { date: string; kilometers: number; raining?: boolean }[],
-): Promise<void> {
-  await Promise.all(
-    entries.map((e) =>
-      fetch(
-        'http://127.0.0.1:8080/v1/projects/demo-vvta/databases/(default)/documents/bike-entries',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: 'Bearer owner' },
-          body: JSON.stringify({
-            fields: {
-              userId: { stringValue: uid },
-              date: { stringValue: e.date },
-              kilometers: { doubleValue: e.kilometers },
-              raining: { booleanValue: e.raining ?? false },
-              rainingSource: { stringValue: 'manual' },
-              userName: { stringValue: userName },
-            },
-          }),
-        },
-      ).catch(() => {
-        /* ignore */
-      }),
-    ),
-  );
-}
-
-/** Delete all bike-entries for a specific userId via the Firestore emulator REST API. */
-async function wipeUserEntries(uid: string): Promise<void> {
-  // Run a structured query to find all docs with userId == uid
-  const queryRes = await fetch(
-    'http://127.0.0.1:8080/v1/projects/demo-vvta/databases/(default)/documents:runQuery',
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer owner' },
-      body: JSON.stringify({
-        structuredQuery: {
-          from: [{ collectionId: 'bike-entries' }],
-          where: {
-            fieldFilter: {
-              field: { fieldPath: 'userId' },
-              op: 'EQUAL',
-              value: { stringValue: uid },
-            },
-          },
-          select: { fields: [{ fieldPath: '__name__' }] },
-        },
-      }),
-    },
-  ).catch(() => null);
-
-  if (!queryRes?.ok) return;
-
-  const results = (await queryRes.json()) as { document?: { name?: string } }[];
-  const deletePromises = results
-    .filter((r) => r.document?.name)
-    .map((r) =>
-      fetch(`http://127.0.0.1:8080/v1/${r.document!.name!}`, {
-        method: 'DELETE',
-        headers: { Authorization: 'Bearer owner' },
-      }).catch(() => {
-        /* ignore */
-      }),
-    );
-  await Promise.all(deletePromises);
-}
-
-/**
- * Inject Firebase auth into IndexedDB before the page scripts run.
- * Firebase Web SDK reads `firebaseLocalStorageDb` / `firebaseLocalStorage`
- * on startup — writing it here means no sign-in round-trip is needed.
- */
-async function injectAuthState(page: Page, auth: NonNullable<typeof sharedAuth>): Promise<void> {
-  await page.addInitScript(
-    ({ uid, email, idToken, refreshToken }) => {
-      const KEY = 'firebase:authUser:demo-key:[DEFAULT]';
-      const value = {
-        uid,
-        email,
-        emailVerified: false,
-        isAnonymous: false,
-        providerData: [
-          {
-            providerId: 'password',
-            uid: email,
-            email,
-            displayName: null,
-            photoURL: null,
-            phoneNumber: null,
-          },
-        ],
-        stsTokenManager: {
-          refreshToken,
-          accessToken: idToken,
-          expirationTime: Date.now() + 3600 * 1000,
-        },
-        createdAt: String(Date.now()),
-        lastLoginAt: String(Date.now()),
-        apiKey: 'demo-key',
-        appName: '[DEFAULT]',
-      };
-      localStorage.setItem(KEY, JSON.stringify(value));
-    },
-    { uid: auth.uid, email: auth.email, idToken: auth.idToken, refreshToken: auth.refreshToken },
-  );
-}
+let sharedAuth: AuthState | null = null;
 
 // Helper to add an entry quickly
 async function addEntry(page: Page, date: string, km: string, raining = false) {
@@ -155,43 +46,8 @@ test.describe('Bike Log App', () => {
     // (Initial full wipe is handled by global setup in e2e/global-setup.ts)
     const email = `worker-${process.pid}@test.com`;
     const password = 'testpassword123';
-
-    const signUpRes = await fetch(
-      'http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/accounts:signUp?key=demo-key',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, returnSecureToken: true }),
-      },
-    );
-    const {
-      localId: uid,
-      idToken,
-      refreshToken,
-    } = (await signUpRes.json()) as {
-      localId: string;
-      idToken: string;
-      refreshToken: string;
-    };
-
-    // Create the user-profile document
-    await fetch(
-      `http://127.0.0.1:8080/v1/projects/demo-vvta/databases/(default)/documents/user-profiles?documentId=${uid}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer owner' },
-        body: JSON.stringify({
-          fields: {
-            uid: { stringValue: uid },
-            firstName: { stringValue: 'TestUser' },
-            email: { stringValue: email },
-          },
-        }),
-      },
-    ).catch(() => {
-      /* ignore */
-    });
-
+    const { uid, idToken, refreshToken } = await signUpUser(email, password);
+    await createUserProfile(uid, 'TestUser', email);
     sharedAuth = { uid, email, idToken, refreshToken };
   });
 

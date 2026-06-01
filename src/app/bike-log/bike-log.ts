@@ -16,6 +16,7 @@ import { Router, RouterLink } from '@angular/router';
 import { filter, switchMap, tap } from 'rxjs';
 
 import { AuthService } from '../auth.service';
+import { ThemeService } from '../theme.service';
 import { UserProfileService } from '../user-profile.service';
 import { BikeLogService } from './bike-log.service';
 import { WeatherService } from './weather.service';
@@ -46,6 +47,7 @@ export class BikeLogComponent {
   private readonly profileService = inject(UserProfileService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  readonly themeService = inject(ThemeService);
 
   @ViewChild('datePicker') private datePicker!: ElementRef<HTMLInputElement>;
 
