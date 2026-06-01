@@ -1,6 +1,5 @@
 export const environment = {
   useEmulator: true,
-  useLocalStorageAuth: true,
   firebase: {
     projectId: 'demo-vvta',
     appId: '1:569496831202:web:ae39160a964a20fe434abb',
