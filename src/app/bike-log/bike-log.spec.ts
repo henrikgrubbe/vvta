@@ -7,6 +7,7 @@ import { BehaviorSubject } from 'rxjs';
 import { vi } from 'vitest';
 
 import { AuthService } from '../auth.service';
+import { provideTranslateTesting } from '../testing/translate-testing';
 import { UserProfileService } from '../user-profile.service';
 import { BikeEntry, BikeLogComponent } from './bike-log';
 import { BikeLogService } from './bike-log.service';
@@ -121,6 +122,7 @@ describe('BikeLogComponent', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         provideRouter([]),
+        ...provideTranslateTesting(),
         { provide: BikeLogService, useValue: mockService },
         {
           provide: AuthService,

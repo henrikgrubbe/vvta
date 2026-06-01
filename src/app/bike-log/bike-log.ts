@@ -13,6 +13,7 @@ import {
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { form, FormField, min, required, submit } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 import { filter, switchMap, tap } from 'rxjs';
 
 import { AuthService } from '../auth.service';
@@ -37,7 +38,7 @@ export interface BikeEntry {
 @Component({
   selector: 'app-bike-log',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormField, DatePipe, RouterLink],
+  imports: [FormField, DatePipe, RouterLink, TranslateModule],
   templateUrl: './bike-log.html',
 })
 export class BikeLogComponent {
@@ -54,9 +55,9 @@ export class BikeLogComponent {
   readonly rideModel = signal({ date: this.todayIso(), kilometers: 0, raining: false });
 
   readonly rideForm = form(this.rideModel, (s) => {
-    required(s.date, { message: 'Date is required' });
-    required(s.kilometers, { message: 'Kilometers is required' });
-    min(s.kilometers, 0.1, { message: 'Must be at least 0.1 km' });
+    required(s.date, { message: 'VALIDATION.DATE_REQUIRED' });
+    required(s.kilometers, { message: 'VALIDATION.KM_REQUIRED' });
+    min(s.kilometers, 0.1, { message: 'VALIDATION.KM_MIN' });
   });
 
   readonly currentUser = this.authService.user;

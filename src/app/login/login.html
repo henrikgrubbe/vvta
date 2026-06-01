@@ -4,9 +4,11 @@
   >
     <div>
       <span class="text-5xl" aria-hidden="true">🚴</span>
-      <h1 class="mt-3 text-2xl font-bold text-gray-900 dark:text-gray-100">Vi viber til arbejde</h1>
+      <h1 class="mt-3 text-2xl font-bold text-gray-900 dark:text-gray-100">
+        {{ 'APP.TITLE' | translate }}
+      </h1>
       <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        Log dine daglige cykelture til arbejde.
+        {{ 'BIKE_LOG.SUBTITLE' | translate }}
       </p>
     </div>
 
@@ -22,9 +24,9 @@
     <button
       class="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 px-4 py-3 font-medium text-gray-700 hover:bg-gray-50 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
       [disabled]="loading()"
+      [attr.aria-label]="'LOGIN.SIGN_IN' | translate"
       (click)="signIn()"
       type="button"
-      aria-label="Sign in with Google"
     >
       <svg aria-hidden="true" width="18" height="18" viewBox="0 0 18 18">
         <path
@@ -44,7 +46,7 @@
           d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.962L3.964 7.294C4.672 5.163 6.656 3.58 9 3.58z"
         />
       </svg>
-      {{ loading() ? 'Signing in…' : 'Sign in with Google' }}
+      {{ (loading() ? 'LOGIN.SIGNING_IN' : 'LOGIN.SIGN_IN') | translate }}
     </button>
   </div>
 </main>

@@ -2,6 +2,7 @@ import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 
 import { AuthService } from '../auth.service';
 import { ThemeService } from '../theme.service';
@@ -19,7 +20,7 @@ interface RiderStats {
 @Component({
   selector: 'app-leaderboard',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, DatePipe],
+  imports: [RouterLink, DatePipe, TranslateModule],
   templateUrl: './leaderboard.html',
 })
 export class LeaderboardComponent {

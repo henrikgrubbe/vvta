@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { AuthService } from '../auth.service';
 import { UserProfileService } from '../user-profile.service';
@@ -7,12 +8,14 @@ import { UserProfileService } from '../user-profile.service';
 @Component({
   selector: 'app-login',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [TranslateModule],
   templateUrl: './login.html',
 })
 export class LoginComponent {
   private readonly authService = inject(AuthService);
   private readonly profileService = inject(UserProfileService);
   private readonly router = inject(Router);
+  private readonly translate = inject(TranslateService);
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
@@ -25,7 +28,9 @@ export class LoginComponent {
       const profile = await this.profileService.getProfile(user.uid);
       await this.router.navigateByUrl(profile ? '/' : '/onboarding');
     } catch (err: unknown) {
-      this.error.set(err instanceof Error ? err.message : 'Sign-in failed. Please try again.');
+      this.error.set(
+        err instanceof Error ? err.message : this.translate.instant('LOGIN.ERROR_GENERIC'),
+      );
     } finally {
       this.loading.set(false);
     }

@@ -2,8 +2,12 @@
   <div class="w-full max-w-sm space-y-6 rounded-2xl bg-white p-8 shadow-md dark:bg-gray-800">
     <div class="text-center">
       <span class="text-5xl" aria-hidden="true">👋</span>
-      <h1 class="mt-3 text-2xl font-bold text-gray-900 dark:text-gray-100">Welcome!</h1>
-      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Just one thing before we start…</p>
+      <h1 class="mt-3 text-2xl font-bold text-gray-900 dark:text-gray-100">
+        {{ 'ONBOARDING.TITLE' | translate }}
+      </h1>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        {{ 'ONBOARDING.SUBTITLE' | translate }}
+      </p>
     </div>
 
     <form class="space-y-4" (submit)="save(); $event.preventDefault()" novalidate>
@@ -12,7 +16,7 @@
           class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
           for="first-name"
         >
-          What's your first name?
+          {{ 'ONBOARDING.NAME_LABEL' | translate }}
         </label>
         <input
           class="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:outline-2 focus:outline-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
@@ -20,14 +24,14 @@
           [value]="firstName()"
           [attr.aria-invalid]="touched() && !firstName().trim() ? 'true' : null"
           [attr.aria-describedby]="touched() && !firstName().trim() ? 'name-error' : null"
+          [attr.placeholder]="'ONBOARDING.NAME_PLACEHOLDER' | translate"
           (input)="firstName.set($any($event.target).value)"
           type="text"
           autocomplete="given-name"
-          placeholder="e.g. Anders"
         />
         @if (touched() && !firstName().trim()) {
           <p class="mt-1 text-sm text-red-600 dark:text-red-400" id="name-error" role="alert">
-            Please enter your first name.
+            {{ 'ONBOARDING.NAME_REQUIRED' | translate }}
           </p>
         }
       </div>
@@ -46,7 +50,7 @@
         [disabled]="saving()"
         type="submit"
       >
-        {{ saving() ? 'Saving…' : 'Get started 🚴' }}
+        {{ (saving() ? 'ONBOARDING.SAVING' : 'ONBOARDING.GET_STARTED') | translate }}
       </button>
     </form>
   </div>
