@@ -1,7 +1,8 @@
 import {
-  APP_INITIALIZER,
   EnvironmentProviders,
   importProvidersFrom,
+  inject,
+  provideAppInitializer,
   Provider,
 } from '@angular/core';
 import {
@@ -29,11 +30,9 @@ export function provideTranslateTesting(): (EnvironmentProviders | Provider)[] {
         fallbackLang: 'en',
       }),
     ),
-    {
-      provide: APP_INITIALIZER,
-      useFactory: (translate: TranslateService) => () => firstValueFrom(translate.use('en')),
-      deps: [TranslateService],
-      multi: true,
-    },
+    provideAppInitializer(() => {
+      const translate = inject(TranslateService);
+      return firstValueFrom(translate.use('en'));
+    }),
   ];
 }
