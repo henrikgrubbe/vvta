@@ -21,7 +21,7 @@ Purpose: keep a short, unambiguous checklist that automated agents and humans ca
 | New component / feature | New unit test file (`*.spec.ts`) covering key behaviours |
 | Modified component / template | Update existing spec to cover the changed behaviour |
 | New/changed service method | Unit tests for the method |
-| i18n translation files only | No test required |
+| i18n translation files | Update any tests that assert on translated text values |
 | CSS / layout-only change | No unit test required (consider e2e if visual correctness matters) |
 
 ### How to run tests
