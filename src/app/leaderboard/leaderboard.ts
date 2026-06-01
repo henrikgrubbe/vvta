@@ -4,6 +4,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 
 import { AuthService } from '../auth.service';
+import { ThemeService } from '../theme.service';
 import { LeaderboardService } from './leaderboard.service';
 
 interface RiderStats {
@@ -24,6 +25,7 @@ interface RiderStats {
 export class LeaderboardComponent {
   private readonly leaderboardService = inject(LeaderboardService);
   private readonly authService = inject(AuthService);
+  readonly themeService = inject(ThemeService);
 
   readonly allEntries = toSignal(this.leaderboardService.allEntries$);
   readonly currentUserId = computed(() => this.authService.user()?.uid ?? null);
