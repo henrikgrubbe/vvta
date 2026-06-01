@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 
-import { AppLang, LanguageService, SUPPORTED_LANGS } from './language.service';
+import { AppLang, LANG_FLAGS, LanguageService, SUPPORTED_LANGS } from './language.service';
 
 @Component({
   selector: 'app-language-switcher',
@@ -9,21 +9,26 @@ import { AppLang, LanguageService, SUPPORTED_LANGS } from './language.service';
   imports: [TranslateModule],
   template: `
     <button
-      class="rounded px-1.5 py-0.5 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200"
+      class="rounded px-1.5 py-0.5 text-xl leading-none hover:bg-gray-100 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 dark:hover:bg-gray-700"
       [attr.aria-label]="'NAV.SWITCH_LANG' | translate"
       (click)="toggle()"
       type="button"
     >
-      {{ languageService.currentLang().toUpperCase() }}
+      {{ nextFlag() }}
     </button>
   `,
 })
 export class LanguageSwitcherComponent {
   protected readonly languageService = inject(LanguageService);
 
-  protected toggle(): void {
+  protected readonly nextLang = computed<AppLang>(() => {
     const current = this.languageService.currentLang();
-    const next = SUPPORTED_LANGS.find((l): l is AppLang => l !== current) ?? 'en';
-    this.languageService.setLang(next);
+    return SUPPORTED_LANGS.find((l): l is AppLang => l !== current) ?? 'en';
+  });
+
+  protected readonly nextFlag = computed(() => LANG_FLAGS[this.nextLang()]);
+
+  protected toggle(): void {
+    this.languageService.setLang(this.nextLang());
   }
 }
