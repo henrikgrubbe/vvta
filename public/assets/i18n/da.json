@@ -1,0 +1,93 @@
+{
+  "APP": {
+    "TITLE": "Vi viber til arbejde"
+  },
+  "NAV": {
+    "LEADERBOARD": "🏆 Rangliste",
+    "MY_RIDES": "← Mine ture",
+    "SIGN_OUT": "Log ud"
+  },
+  "THEME": {
+    "SWITCH_LIGHT": "Skift til lys tilstand",
+    "SWITCH_DARK": "Skift til mørk tilstand"
+  },
+  "BIKE_LOG": {
+    "GREETING": "Hej, {{name}}! Log dine daglige cykelture.",
+    "SUBTITLE": "Log dine daglige cykelture til arbejde.",
+    "FORM": {
+      "DATE_LABEL": "Dato",
+      "KM_LABEL": "Kilometer kørt",
+      "KM_PLACEHOLDER": "f.eks. 12,5",
+      "RAINING_LABEL": "🌧️ Det regnede",
+      "CHECKING_WEATHER": "Tjekker vejr…",
+      "SAVING": "Gemmer…",
+      "UPDATE": "Opdater tur",
+      "ADD": "Tilføj tur",
+      "CANCEL": "Annuller"
+    },
+    "RIDES": {
+      "LOAD_ERROR": "Kunne ikke indlæse ture. Opdater siden.",
+      "LOADING": "Indlæser ture…",
+      "TITLE": "Loggede ture",
+      "TOTAL": "I alt:",
+      "SORT_LABEL": "Sorter:",
+      "SORT_DATE": "Dato",
+      "SORT_DISTANCE": "Afstand",
+      "SORT_DATE_ARIA": "Sorter efter dato",
+      "SORT_DATE_ACTIVE_ARIA": "Sorter efter dato {{direction}}",
+      "SORT_DISTANCE_ARIA": "Sorter efter afstand",
+      "SORT_DISTANCE_ACTIVE_ARIA": "Sorter efter afstand {{direction}}",
+      "SORT_NEWEST": "nyeste først",
+      "SORT_OLDEST": "ældste først",
+      "SORT_LONGEST": "længste først",
+      "SORT_SHORTEST": "korteste først",
+      "RAINING_AUTO": "Registreret automatisk",
+      "RAINING_MANUAL": "Angivet manuelt",
+      "DELETE_CONFIRM": "Slet?",
+      "CONFIRM_DELETE_ARIA": "Bekræft sletning",
+      "CANCEL_DELETE_ARIA": "Annuller sletning",
+      "EDIT_ARIA": "Rediger tur den {{date}}",
+      "DELETE_ARIA": "Slet tur den {{date}}",
+      "ARIA_LABEL": "Loggede cykelture",
+      "SORT_GROUP_ARIA": "Sorter ture efter",
+      "EMPTY": "Ingen ture logget endnu. Kom i gang!"
+    }
+  },
+  "LEADERBOARD": {
+    "TITLE": "🏆 Rangliste",
+    "SUBTITLE": "Hvem har kørt mest?",
+    "EMPTY": "Ingen ture logget endnu. Vær den første!",
+    "RANKINGS_ARIA": "Rangering af ryttere",
+    "RANK_ARIA": "Placering {{rank}}",
+    "YOU": "(dig)",
+    "LAST_RIDE": "Seneste tur:",
+    "RIDE": "tur",
+    "RIDES": "ture",
+    "RECENT_RIDES": "Seneste ture",
+    "RAINING_ARIA": "regnvejr"
+  },
+  "LOGIN": {
+    "SIGNING_IN": "Logger ind…",
+    "SIGN_IN": "Log ind med Google",
+    "ERROR_GENERIC": "Login mislykkedes. Prøv igen."
+  },
+  "ONBOARDING": {
+    "TITLE": "Velkommen!",
+    "SUBTITLE": "Én ting inden vi starter…",
+    "NAME_LABEL": "Hvad er dit fornavn?",
+    "NAME_PLACEHOLDER": "f.eks. Anders",
+    "NAME_REQUIRED": "Angiv venligst dit fornavn.",
+    "SAVING": "Gemmer…",
+    "GET_STARTED": "Kom i gang 🚴",
+    "ERROR_GENERIC": "Noget gik galt. Prøv igen."
+  },
+  "VALIDATION": {
+    "DATE_REQUIRED": "Dato er påkrævet",
+    "KM_REQUIRED": "Kilometer er påkrævet",
+    "KM_MIN": "Skal være mindst 0,1 km"
+  },
+  "COMMON": {
+    "LOADING": "Indlæser…",
+    "UNKNOWN": "Ukendt"
+  }
+}

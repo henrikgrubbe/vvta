@@ -1,0 +1,93 @@
+{
+  "APP": {
+    "TITLE": "Vi viber til arbejde"
+  },
+  "NAV": {
+    "LEADERBOARD": "🏆 Leaderboard",
+    "MY_RIDES": "← My rides",
+    "SIGN_OUT": "Sign out"
+  },
+  "THEME": {
+    "SWITCH_LIGHT": "Switch to light mode",
+    "SWITCH_DARK": "Switch to dark mode"
+  },
+  "BIKE_LOG": {
+    "GREETING": "Hello, {{name}}! Log your daily bike rides.",
+    "SUBTITLE": "Log your daily bike rides to work.",
+    "FORM": {
+      "DATE_LABEL": "Date",
+      "KM_LABEL": "Kilometers driven",
+      "KM_PLACEHOLDER": "e.g. 12.5",
+      "RAINING_LABEL": "🌧️ It was raining",
+      "CHECKING_WEATHER": "Checking weather…",
+      "SAVING": "Saving…",
+      "UPDATE": "Update Entry",
+      "ADD": "Add Entry",
+      "CANCEL": "Cancel"
+    },
+    "RIDES": {
+      "LOAD_ERROR": "Failed to load rides. Please refresh.",
+      "LOADING": "Loading rides…",
+      "TITLE": "Logged Rides",
+      "TOTAL": "Total:",
+      "SORT_LABEL": "Sort:",
+      "SORT_DATE": "Date",
+      "SORT_DISTANCE": "Distance",
+      "SORT_DATE_ARIA": "Sort by date",
+      "SORT_DATE_ACTIVE_ARIA": "Sort by date {{direction}}",
+      "SORT_DISTANCE_ARIA": "Sort by distance",
+      "SORT_DISTANCE_ACTIVE_ARIA": "Sort by distance {{direction}}",
+      "SORT_NEWEST": "newest first",
+      "SORT_OLDEST": "oldest first",
+      "SORT_LONGEST": "longest first",
+      "SORT_SHORTEST": "shortest first",
+      "RAINING_AUTO": "Detected by weather data",
+      "RAINING_MANUAL": "Set manually",
+      "DELETE_CONFIRM": "Delete?",
+      "CONFIRM_DELETE_ARIA": "Confirm delete",
+      "CANCEL_DELETE_ARIA": "Cancel delete",
+      "EDIT_ARIA": "Edit ride on {{date}}",
+      "DELETE_ARIA": "Delete ride on {{date}}",
+      "ARIA_LABEL": "Logged bike rides",
+      "SORT_GROUP_ARIA": "Sort rides by",
+      "EMPTY": "No rides logged yet. Start tracking!"
+    }
+  },
+  "LEADERBOARD": {
+    "TITLE": "🏆 Leaderboard",
+    "SUBTITLE": "Who's been riding the most?",
+    "EMPTY": "No rides logged yet. Be the first!",
+    "RANKINGS_ARIA": "Rider rankings",
+    "RANK_ARIA": "Rank {{rank}}",
+    "YOU": "(you)",
+    "LAST_RIDE": "Last ride:",
+    "RIDE": "ride",
+    "RIDES": "rides",
+    "RECENT_RIDES": "Recent rides",
+    "RAINING_ARIA": "raining"
+  },
+  "LOGIN": {
+    "SIGNING_IN": "Signing in…",
+    "SIGN_IN": "Sign in with Google",
+    "ERROR_GENERIC": "Sign-in failed. Please try again."
+  },
+  "ONBOARDING": {
+    "TITLE": "Welcome!",
+    "SUBTITLE": "Just one thing before we start…",
+    "NAME_LABEL": "What's your first name?",
+    "NAME_PLACEHOLDER": "e.g. Anders",
+    "NAME_REQUIRED": "Please enter your first name.",
+    "SAVING": "Saving…",
+    "GET_STARTED": "Get started 🚴",
+    "ERROR_GENERIC": "Something went wrong. Please try again."
+  },
+  "VALIDATION": {
+    "DATE_REQUIRED": "Date is required",
+    "KM_REQUIRED": "Kilometers is required",
+    "KM_MIN": "Must be at least 0.1 km"
+  },
+  "COMMON": {
+    "LOADING": "Loading…",
+    "UNKNOWN": "Unknown"
+  }
+}
