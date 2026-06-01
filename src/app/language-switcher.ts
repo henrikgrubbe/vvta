@@ -23,7 +23,8 @@ export class LanguageSwitcherComponent {
 
   protected readonly nextLang = computed<AppLang>(() => {
     const current = this.languageService.currentLang();
-    return SUPPORTED_LANGS.find((l): l is AppLang => l !== current) ?? 'en';
+    const idx = SUPPORTED_LANGS.indexOf(current);
+    return SUPPORTED_LANGS[(idx + 1) % SUPPORTED_LANGS.length];
   });
 
   protected readonly nextFlag = computed(() => LANG_FLAGS[this.nextLang()]);

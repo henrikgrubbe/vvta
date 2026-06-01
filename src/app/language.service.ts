@@ -2,12 +2,13 @@ import { inject, Injectable, signal } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { TranslateService } from '@ngx-translate/core';
 
-export const SUPPORTED_LANGS = ['en', 'da'] as const;
+export const SUPPORTED_LANGS = ['en', 'da', 'de'] as const;
 export type AppLang = (typeof SUPPORTED_LANGS)[number];
 
 export const LANG_FLAGS: Record<AppLang, string> = {
   en: '🇬🇧',
   da: '🇩🇰',
+  de: '🇩🇪',
 };
 
 const LANG_STORAGE_KEY = 'lang';

@@ -1,0 +1,94 @@
+{
+  "APP": {
+    "TITLE": "Wir viben zur Arbeit"
+  },
+  "NAV": {
+    "LEADERBOARD": "🏆 Rangliste",
+    "MY_RIDES": "← Meine Fahrten",
+    "SIGN_OUT": "Abmelden",
+    "SWITCH_LANG": "Sprache wechseln"
+  },
+  "THEME": {
+    "SWITCH_LIGHT": "Zu hellem Modus wechseln",
+    "SWITCH_DARK": "Zu dunklem Modus wechseln"
+  },
+  "BIKE_LOG": {
+    "GREETING": "Hallo, {{name}}! Erfasse deine täglichen Fahrradtouren.",
+    "SUBTITLE": "Erfasse deine täglichen Fahrradtouren zur Arbeit.",
+    "FORM": {
+      "DATE_LABEL": "Datum",
+      "KM_LABEL": "Gefahrene Kilometer",
+      "KM_PLACEHOLDER": "z. B. 12,5",
+      "RAINING_LABEL": "🌧️ Es hat geregnet",
+      "CHECKING_WEATHER": "Wetter wird geprüft…",
+      "SAVING": "Wird gespeichert…",
+      "UPDATE": "Fahrt aktualisieren",
+      "ADD": "Fahrt hinzufügen",
+      "CANCEL": "Abbrechen"
+    },
+    "RIDES": {
+      "LOAD_ERROR": "Fahrten konnten nicht geladen werden. Bitte neu laden.",
+      "LOADING": "Fahrten werden geladen…",
+      "TITLE": "Erfasste Fahrten",
+      "TOTAL": "Gesamt:",
+      "SORT_LABEL": "Sortieren:",
+      "SORT_DATE": "Datum",
+      "SORT_DISTANCE": "Distanz",
+      "SORT_DATE_ARIA": "Nach Datum sortieren",
+      "SORT_DATE_ACTIVE_ARIA": "Nach Datum sortieren {{direction}}",
+      "SORT_DISTANCE_ARIA": "Nach Distanz sortieren",
+      "SORT_DISTANCE_ACTIVE_ARIA": "Nach Distanz sortieren {{direction}}",
+      "SORT_NEWEST": "neueste zuerst",
+      "SORT_OLDEST": "älteste zuerst",
+      "SORT_LONGEST": "längste zuerst",
+      "SORT_SHORTEST": "kürzeste zuerst",
+      "RAINING_AUTO": "Automatisch erkannt",
+      "RAINING_MANUAL": "Manuell angegeben",
+      "DELETE_CONFIRM": "Löschen?",
+      "CONFIRM_DELETE_ARIA": "Löschen bestätigen",
+      "CANCEL_DELETE_ARIA": "Löschen abbrechen",
+      "EDIT_ARIA": "Fahrt vom {{date}} bearbeiten",
+      "DELETE_ARIA": "Fahrt vom {{date}} löschen",
+      "ARIA_LABEL": "Erfasste Fahrradtouren",
+      "SORT_GROUP_ARIA": "Fahrten sortieren nach",
+      "EMPTY": "Noch keine Fahrten erfasst. Fang an zu radeln!"
+    }
+  },
+  "LEADERBOARD": {
+    "TITLE": "🏆 Rangliste",
+    "SUBTITLE": "Wer ist am meisten gefahren?",
+    "EMPTY": "Noch keine Fahrten erfasst. Sei der Erste!",
+    "RANKINGS_ARIA": "Fahrerrangliste",
+    "RANK_ARIA": "Platz {{rank}}",
+    "YOU": "(du)",
+    "LAST_RIDE": "Letzte Fahrt:",
+    "RIDE": "Fahrt",
+    "RIDES": "Fahrten",
+    "RECENT_RIDES": "Letzte Fahrten",
+    "RAINING_ARIA": "Regen"
+  },
+  "LOGIN": {
+    "SIGNING_IN": "Wird angemeldet…",
+    "SIGN_IN": "Mit Google anmelden",
+    "ERROR_GENERIC": "Anmeldung fehlgeschlagen. Bitte erneut versuchen."
+  },
+  "ONBOARDING": {
+    "TITLE": "Willkommen!",
+    "SUBTITLE": "Nur noch eine Sache, bevor es losgeht…",
+    "NAME_LABEL": "Wie heißt du mit Vornamen?",
+    "NAME_PLACEHOLDER": "z. B. Max",
+    "NAME_REQUIRED": "Bitte gib deinen Vornamen ein.",
+    "SAVING": "Wird gespeichert…",
+    "GET_STARTED": "Los geht's 🚴",
+    "ERROR_GENERIC": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+  },
+  "VALIDATION": {
+    "DATE_REQUIRED": "Datum ist erforderlich",
+    "KM_REQUIRED": "Kilometer ist erforderlich",
+    "KM_MIN": "Muss mindestens 0,1 km betragen"
+  },
+  "COMMON": {
+    "LOADING": "Wird geladen…",
+    "UNKNOWN": "Unbekannt"
+  }
+}
