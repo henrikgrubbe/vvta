@@ -1,5 +1,5 @@
 <div class="mx-auto max-w-lg p-6">
-  <header class="mb-6 flex items-start justify-between">
+  <header class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
     <div>
       <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">
         🚴 {{ 'APP.TITLE' | translate }}
@@ -12,7 +12,7 @@
         <p class="mt-1 text-gray-600 dark:text-gray-400">{{ 'BIKE_LOG.SUBTITLE' | translate }}</p>
       }
     </div>
-    <nav class="ml-4 flex shrink-0 items-center gap-2" aria-label="App navigation">
+    <nav class="flex shrink-0 items-center gap-2 sm:ml-4" aria-label="App navigation">
       <a
         class="rounded text-sm whitespace-nowrap text-blue-600 hover:underline focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 dark:text-blue-400"
         routerLink="/leaderboard"
@@ -147,7 +147,7 @@
     </div>
 
     <div
-      class="mb-3 flex items-center gap-1"
+      class="mb-3 flex items-center gap-2"
       [attr.aria-label]="'BIKE_LOG.RIDES.SORT_GROUP_ARIA' | translate"
       role="group"
     >
