@@ -16,6 +16,14 @@
         {{ 'NAV.MY_RIDES' | translate }}
       </a>
       <span class="text-gray-300 dark:text-gray-600" aria-hidden="true">|</span>
+      <button
+        class="rounded text-sm whitespace-nowrap text-gray-500 hover:text-gray-700 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 dark:text-gray-400 dark:hover:text-gray-200"
+        (click)="signOut()"
+        type="button"
+      >
+        {{ 'NAV.SIGN_OUT' | translate }}
+      </button>
+      <span class="text-gray-300 dark:text-gray-600" aria-hidden="true">|</span>
       <app-language-switcher />
       <span class="text-gray-300 dark:text-gray-600" aria-hidden="true">|</span>
       <button
