@@ -53,3 +53,52 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - Design services around a single responsibility
 - Use the `providedIn: 'root'` option for singleton services
 - Use the `inject()` function instead of constructor injection
+
+## Dark Mode System
+
+Dark mode is implemented via `src/app/theme.service.ts` using Tailwind CSS 4's class-based dark variant.
+
+### How it works
+
+- **Tailwind config** (`src/styles.css`): `@custom-variant dark (&:where(.dark, .dark *))` — dark styles activate when `<html>` has class `dark`.
+- **FOUC prevention** (`src/index.html`): inline `<script>` in `<head>` applies `.dark` to `<html>` before Angular boots, reading localStorage then OS preference.
+- **ThemeService** (`src/app/theme.service.ts`):
+  - Tri-state preference: `'system' | 'light' | 'dark'` — avoids overwriting OS-inferred preference on first load.
+  - `isDark = computed(...)` derives effective dark state from theme + systemDark signals.
+  - `toggle()` writes explicit `'light'` or `'dark'` to `localStorage`.
+  - Listens to `matchMedia` changes (OS preference) and `storage` events (cross-tab sync).
+  - `AppComponent` injects `ThemeService` early so it initialises for all routes (including login/onboarding which have no toggle button).
+- **`color-scheme` CSS** (`src/styles.css`): applied so native controls (date picker, scrollbars, autofill) also switch to dark.
+
+### Toggle button pattern
+
+Both `bike-log.html` and `leaderboard.html` include the toggle in their nav:
+
+```html
+<button
+  (click)="themeService.toggle()"
+  type="button"
+  [attr.aria-label]="themeService.isDark() ? 'Switch to light mode' : 'Switch to dark mode'"
+  [attr.aria-pressed]="themeService.isDark()"
+>
+  <span class="material-symbols-outlined">{{ themeService.isDark() ? 'light_mode' : 'dark_mode' }}</span>
+</button>
+```
+
+The component must expose `readonly themeService = inject(ThemeService)`.
+
+### Testing dark mode
+
+**Vitest (`src/app/theme.service.spec.ts`):**
+- `window.matchMedia` is not implemented in jsdom — mock it with `vi.stubGlobal('matchMedia', vi.fn().mockImplementation(...))` before `TestBed.inject(ThemeService)`.
+- Use the real jsdom `localStorage` (just `localStorage.clear()` in `beforeEach`).
+- Use `TestBed.flushEffects()` to synchronously run the DOM class effect.
+- Storage event cross-tab sync: update `localStorage` then `window.dispatchEvent(new StorageEvent('storage', { key: 'theme' }))`.
+
+**Playwright (`e2e/dark-mode.spec.ts`):**
+- `page.emulateMedia({ colorScheme: 'dark' })` **before** `page.goto` — the inline FOUC script reads `matchMedia` during HTML parsing.
+- Inject theme via `page.addInitScript` (runs before all page scripts, including the inline FOUC script).
+- Clear stored preference per-test: `localStorage.removeItem('theme')` inside `addInitScript`.
+- Assert with `expect(page.locator('html')).toHaveClass(/dark/)`.
+- Toggle button selectors: `button[aria-label="Switch to dark mode"]` (light mode) / `button[aria-label="Switch to light mode"]` (dark mode).
+- Use `test.describe.configure({ mode: 'serial' })` to prevent parallel workers from stomping localStorage state.
