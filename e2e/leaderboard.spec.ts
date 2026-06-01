@@ -1,13 +1,15 @@
 import { expect, test } from '@playwright/test';
 
-type Page = import('@playwright/test').Page;
+import {
+  type AuthState,
+  createUserProfile,
+  injectAuthState,
+  seedEntries,
+  signUpUser,
+  wipeUserEntries,
+} from './test-utils';
 
-let sharedAuth: {
-  uid: string;
-  email: string;
-  idToken: string;
-  refreshToken: string;
-} | null = null;
+let sharedAuth: AuthState | null = null;
 
 // Fixed UIDs — serial mode ensures only one worker runs at a time.
 const ALICE_UID = 'ldrtest-alice-001';
@@ -19,152 +21,14 @@ const ALICE_KM = 10000;
 const MAIN_KM = 9000; // MainRider: two entries summing to this
 const BOB_KM = 8000;
 
-async function seedEntries(
-  uid: string,
-  userName: string,
-  entries: { date: string; kilometers: number; raining?: boolean }[],
-): Promise<void> {
-  await Promise.all(
-    entries.map((e) =>
-      fetch(
-        'http://127.0.0.1:8080/v1/projects/demo-vvta/databases/(default)/documents/bike-entries',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: 'Bearer owner' },
-          body: JSON.stringify({
-            fields: {
-              userId: { stringValue: uid },
-              date: { stringValue: e.date },
-              kilometers: { doubleValue: e.kilometers },
-              raining: { booleanValue: e.raining ?? false },
-              rainingSource: { stringValue: 'manual' },
-              userName: { stringValue: userName },
-            },
-          }),
-        },
-      ).catch(() => {
-        /* ignore */
-      }),
-    ),
-  );
-}
-
-async function wipeUserEntries(uid: string): Promise<void> {
-  const queryRes = await fetch(
-    'http://127.0.0.1:8080/v1/projects/demo-vvta/databases/(default)/documents:runQuery',
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer owner' },
-      body: JSON.stringify({
-        structuredQuery: {
-          from: [{ collectionId: 'bike-entries' }],
-          where: {
-            fieldFilter: {
-              field: { fieldPath: 'userId' },
-              op: 'EQUAL',
-              value: { stringValue: uid },
-            },
-          },
-          select: { fields: [{ fieldPath: '__name__' }] },
-        },
-      }),
-    },
-  ).catch(() => null);
-
-  if (!queryRes?.ok) return;
-
-  const results = (await queryRes.json()) as { document?: { name?: string } }[];
-  await Promise.all(
-    results
-      .filter((r) => r.document?.name)
-      .map((r) =>
-        fetch(`http://127.0.0.1:8080/v1/${r.document!.name!}`, {
-          method: 'DELETE',
-          headers: { Authorization: 'Bearer owner' },
-        }).catch(() => {
-          /* ignore */
-        }),
-      ),
-  );
-}
-
-async function injectAuthState(page: Page, auth: NonNullable<typeof sharedAuth>): Promise<void> {
-  await page.addInitScript(
-    ({ uid, email, idToken, refreshToken }) => {
-      const KEY = 'firebase:authUser:demo-key:[DEFAULT]';
-      const value = {
-        uid,
-        email,
-        emailVerified: false,
-        isAnonymous: false,
-        providerData: [
-          {
-            providerId: 'password',
-            uid: email,
-            email,
-            displayName: null,
-            photoURL: null,
-            phoneNumber: null,
-          },
-        ],
-        stsTokenManager: {
-          refreshToken,
-          accessToken: idToken,
-          expirationTime: Date.now() + 3600 * 1000,
-        },
-        createdAt: String(Date.now()),
-        lastLoginAt: String(Date.now()),
-        apiKey: 'demo-key',
-        appName: '[DEFAULT]',
-      };
-      localStorage.setItem(KEY, JSON.stringify(value));
-    },
-    { uid: auth.uid, email: auth.email, idToken: auth.idToken, refreshToken: auth.refreshToken },
-  );
-}
-
 test.describe('Leaderboard', () => {
   // Serial mode prevents parallel workers from polluting each other's leaderboard data.
   test.describe.configure({ mode: 'serial' });
   test.beforeAll(async () => {
     const email = `leaderboard-worker-${process.pid}@test.com`;
     const password = 'testpassword123';
-
-    const signUpRes = await fetch(
-      'http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/accounts:signUp?key=demo-key',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, returnSecureToken: true }),
-      },
-    );
-    const {
-      localId: uid,
-      idToken,
-      refreshToken,
-    } = (await signUpRes.json()) as {
-      localId: string;
-      idToken: string;
-      refreshToken: string;
-    };
-
-    await fetch(
-      `http://127.0.0.1:8080/v1/projects/demo-vvta/databases/(default)/documents/user-profiles?documentId=${uid}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer owner' },
-        body: JSON.stringify({
-          fields: {
-            uid: { stringValue: uid },
-            firstName: { stringValue: 'MainRider' },
-            email: { stringValue: email },
-          },
-        }),
-      },
-    ).catch(() => {
-      /* ignore */
-    });
-
+    const { uid, idToken, refreshToken } = await signUpUser(email, password);
+    await createUserProfile(uid, 'MainRider', email);
     sharedAuth = { uid, email, idToken, refreshToken };
   });
 

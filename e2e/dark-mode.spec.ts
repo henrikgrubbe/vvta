@@ -1,120 +1,14 @@
 import { expect, test } from '@playwright/test';
 
-type Page = import('@playwright/test').Page;
-
-const AUTH_LS_KEY = 'firebase:authUser:demo-key:[DEFAULT]';
-const THEME_LS_KEY = 'theme';
+import {
+  type AuthState,
+  createUserProfile,
+  deleteUserProfile,
+  injectPageState,
+  signUpOrSignIn,
+} from './test-utils';
 
 const DARK_TEST_EMAIL = 'dark-test@test.com';
-
-async function signUpUser(
-  email: string,
-  password: string,
-): Promise<{ uid: string; idToken: string; refreshToken: string }> {
-  const res = await fetch(
-    'http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/accounts:signUp?key=demo-key',
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, returnSecureToken: true }),
-    },
-  );
-  const {
-    localId: uid,
-    idToken,
-    refreshToken,
-  } = (await res.json()) as {
-    localId: string;
-    idToken: string;
-    refreshToken: string;
-  };
-  return { uid, idToken, refreshToken };
-}
-
-async function createUserProfile(uid: string, firstName: string, email: string): Promise<void> {
-  await fetch(
-    `http://127.0.0.1:8080/v1/projects/demo-vvta/databases/(default)/documents/user-profiles?documentId=${uid}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer owner' },
-      body: JSON.stringify({
-        fields: {
-          uid: { stringValue: uid },
-          firstName: { stringValue: firstName },
-          email: { stringValue: email },
-        },
-      }),
-    },
-  ).catch(() => {
-    /* ignore */
-  });
-}
-
-async function deleteUserProfile(uid: string): Promise<void> {
-  await fetch(
-    `http://127.0.0.1:8080/v1/projects/demo-vvta/databases/(default)/documents/user-profiles/${uid}`,
-    {
-      method: 'DELETE',
-      headers: { Authorization: 'Bearer owner' },
-    },
-  ).catch(() => {
-    /* ignore */
-  });
-}
-
-/** Inject Firebase auth token and an optional theme preference into localStorage before page load. */
-async function injectPageState(
-  page: Page,
-  auth: { uid: string; email: string; idToken: string; refreshToken: string } | null,
-  theme?: 'dark' | 'light' | null, // null = explicitly clear; undefined = don't touch
-): Promise<void> {
-  await page.addInitScript(
-    ({ authKey, themeKey, authValue, themeValue }) => {
-      if (authValue) localStorage.setItem(authKey, JSON.stringify(authValue));
-      // 'UNSET' sentinel means caller didn't specify a preference — leave localStorage alone
-      if (themeValue !== 'UNSET') {
-        if (themeValue) {
-          localStorage.setItem(themeKey, themeValue as string);
-        } else {
-          localStorage.removeItem(themeKey);
-        }
-      }
-    },
-    {
-      authKey: AUTH_LS_KEY,
-      themeKey: THEME_LS_KEY,
-      // undefined cannot survive JSON serialisation — use a sentinel instead
-      themeValue: theme !== undefined ? theme : 'UNSET',
-      authValue: auth
-        ? {
-            uid: auth.uid,
-            email: auth.email,
-            emailVerified: false,
-            isAnonymous: false,
-            providerData: [
-              {
-                providerId: 'password',
-                uid: auth.email,
-                email: auth.email,
-                displayName: null,
-                photoURL: null,
-                phoneNumber: null,
-              },
-            ],
-            stsTokenManager: {
-              refreshToken: auth.refreshToken,
-              accessToken: auth.idToken,
-              expirationTime: Date.now() + 3600 * 1000,
-            },
-            createdAt: String(Date.now()),
-            lastLoginAt: String(Date.now()),
-            apiKey: 'demo-key',
-            appName: '[DEFAULT]',
-          }
-        : null,
-    },
-  );
-}
 
 // ============================================================================
 // Unauthenticated pages (login / onboarding)
@@ -164,34 +58,14 @@ test.describe('Dark mode — unauthenticated pages', () => {
 // Authenticated pages (bike-log + leaderboard)
 // ============================================================================
 
-let sharedAuth: { uid: string; email: string; idToken: string; refreshToken: string } | null = null;
+let sharedAuth: AuthState | null = null;
 
 test.describe('Dark mode — main app', () => {
   test.describe.configure({ mode: 'serial' });
 
   test.beforeAll(async () => {
     const password = 'testpassword123';
-    // Try to sign up; if the user already exists sign-in token may be stale — just create fresh
-    const { uid, idToken, refreshToken } = await signUpUser(DARK_TEST_EMAIL, password).catch(
-      async () => {
-        // User may exist from a previous run — sign in instead
-        const res = await fetch(
-          'http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=demo-key',
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: DARK_TEST_EMAIL, password, returnSecureToken: true }),
-          },
-        );
-        const data = (await res.json()) as {
-          localId: string;
-          idToken: string;
-          refreshToken: string;
-        };
-        return { uid: data.localId, idToken: data.idToken, refreshToken: data.refreshToken };
-      },
-    );
-
+    const { uid, idToken, refreshToken } = await signUpOrSignIn(DARK_TEST_EMAIL, password);
     await deleteUserProfile(uid);
     await createUserProfile(uid, 'DarkTester', DARK_TEST_EMAIL);
     sharedAuth = { uid, email: DARK_TEST_EMAIL, idToken, refreshToken };
