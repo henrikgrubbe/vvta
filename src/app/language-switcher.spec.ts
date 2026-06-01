@@ -28,35 +28,38 @@ describe('LanguageSwitcherComponent', () => {
     expect(button.textContent?.trim()).toBe(LANG_FLAGS['da']);
   });
 
-  it('shows the flag of the next language (en flag when current is da)', () => {
+  it('shows the flag of the next language (de flag when current is da)', () => {
     languageService.setLang('da');
+    fixture.detectChanges();
+
+    const button: HTMLButtonElement = fixture.debugElement.query(By.css('button')).nativeElement;
+    expect(button.textContent?.trim()).toBe(LANG_FLAGS['de']);
+  });
+
+  it('shows the flag of the next language (en flag when current is de)', () => {
+    languageService.setLang('de');
     fixture.detectChanges();
 
     const button: HTMLButtonElement = fixture.debugElement.query(By.css('button')).nativeElement;
     expect(button.textContent?.trim()).toBe(LANG_FLAGS['en']);
   });
 
-  it('toggles language on click', () => {
+  it('cycles en → da → de → en on successive clicks', () => {
     languageService.setLang('en');
     fixture.detectChanges();
 
     const button: HTMLButtonElement = fixture.debugElement.query(By.css('button')).nativeElement;
+
     button.click();
     fixture.detectChanges();
-
     expect(languageService.currentLang()).toBe('da');
-  });
 
-  it('toggles back on second click', () => {
-    languageService.setLang('en');
-    fixture.detectChanges();
-
-    const button: HTMLButtonElement = fixture.debugElement.query(By.css('button')).nativeElement;
     button.click();
     fixture.detectChanges();
+    expect(languageService.currentLang()).toBe('de');
+
     button.click();
     fixture.detectChanges();
-
     expect(languageService.currentLang()).toBe('en');
   });
 
