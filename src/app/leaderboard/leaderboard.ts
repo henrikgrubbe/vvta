@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 
 import { AuthService } from '../auth.service';
@@ -27,6 +27,7 @@ interface RiderStats {
 export class LeaderboardComponent {
   private readonly leaderboardService = inject(LeaderboardService);
   private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
   readonly themeService = inject(ThemeService);
 
   readonly allEntries = toSignal(this.leaderboardService.allEntries$);
@@ -61,4 +62,9 @@ export class LeaderboardComponent {
   readonly recentEntries = computed(() =>
     (this.allEntries() ?? []).filter((e) => !!e.userId).slice(0, 10),
   );
+
+  async signOut(): Promise<void> {
+    await this.authService.signOut();
+    await this.router.navigateByUrl('/login');
+  }
 }
