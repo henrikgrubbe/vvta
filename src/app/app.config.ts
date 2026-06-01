@@ -2,7 +2,12 @@ import { provideHttpClient } from '@angular/common/http';
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { initializeApp } from 'firebase/app';
-import { connectAuthEmulator, getAuth } from 'firebase/auth';
+import {
+  browserLocalPersistence,
+  connectAuthEmulator,
+  indexedDBLocalPersistence,
+  initializeAuth,
+} from 'firebase/auth';
 import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore';
 
 import { environment } from '../environments/environment';
@@ -11,7 +16,11 @@ import { routes } from './app.routes';
 // Initialize Firebase app on module load
 const app = initializeApp(environment.firebase);
 const firestore = getFirestore(app);
-const auth = getAuth(app);
+const auth = initializeAuth(app, {
+  persistence: environment.useLocalStorageAuth
+    ? [browserLocalPersistence]
+    : [indexedDBLocalPersistence, browserLocalPersistence],
+});
 
 if (environment.useEmulator) {
   connectFirestoreEmulator(firestore, '127.0.0.1', 8080);

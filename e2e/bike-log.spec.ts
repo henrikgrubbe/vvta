@@ -89,50 +89,33 @@ async function wipeUserEntries(uid: string): Promise<void> {
 async function injectAuthState(page: Page, auth: NonNullable<typeof sharedAuth>): Promise<void> {
   await page.addInitScript(
     ({ uid, email, idToken, refreshToken }) => {
-      const DB_NAME = 'firebaseLocalStorageDb';
-      const STORE = 'firebaseLocalStorage';
       const KEY = 'firebase:authUser:demo-key:[DEFAULT]';
-
-      const record = {
-        fbase_key: KEY,
-        value: {
-          uid,
-          email,
-          emailVerified: false,
-          isAnonymous: false,
-          providerData: [
-            {
-              providerId: 'password',
-              uid: email,
-              email,
-              displayName: null,
-              photoURL: null,
-              phoneNumber: null,
-            },
-          ],
-          stsTokenManager: {
-            refreshToken,
-            accessToken: idToken,
-            expirationTime: Date.now() + 3600 * 1000,
+      const value = {
+        uid,
+        email,
+        emailVerified: false,
+        isAnonymous: false,
+        providerData: [
+          {
+            providerId: 'password',
+            uid: email,
+            email,
+            displayName: null,
+            photoURL: null,
+            phoneNumber: null,
           },
-          createdAt: String(Date.now()),
-          lastLoginAt: String(Date.now()),
-          apiKey: 'demo-key',
-          appName: '[DEFAULT]',
+        ],
+        stsTokenManager: {
+          refreshToken,
+          accessToken: idToken,
+          expirationTime: Date.now() + 3600 * 1000,
         },
+        createdAt: String(Date.now()),
+        lastLoginAt: String(Date.now()),
+        apiKey: 'demo-key',
+        appName: '[DEFAULT]',
       };
-
-      const req = indexedDB.open(DB_NAME, 1);
-      req.onupgradeneeded = () => {
-        req.result.createObjectStore(STORE, { keyPath: 'fbase_key' });
-      };
-      req.onsuccess = () => {
-        const db = req.result;
-        // Ensure object store exists (may already exist)
-        if (!db.objectStoreNames.contains(STORE)) return;
-        const tx = db.transaction(STORE, 'readwrite');
-        tx.objectStore(STORE).put(record);
-      };
+      localStorage.setItem(KEY, JSON.stringify(value));
     },
     { uid: auth.uid, email: auth.email, idToken: auth.idToken, refreshToken: auth.refreshToken },
   );
