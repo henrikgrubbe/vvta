@@ -50,11 +50,11 @@ test.describe('Leaderboard', () => {
     });
 
     test('should have a link back to home', async ({ page }) => {
-      await expect(page.locator('a', { hasText: '← Mine ture' })).toBeVisible();
+      await expect(page.locator('a', { hasText: '← My rides' })).toBeVisible();
     });
 
     test('should navigate back to home when clicking the link', async ({ page }) => {
-      await page.click('a', { hasText: '← Mine ture' });
+      await page.click('a', { hasText: '← My rides' });
       await expect(page).toHaveURL('/');
     });
   });

@@ -91,7 +91,7 @@ test.describe('Onboarding', () => {
     test('should show the app after completing onboarding', async ({ page }) => {
       await page.fill('#first-name', 'Anders');
       await page.click('button[type="submit"]');
-      await expect(page.locator('h1')).toContainText('Vi viber til arbejde');
+      await expect(page.locator('h1')).toContainText('We bike to work');
     });
   });
 });
