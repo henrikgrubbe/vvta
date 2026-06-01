@@ -1,14 +1,15 @@
 <div class="mx-auto max-w-lg p-6">
   <header class="mb-6 flex items-start justify-between">
     <div>
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">🚴 Vi viber til arbejde</h1>
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">
+        🚴 {{ 'APP.TITLE' | translate }}
+      </h1>
       @if (firstName()) {
         <p class="mt-1 text-gray-600 dark:text-gray-400">
-          Hej, <strong>{{ firstName() }}</strong
-          >! Log dine daglige cykelture.
+          {{ 'BIKE_LOG.GREETING' | translate: { name: firstName() } }}
         </p>
       } @else {
-        <p class="mt-1 text-gray-600 dark:text-gray-400">Log dine daglige cykelture til arbejde.</p>
+        <p class="mt-1 text-gray-600 dark:text-gray-400">{{ 'BIKE_LOG.SUBTITLE' | translate }}</p>
       }
     </div>
     <nav class="ml-4 flex shrink-0 items-center gap-2" aria-label="App navigation">
@@ -16,7 +17,7 @@
         class="rounded text-sm whitespace-nowrap text-blue-600 hover:underline focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 dark:text-blue-400"
         routerLink="/leaderboard"
       >
-        🏆 Leaderboard
+        {{ 'NAV.LEADERBOARD' | translate }}
       </a>
       <span class="text-gray-300 dark:text-gray-600" aria-hidden="true">|</span>
       <button
@@ -24,12 +25,16 @@
         (click)="signOut()"
         type="button"
       >
-        Sign out
+        {{ 'NAV.SIGN_OUT' | translate }}
       </button>
+      <span class="text-gray-300 dark:text-gray-600" aria-hidden="true">|</span>
+      <app-language-switcher />
       <span class="text-gray-300 dark:text-gray-600" aria-hidden="true">|</span>
       <button
         class="flex h-8 w-8 items-center justify-center rounded text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200"
-        [attr.aria-label]="themeService.isDark() ? 'Switch to light mode' : 'Switch to dark mode'"
+        [attr.aria-label]="
+          (themeService.isDark() ? 'THEME.SWITCH_LIGHT' : 'THEME.SWITCH_DARK') | translate
+        "
         [attr.aria-pressed]="themeService.isDark()"
         (click)="themeService.toggle()"
         type="button"
@@ -43,8 +48,10 @@
 
   <form class="mb-8 space-y-4" (submit)="onSubmit(); $event.preventDefault()">
     <div>
-      <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300" for="ride-date"
-        >Date</label
+      <label
+        class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+        for="ride-date"
+        >{{ 'BIKE_LOG.FORM.DATE_LABEL' | translate }}</label
       >
       <input
         class="w-full cursor-pointer rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:outline-2 focus:outline-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
@@ -56,26 +63,26 @@
       />
       @if (rideForm.date().touched() && rideForm.date().errors().length) {
         <p class="mt-1 text-sm text-red-600 dark:text-red-400" role="alert">
-          {{ rideForm.date().errors()[0].message }}
+          {{ rideForm.date().errors()[0].message | translate }}
         </p>
       }
     </div>
 
     <div>
       <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300" for="ride-km">
-        Kilometers driven
+        {{ 'BIKE_LOG.FORM.KM_LABEL' | translate }}
       </label>
       <input
         class="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:outline-2 focus:outline-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
         id="ride-km"
         [formField]="rideForm.kilometers"
+        [attr.placeholder]="'BIKE_LOG.FORM.KM_PLACEHOLDER' | translate"
         type="number"
         step="0.1"
-        placeholder="e.g. 12.5"
       />
       @if (rideForm.kilometers().touched() && rideForm.kilometers().errors().length) {
         <p class="mt-1 text-sm text-red-600 dark:text-red-400" role="alert">
-          {{ rideForm.kilometers().errors()[0].message }}
+          {{ rideForm.kilometers().errors()[0].message | translate }}
         </p>
       }
     </div>
@@ -89,10 +96,12 @@
         type="checkbox"
       />
       <label class="text-sm font-medium text-gray-700 dark:text-gray-300" for="ride-raining">
-        🌧️ It was raining
+        {{ 'BIKE_LOG.FORM.RAINING_LABEL' | translate }}
       </label>
       @if (checkingWeather()) {
-        <span class="text-xs text-gray-400 italic dark:text-gray-500">Checking weather…</span>
+        <span class="text-xs text-gray-400 italic dark:text-gray-500">{{
+          'BIKE_LOG.FORM.CHECKING_WEATHER' | translate
+        }}</span>
       }
     </div>
 
@@ -102,9 +111,9 @@
       type="submit"
     >
       @if (saving()) {
-        Saving…
+        {{ 'BIKE_LOG.FORM.SAVING' | translate }}
       } @else {
-        {{ editingId() !== null ? 'Update Entry' : 'Add Entry' }}
+        {{ (editingId() !== null ? 'BIKE_LOG.FORM.UPDATE' : 'BIKE_LOG.FORM.ADD') | translate }}
       }
     </button>
 
@@ -114,27 +123,37 @@
         (click)="cancelEdit()"
         type="button"
       >
-        Cancel
+        {{ 'BIKE_LOG.FORM.CANCEL' | translate }}
       </button>
     }
   </form>
 
   @if (loadError()) {
     <p class="py-8 text-center text-red-500 dark:text-red-400">
-      Failed to load rides. Please refresh.
+      {{ 'BIKE_LOG.RIDES.LOAD_ERROR' | translate }}
     </p>
   } @else if (entries() === undefined) {
-    <p class="py-8 text-center text-gray-400 dark:text-gray-500">Loading rides…</p>
+    <p class="py-8 text-center text-gray-400 dark:text-gray-500">
+      {{ 'BIKE_LOG.RIDES.LOADING' | translate }}
+    </p>
   } @else if (entries()!.length > 0) {
     <div class="mb-3 flex items-center justify-between">
-      <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Logged Rides</h2>
+      <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+        {{ 'BIKE_LOG.RIDES.TITLE' | translate }}
+      </h2>
       <p class="text-sm text-gray-600 dark:text-gray-400">
-        Total: <strong>{{ totalKilometers() }} km</strong>
+        {{ 'BIKE_LOG.RIDES.TOTAL' | translate }} <strong>{{ totalKilometers() }} km</strong>
       </p>
     </div>
 
-    <div class="mb-3 flex items-center gap-1" role="group" aria-label="Sort rides by">
-      <span class="mr-1 text-xs text-gray-500 dark:text-gray-400">Sort:</span>
+    <div
+      class="mb-3 flex items-center gap-1"
+      [attr.aria-label]="'BIKE_LOG.RIDES.SORT_GROUP_ARIA' | translate"
+      role="group"
+    >
+      <span class="mr-1 text-xs text-gray-500 dark:text-gray-400">{{
+        'BIKE_LOG.RIDES.SORT_LABEL' | translate
+      }}</span>
       <button
         [class]="
           sortField() === 'date'
@@ -143,17 +162,21 @@
         "
         [attr.aria-pressed]="sortField() === 'date'"
         [attr.aria-label]="
-          'Sort by date ' +
-          (sortField() === 'date'
-            ? sortDirection() === 'desc'
-              ? 'newest first'
-              : 'oldest first'
-            : '')
+          sortField() === 'date'
+            ? ('BIKE_LOG.RIDES.SORT_DATE_ACTIVE_ARIA'
+              | translate
+                : {
+                    direction:
+                      sortDirection() === 'desc'
+                        ? ('BIKE_LOG.RIDES.SORT_NEWEST' | translate)
+                        : ('BIKE_LOG.RIDES.SORT_OLDEST' | translate),
+                  })
+            : ('BIKE_LOG.RIDES.SORT_DATE_ARIA' | translate)
         "
         (click)="setSort('date')"
         type="button"
       >
-        Date
+        {{ 'BIKE_LOG.RIDES.SORT_DATE' | translate }}
         @if (sortField() === 'date') {
           <span aria-hidden="true">{{ sortDirection() === 'desc' ? '↓' : '↑' }}</span>
         }
@@ -166,24 +189,28 @@
         "
         [attr.aria-pressed]="sortField() === 'kilometers'"
         [attr.aria-label]="
-          'Sort by distance ' +
-          (sortField() === 'kilometers'
-            ? sortDirection() === 'desc'
-              ? 'longest first'
-              : 'shortest first'
-            : '')
+          sortField() === 'kilometers'
+            ? ('BIKE_LOG.RIDES.SORT_DISTANCE_ACTIVE_ARIA'
+              | translate
+                : {
+                    direction:
+                      sortDirection() === 'desc'
+                        ? ('BIKE_LOG.RIDES.SORT_LONGEST' | translate)
+                        : ('BIKE_LOG.RIDES.SORT_SHORTEST' | translate),
+                  })
+            : ('BIKE_LOG.RIDES.SORT_DISTANCE_ARIA' | translate)
         "
         (click)="setSort('kilometers')"
         type="button"
       >
-        Distance
+        {{ 'BIKE_LOG.RIDES.SORT_DISTANCE' | translate }}
         @if (sortField() === 'kilometers') {
           <span aria-hidden="true">{{ sortDirection() === 'desc' ? '↓' : '↑' }}</span>
         }
       </button>
     </div>
 
-    <ul class="space-y-2" aria-label="Logged bike rides">
+    <ul class="space-y-2" [attr.aria-label]="'BIKE_LOG.RIDES.ARIA_LABEL' | translate">
       @for (entry of sortedEntries(); track entry.id) {
         <li
           class="flex items-center justify-between gap-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-800"
@@ -204,36 +231,41 @@
                   class="pointer-events-none invisible absolute bottom-full left-1/2 mb-1 -translate-x-1/2 rounded bg-gray-800 px-2 py-1 text-xs whitespace-nowrap text-white group-hover:visible dark:bg-gray-900 dark:text-gray-100"
                   role="tooltip"
                 >
-                  {{ entry.rainingSource === 'auto' ? 'Detected by weather data' : 'Set manually' }}
+                  {{
+                    (entry.rainingSource === 'auto'
+                      ? 'BIKE_LOG.RIDES.RAINING_AUTO'
+                      : 'BIKE_LOG.RIDES.RAINING_MANUAL'
+                    ) | translate
+                  }}
                 </span>
               </span>
             }
           </div>
           <div class="flex shrink-0 items-center gap-1">
             @if (confirmDeleteId() === entry.id) {
-              <span class="mr-1 text-xs whitespace-nowrap text-red-600 dark:text-red-400"
-                >Delete?</span
-              >
+              <span class="mr-1 text-xs whitespace-nowrap text-red-600 dark:text-red-400">{{
+                'BIKE_LOG.RIDES.DELETE_CONFIRM' | translate
+              }}</span>
               <button
                 class="flex h-10 w-10 items-center justify-center rounded-lg text-red-600 hover:bg-red-50 focus:outline-2 focus:outline-offset-2 focus:outline-red-500 dark:text-red-400 dark:hover:bg-red-900/30"
+                [attr.aria-label]="'BIKE_LOG.RIDES.CONFIRM_DELETE_ARIA' | translate"
                 (click)="deleteEntry(entry.id)"
                 type="button"
-                aria-label="Confirm delete"
               >
                 <span class="material-symbols-outlined">check</span>
               </button>
               <button
                 class="flex h-10 w-10 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 focus:outline-2 focus:outline-offset-2 focus:outline-gray-400 dark:text-gray-400 dark:hover:bg-gray-700"
+                [attr.aria-label]="'BIKE_LOG.RIDES.CANCEL_DELETE_ARIA' | translate"
                 (click)="cancelDelete()"
                 type="button"
-                aria-label="Cancel delete"
               >
                 <span class="material-symbols-outlined">close</span>
               </button>
             } @else {
               <button
                 class="flex h-10 w-10 items-center justify-center rounded-lg text-blue-600 hover:bg-blue-50 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 dark:text-blue-400 dark:hover:bg-blue-900/30"
-                [attr.aria-label]="'Edit ride on ' + entry.date"
+                [attr.aria-label]="'BIKE_LOG.RIDES.EDIT_ARIA' | translate: { date: entry.date }"
                 (click)="startEdit(entry)"
                 type="button"
               >
@@ -241,7 +273,7 @@
               </button>
               <button
                 class="flex h-10 w-10 items-center justify-center rounded-lg text-red-600 hover:bg-red-50 focus:outline-2 focus:outline-offset-2 focus:outline-red-500 dark:text-red-400 dark:hover:bg-red-900/30"
-                [attr.aria-label]="'Delete ride on ' + entry.date"
+                [attr.aria-label]="'BIKE_LOG.RIDES.DELETE_ARIA' | translate: { date: entry.date }"
                 (click)="requestDelete(entry.id)"
                 type="button"
               >
@@ -254,7 +286,7 @@
     </ul>
   } @else {
     <p class="py-8 text-center text-gray-500 dark:text-gray-400">
-      No rides logged yet. Start tracking!
+      {{ 'BIKE_LOG.RIDES.EMPTY' | translate }}
     </p>
   }
 </div>

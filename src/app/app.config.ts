@@ -7,6 +7,7 @@ import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore';
 
 import { environment } from '../environments/environment';
 import { routes } from './app.routes';
+import { provideTranslate } from './translate.config';
 
 // Initialize Firebase app on module load
 const app = initializeApp(environment.firebase);
@@ -19,5 +20,10 @@ if (environment.useEmulator) {
 }
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideBrowserGlobalErrorListeners(), provideHttpClient(), provideRouter(routes)],
+  providers: [
+    provideBrowserGlobalErrorListeners(),
+    provideHttpClient(),
+    provideRouter(routes),
+    provideTranslate(),
+  ],
 };

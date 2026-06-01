@@ -7,6 +7,7 @@ import { BehaviorSubject } from 'rxjs';
 import { vi } from 'vitest';
 
 import { AuthService } from '../auth.service';
+import { provideTranslateTesting } from '../testing/translate-testing';
 import { UserProfileService } from '../user-profile.service';
 import { BikeEntry, BikeLogComponent } from './bike-log';
 import { BikeLogService } from './bike-log.service';
@@ -121,6 +122,7 @@ describe('BikeLogComponent', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         provideRouter([]),
+        ...provideTranslateTesting(),
         { provide: BikeLogService, useValue: mockService },
         {
           provide: AuthService,
@@ -165,7 +167,7 @@ describe('BikeLogComponent', () => {
   });
 
   it('should display the heading', () => {
-    expect(el.querySelector('h1')?.textContent).toContain('Vi viber til arbejde');
+    expect(el.querySelector('h1')?.textContent).toContain('We bike to work');
   });
 
   it('should show empty state message when no entries', () => {

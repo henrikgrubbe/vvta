@@ -1,18 +1,22 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
+import { LanguageSwitcherComponent } from '../language-switcher';
 import { UserProfileService } from '../user-profile.service';
 
 @Component({
   selector: 'app-onboarding',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [TranslateModule, LanguageSwitcherComponent],
   templateUrl: './onboarding.html',
 })
 export class OnboardingComponent {
   private readonly auth = getAuth();
   private readonly profileService = inject(UserProfileService);
   private readonly router = inject(Router);
+  private readonly translate = inject(TranslateService);
 
   readonly firstName = signal('');
   readonly touched = signal(false);
@@ -39,7 +43,7 @@ export class OnboardingComponent {
       await this.router.navigateByUrl('/');
     } catch (err: unknown) {
       this.error.set(
-        err instanceof Error ? err.message : 'Something went wrong. Please try again.',
+        err instanceof Error ? err.message : this.translate.instant('ONBOARDING.ERROR_GENERIC'),
       );
     } finally {
       this.saving.set(false);
