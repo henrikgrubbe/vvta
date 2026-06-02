@@ -1,8 +1,11 @@
-<button
-  class="rounded px-1.5 py-0.5 text-xl leading-none hover:bg-gray-100 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 dark:hover:bg-gray-700"
-  [attr.aria-label]="'NAV.SWITCH_LANG' | translate"
-  (click)="toggle()"
-  type="button"
+<label class="sr-only" for="lang-select">{{ 'NAV.SWITCH_LANG' | translate }}</label>
+<select
+  class="cursor-pointer rounded bg-transparent px-1.5 py-0.5 text-sm text-gray-700 hover:bg-gray-100 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 dark:text-gray-300 dark:hover:bg-gray-700"
+  id="lang-select"
+  [value]="languageService.currentLang()"
+  (change)="onChange($event)"
 >
-  {{ nextFlag() }}
-</button>
+  @for (lang of langs; track lang) {
+    <option [value]="lang">{{ flags[lang] }} {{ names[lang] }}</option>
+  }
+</select>

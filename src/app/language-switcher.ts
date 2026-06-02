@@ -1,7 +1,13 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 
 import { AppLang, LANG_FLAGS, LanguageService, SUPPORTED_LANGS } from './language.service';
+
+const LANG_NAMES: Record<AppLang, string> = {
+  en: 'English',
+  da: 'Dansk',
+  de: 'Deutsch',
+};
 
 @Component({
   selector: 'app-language-switcher',
@@ -11,16 +17,12 @@ import { AppLang, LANG_FLAGS, LanguageService, SUPPORTED_LANGS } from './languag
 })
 export class LanguageSwitcherComponent {
   protected readonly languageService = inject(LanguageService);
+  protected readonly langs = SUPPORTED_LANGS;
+  protected readonly flags = LANG_FLAGS;
+  protected readonly names = LANG_NAMES;
 
-  protected readonly nextLang = computed<AppLang>(() => {
-    const current = this.languageService.currentLang();
-    const idx = SUPPORTED_LANGS.indexOf(current);
-    return SUPPORTED_LANGS[(idx + 1) % SUPPORTED_LANGS.length];
-  });
-
-  protected readonly nextFlag = computed(() => LANG_FLAGS[this.nextLang()]);
-
-  protected toggle(): void {
-    this.languageService.setLang(this.nextLang());
+  protected onChange(event: Event): void {
+    const lang = (event.target as HTMLSelectElement).value as AppLang;
+    this.languageService.setLang(lang);
   }
 }
