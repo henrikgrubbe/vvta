@@ -37,3 +37,36 @@ input[type="checkbox"] {
   cursor: pointer;
 }
 
+/* Route transition animations (View Transitions API) */
+@keyframes fade-slide-out {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+}
+
+@keyframes fade-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root) {
+    animation: 120ms ease-in both fade-slide-out;
+  }
+
+  ::view-transition-new(root) {
+    animation: 200ms ease-out 100ms both fade-slide-in;
+  }
+}
+
