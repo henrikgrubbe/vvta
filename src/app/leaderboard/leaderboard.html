@@ -1,5 +1,5 @@
 <div class="mx-auto max-w-lg p-6">
-  <header class="mb-6 flex items-start justify-between">
+  <header class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
     <div>
       <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">
         {{ 'LEADERBOARD.TITLE' | translate }}
@@ -8,7 +8,7 @@
         {{ 'LEADERBOARD.SUBTITLE' | translate }}
       </p>
     </div>
-    <nav class="ml-4 flex shrink-0 items-center gap-2" aria-label="App navigation">
+    <nav class="flex flex-wrap items-center gap-2 sm:ml-4 sm:shrink-0" aria-label="App navigation">
       <a
         class="rounded text-sm whitespace-nowrap text-blue-600 hover:underline focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 dark:text-blue-400"
         routerLink="/"
