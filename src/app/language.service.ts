@@ -22,7 +22,7 @@ export class LanguageService {
   private readonly translate = inject(TranslateService);
   private readonly titleService = inject(Title);
 
-  readonly currentLang = signal<AppLang>(resolveAppLang(this.translate.currentLang ?? 'en'));
+  readonly currentLang = signal<AppLang>(LanguageService.getPersistedLang());
 
   constructor() {
     this.translate.onLangChange.subscribe(({ lang }) => {
