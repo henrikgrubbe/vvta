@@ -1,50 +1,13 @@
 <div class="mx-auto max-w-lg p-6">
-  <header class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-    <div>
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">
-        🚴 {{ 'APP.TITLE' | translate }}
-      </h1>
-      @if (firstName()) {
-        <p class="mt-1 text-gray-600 dark:text-gray-400">
-          {{ 'BIKE_LOG.GREETING' | translate: { name: firstName() } }}
-        </p>
-      } @else {
-        <p class="mt-1 text-gray-600 dark:text-gray-400">{{ 'BIKE_LOG.SUBTITLE' | translate }}</p>
-      }
-    </div>
-    <nav class="flex flex-wrap items-center gap-2 sm:ml-4 sm:shrink-0" aria-label="App navigation">
-      <a
-        class="rounded text-sm whitespace-nowrap text-blue-600 hover:underline focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 dark:text-blue-400"
-        routerLink="/leaderboard"
-      >
-        {{ 'NAV.LEADERBOARD' | translate }}
-      </a>
-      <span class="text-gray-300 dark:text-gray-600" aria-hidden="true">|</span>
-      <button
-        class="rounded text-sm whitespace-nowrap text-gray-500 hover:text-gray-700 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 dark:text-gray-400 dark:hover:text-gray-200"
-        (click)="signOut()"
-        type="button"
-      >
-        {{ 'NAV.SIGN_OUT' | translate }}
-      </button>
-      <span class="text-gray-300 dark:text-gray-600" aria-hidden="true">|</span>
-      <app-language-switcher />
-      <span class="text-gray-300 dark:text-gray-600" aria-hidden="true">|</span>
-      <button
-        class="flex h-8 w-8 items-center justify-center rounded text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200"
-        [attr.aria-label]="
-          (themeService.isDark() ? 'THEME.SWITCH_LIGHT' : 'THEME.SWITCH_DARK') | translate
-        "
-        [attr.aria-pressed]="themeService.isDark()"
-        (click)="themeService.toggle()"
-        type="button"
-      >
-        <span class="material-symbols-outlined">{{
-          themeService.isDark() ? 'light_mode' : 'dark_mode'
-        }}</span>
-      </button>
-    </nav>
-  </header>
+  <div class="mb-6">
+    @if (firstName()) {
+      <p class="text-gray-600 dark:text-gray-400">
+        {{ 'BIKE_LOG.GREETING' | translate: { name: firstName() } }}
+      </p>
+    } @else {
+      <p class="text-gray-600 dark:text-gray-400">{{ 'BIKE_LOG.SUBTITLE' | translate }}</p>
+    }
+  </div>
 
   <form class="mb-8 space-y-4" (submit)="onSubmit(); $event.preventDefault()">
     <div>

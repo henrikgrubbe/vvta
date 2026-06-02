@@ -166,8 +166,8 @@ describe('BikeLogComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should display the heading', () => {
-    expect(el.querySelector('h1')?.textContent).toContain('We Vibe to Work');
+  it('should display the greeting when user has a name', () => {
+    expect(el.textContent).toContain('Hello, Test!');
   });
 
   it('should show empty state message when no entries', () => {

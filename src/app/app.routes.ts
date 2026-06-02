@@ -1,12 +1,23 @@
 import { Routes } from '@angular/router';
 
-import { authGuard, signedInGuard } from './auth.guard';
+import { authGuard } from './auth.guard';
 
 export const routes: Routes = [
   {
     path: '',
     canActivate: [authGuard],
-    loadChildren: () => import('./bike-log/bike-log.routes'),
+    loadComponent: () => import('./shell/shell').then((m) => m.ShellComponent),
+    children: [
+      {
+        path: '',
+        loadChildren: () => import('./bike-log/bike-log.routes'),
+      },
+      {
+        path: 'leaderboard',
+        loadComponent: () =>
+          import('./leaderboard/leaderboard').then((m) => m.LeaderboardComponent),
+      },
+    ],
   },
   {
     path: 'login',
@@ -14,12 +25,7 @@ export const routes: Routes = [
   },
   {
     path: 'onboarding',
-    canActivate: [signedInGuard],
-    loadComponent: () => import('./onboarding/onboarding').then((m) => m.OnboardingComponent),
-  },
-  {
-    path: 'leaderboard',
     canActivate: [authGuard],
-    loadComponent: () => import('./leaderboard/leaderboard').then((m) => m.LeaderboardComponent),
+    loadComponent: () => import('./onboarding/onboarding').then((m) => m.OnboardingComponent),
   },
 ];

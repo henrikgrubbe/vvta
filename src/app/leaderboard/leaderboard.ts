@@ -1,12 +1,9 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Router, RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 
 import { AuthService } from '../auth.service';
-import { LanguageSwitcherComponent } from '../language-switcher';
-import { ThemeService } from '../theme.service';
 import { LeaderboardService } from './leaderboard.service';
 
 interface RiderStats {
@@ -21,14 +18,12 @@ interface RiderStats {
 @Component({
   selector: 'app-leaderboard',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, DatePipe, TranslateModule, LanguageSwitcherComponent],
+  imports: [DatePipe, TranslateModule],
   templateUrl: './leaderboard.html',
 })
 export class LeaderboardComponent {
   private readonly leaderboardService = inject(LeaderboardService);
   private readonly authService = inject(AuthService);
-  private readonly router = inject(Router);
-  readonly themeService = inject(ThemeService);
 
   readonly allEntries = toSignal(this.leaderboardService.allEntries$);
   readonly currentUserId = computed(() => this.authService.user()?.uid ?? null);
@@ -38,7 +33,7 @@ export class LeaderboardComponent {
     const map = new Map<string, RiderStats>();
 
     for (const entry of entries) {
-      if (!entry.userId) continue; // skip legacy entries without userId
+      if (!entry.userId) continue;
       if (!map.has(entry.userId)) {
         map.set(entry.userId, {
           userId: entry.userId,
@@ -62,9 +57,4 @@ export class LeaderboardComponent {
   readonly recentEntries = computed(() =>
     (this.allEntries() ?? []).filter((e) => !!e.userId).slice(0, 10),
   );
-
-  async signOut(): Promise<void> {
-    await this.authService.signOut();
-    await this.router.navigateByUrl('/login');
-  }
 }
