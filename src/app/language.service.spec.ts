@@ -20,6 +20,7 @@ describe('LanguageService', () => {
   });
 
   afterEach(() => {
+    localStorage.clear();
     vi.restoreAllMocks();
   });
 
