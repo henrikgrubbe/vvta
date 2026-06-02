@@ -7,16 +7,7 @@ import { AppLang, LANG_FLAGS, LanguageService, SUPPORTED_LANGS } from './languag
   selector: 'app-language-switcher',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [TranslateModule],
-  template: `
-    <button
-      class="rounded px-1.5 py-0.5 text-xl leading-none hover:bg-gray-100 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 dark:hover:bg-gray-700"
-      [attr.aria-label]="'NAV.SWITCH_LANG' | translate"
-      (click)="toggle()"
-      type="button"
-    >
-      {{ nextFlag() }}
-    </button>
-  `,
+  templateUrl: './language-switcher.html',
 })
 export class LanguageSwitcherComponent {
   protected readonly languageService = inject(LanguageService);
