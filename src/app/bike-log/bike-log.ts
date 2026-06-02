@@ -12,13 +12,11 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { form, FormField, min, required, submit } from '@angular/forms/signals';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { filter, switchMap, tap } from 'rxjs';
 
 import { AuthService } from '../auth.service';
-import { LanguageSwitcherComponent } from '../language-switcher';
-import { ThemeService } from '../theme.service';
 import { UserProfileService } from '../user-profile.service';
 import { BikeLogService } from './bike-log.service';
 import { WeatherService } from './weather.service';
@@ -39,7 +37,7 @@ export interface BikeEntry {
 @Component({
   selector: 'app-bike-log',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormField, DatePipe, RouterLink, TranslateModule, LanguageSwitcherComponent],
+  imports: [FormField, DatePipe, TranslateModule],
   templateUrl: './bike-log.html',
 })
 export class BikeLogComponent {
@@ -49,7 +47,6 @@ export class BikeLogComponent {
   private readonly profileService = inject(UserProfileService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
-  readonly themeService = inject(ThemeService);
 
   @ViewChild('datePicker') private datePicker!: ElementRef<HTMLInputElement>;
 
@@ -205,11 +202,6 @@ export class BikeLogComponent {
       this.sortField.set(field);
       this.sortDirection.set('desc');
     }
-  }
-
-  async signOut(): Promise<void> {
-    await this.authService.signOut();
-    await this.router.navigateByUrl('/login');
   }
 
   private todayIso(): string {

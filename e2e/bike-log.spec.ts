@@ -71,7 +71,7 @@ test.describe('Bike Log App', () => {
 
   test.describe('Initial state', () => {
     test('should show the app heading', async ({ page }) => {
-      await expect(page.locator('h1')).toContainText('We Vibe to Work');
+      await expect(page.locator('header a').first()).toContainText('We Vibe to Work');
     });
 
     test('should show the subtitle', async ({ page }) => {
@@ -551,7 +551,7 @@ test.describe('Bike Log App', () => {
     test('should handle empty localStorage gracefully on load', async ({ page }) => {
       await page.evaluate(() => localStorage.removeItem('bike-log-entries'));
       await page.reload();
-      await page.waitForSelector('h1');
+      await page.waitForSelector('main');
 
       await expect(page.locator('text=No rides logged yet')).toBeVisible();
     });
