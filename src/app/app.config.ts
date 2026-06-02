@@ -1,6 +1,6 @@
 import { provideHttpClient } from '@angular/common/http';
 import { ApplicationConfig, isDevMode, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withViewTransitions } from '@angular/router';
 import { provideServiceWorker } from '@angular/service-worker';
 import { initializeApp } from 'firebase/app';
 import { browserLocalPersistence, connectAuthEmulator, initializeAuth } from 'firebase/auth';
@@ -24,7 +24,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideHttpClient(),
-    provideRouter(routes),
+    provideRouter(routes, withViewTransitions()),
     provideTranslate(),
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),
