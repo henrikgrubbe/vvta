@@ -6,6 +6,8 @@
   (change)="onChange($event)"
 >
   @for (lang of langs; track lang) {
-    <option [value]="lang">{{ flags[lang] }} {{ names[lang] }}</option>
+    <option [value]="lang" [selected]="lang === languageService.currentLang()">
+      {{ flags[lang] }} {{ names[lang] }}
+    </option>
   }
 </select>
