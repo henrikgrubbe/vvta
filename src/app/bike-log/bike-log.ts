@@ -126,6 +126,10 @@ export class BikeLogComponent {
       });
   }
 
+  onDateChange(): void {
+    this.rainingSource.set('auto');
+  }
+
   onSubmit(): void {
     submit(this.rideForm, async () => {
       const { date, kilometers, raining } = this.rideModel();

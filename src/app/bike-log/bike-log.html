@@ -30,6 +30,7 @@
         #datePicker
         [formField]="rideForm.date"
         (click)="datePicker.showPicker()"
+        (change)="onDateChange()"
         type="date"
       />
       @if (rideForm.date().touched() && rideForm.date().errors().length) {
@@ -66,7 +67,10 @@
         (click)="rainingSource.set('manual')"
         type="checkbox"
       />
-      <label class="text-sm font-medium text-gray-700 dark:text-gray-300" for="ride-raining">
+      <label
+        class="cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300"
+        for="ride-raining"
+      >
         {{ 'BIKE_LOG.FORM.RAINING_LABEL' | translate }}
       </label>
       @if (checkingWeather()) {
