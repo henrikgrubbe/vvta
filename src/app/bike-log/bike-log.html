@@ -30,6 +30,7 @@
         #datePicker
         [formField]="rideForm.date"
         (click)="datePicker.showPicker()"
+        (change)="onDateChange()"
         type="date"
       />
       @if (rideForm.date().touched() && rideForm.date().errors().length) {
