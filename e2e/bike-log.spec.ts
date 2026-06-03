@@ -229,33 +229,33 @@ test.describe('Bike Log App', () => {
   });
 
   test.describe('Raining checkbox', () => {
-    test('should add rain emoji when raining is checked', async ({ page }) => {
+    test('should add rain icon when raining is checked', async ({ page }) => {
       await addEntry(page, '2025-06-01', '10', true);
-      await expect(page.locator('ul li').first()).toContainText('🌧️');
+      await expect(page.locator('ul li').first().locator('app-rain-icon')).toHaveCount(1);
     });
 
-    test('should not show rain emoji when raining is unchecked', async ({ page }) => {
+    test('should not show rain icon when raining is unchecked', async ({ page }) => {
       await addEntry(page, '2025-06-01', '10', false);
-      await expect(page.locator('ul li').first()).not.toContainText('🌧️');
+      await expect(page.locator('ul li').first().locator('app-rain-icon')).toHaveCount(0);
     });
 
-    test('should show tooltip on hover over rain emoji', async ({ page }) => {
+    test('should show tooltip on hover over rain icon', async ({ page }) => {
       await addEntry(page, '2025-06-01', '10', true);
 
-      const rainEmoji = page.locator('ul li').first().locator('span.group');
-      await rainEmoji.hover();
+      const rainIcon = page.locator('ul li').first().locator('span.group');
+      await rainIcon.hover();
 
-      const tooltip = rainEmoji.locator('span[role="tooltip"]');
+      const tooltip = rainIcon.locator('span[role="tooltip"]');
       await expect(tooltip).toBeVisible();
     });
 
     test('should show correct tooltip text for manually set rain', async ({ page }) => {
       await addEntry(page, '2025-06-01', '10', true);
 
-      const rainEmoji = page.locator('ul li').first().locator('span.group');
-      await rainEmoji.hover();
+      const rainIcon = page.locator('ul li').first().locator('span.group');
+      await rainIcon.hover();
 
-      const tooltip = rainEmoji.locator('span[role="tooltip"]');
+      const tooltip = rainIcon.locator('span[role="tooltip"]');
       await expect(tooltip).toContainText('Set manually');
     });
 
@@ -265,9 +265,9 @@ test.describe('Bike Log App', () => {
       await addEntry(page, '2025-06-03', '20', true);
 
       const items = page.locator('ul li');
-      await expect(items.nth(0)).toContainText('🌧️'); // newest (June 3)
-      await expect(items.nth(1)).not.toContainText('🌧️'); // June 2
-      await expect(items.nth(2)).toContainText('🌧️'); // June 1
+      await expect(items.nth(0).locator('app-rain-icon')).toHaveCount(1); // newest (June 3)
+      await expect(items.nth(1).locator('app-rain-icon')).toHaveCount(0); // June 2
+      await expect(items.nth(2).locator('app-rain-icon')).toHaveCount(1); // June 1
     });
 
     test('tooltip should hide when not hovering', async ({ page }) => {
@@ -334,7 +334,7 @@ test.describe('Bike Log App', () => {
       // Wait for form to reset
       await expect(page.locator('#ride-km')).toHaveValue('0');
 
-      await expect(page.locator('ul li').first()).toContainText('🌧️');
+      await expect(page.locator('ul li').first().locator('app-rain-icon')).toHaveCount(1);
     });
 
     test('should return to Add Entry mode after update', async ({ page }) => {
@@ -522,7 +522,7 @@ test.describe('Bike Log App', () => {
       await page.reload();
       await page.waitForSelector('ul li');
 
-      await expect(page.locator('ul li').first()).toContainText('🌧️');
+      await expect(page.locator('ul li').first().locator('app-rain-icon')).toHaveCount(1);
     });
 
     test('should persist deletion across reload', async ({ page }) => {
@@ -600,9 +600,9 @@ test.describe('Bike Log App', () => {
       await expect(page.locator('ul li').first()).toContainText('25 km');
     });
 
-    test('add rainy → edit to remove rain → verify no rain emoji', async ({ page }) => {
+    test('add rainy → edit to remove rain → verify no rain icon', async ({ page }) => {
       await addEntry(page, '2025-06-01', '10', true);
-      await expect(page.locator('ul li').first()).toContainText('🌧️');
+      await expect(page.locator('ul li').first().locator('app-rain-icon')).toHaveCount(1);
 
       await page.click('button[aria-label*="Edit"]');
       await expect(page.locator('button[type="submit"]')).toContainText('Update Entry');
@@ -615,13 +615,13 @@ test.describe('Bike Log App', () => {
       // Submit the edit
       await page.click('button[type="submit"]');
 
-      // Verify the rain emoji is gone
-      await expect(page.locator('ul li').first()).not.toContainText('🌧️');
+      // Verify the rain icon is gone
+      await expect(page.locator('ul li').first().locator('app-rain-icon')).toHaveCount(0);
     });
 
-    test('add non-rainy → edit to add rain → verify rain emoji', async ({ page }) => {
+    test('add non-rainy → edit to add rain → verify rain icon', async ({ page }) => {
       await addEntry(page, '2025-06-01', '10', false);
-      await expect(page.locator('ul li').first()).not.toContainText('🌧️');
+      await expect(page.locator('ul li').first().locator('app-rain-icon')).toHaveCount(0);
 
       await page.click('button[aria-label*="Edit"]');
       await page.check('#ride-raining');
@@ -630,7 +630,7 @@ test.describe('Bike Log App', () => {
       // Wait for form to reset
       await expect(page.locator('#ride-km')).toHaveValue('0');
 
-      await expect(page.locator('ul li').first()).toContainText('🌧️');
+      await expect(page.locator('ul li').first().locator('app-rain-icon')).toHaveCount(1);
     });
 
     test('rapid entry addition should work correctly', async ({ page }) => {

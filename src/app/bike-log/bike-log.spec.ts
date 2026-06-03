@@ -595,14 +595,14 @@ describe('BikeLogComponent', () => {
     expect(el.textContent).toContain('25 km');
   });
 
-  it('should display rain emoji for rainy entries', async () => {
+  it('should display rain icon for rainy entries', async () => {
     await addEntry('2025-06-01', 10, true);
-    expect(getListItems()[0].textContent).toContain('🌧');
+    expect(getListItems()[0].querySelector('app-rain-icon')).toBeTruthy();
   });
 
-  it('should not show rain emoji for non-rainy entries', async () => {
+  it('should not show rain icon for non-rainy entries', async () => {
     await addEntry('2025-06-01', 10, false);
-    expect(getListItems()[0].textContent).not.toContain('🌧');
+    expect(getListItems()[0].querySelector('app-rain-icon')).toBeNull();
   });
 
   it('should have accessible aria-labels on edit/delete buttons', async () => {
