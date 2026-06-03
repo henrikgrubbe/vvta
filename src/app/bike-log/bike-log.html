@@ -1,14 +1,11 @@
-<div class="mx-auto max-w-lg p-6">
-  <div class="mb-6">
-    @if (firstName()) {
-      <p class="text-gray-600 dark:text-gray-400">
-        {{ 'BIKE_LOG.GREETING' | translate: { name: firstName() } }}
-      </p>
-    } @else {
-      <p class="text-gray-600 dark:text-gray-400">{{ 'BIKE_LOG.SUBTITLE' | translate }}</p>
-    }
-  </div>
-
+<app-page-layout
+  [title]="'BIKE_LOG.TITLE' | translate"
+  [subtitle]="
+    firstName()
+      ? ('BIKE_LOG.GREETING' | translate: { name: firstName() })
+      : ('BIKE_LOG.SUBTITLE' | translate)
+  "
+>
   <form
     class="mb-8 space-y-4 rounded-xl border p-4 transition-colors duration-300"
     [class]="
@@ -326,4 +323,4 @@
       {{ 'BIKE_LOG.RIDES.EMPTY' | translate }}
     </p>
   }
-</div>
+</app-page-layout>

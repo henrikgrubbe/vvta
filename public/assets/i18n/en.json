@@ -53,7 +53,8 @@
       "ARIA_LABEL": "Logged bike rides",
       "SORT_GROUP_ARIA": "Sort rides by",
       "EMPTY": "No rides logged yet. Start tracking!"
-    }
+    },
+    "TITLE": "My Rides"
   },
   "LEADERBOARD": {
     "TITLE": "🏆 Leaderboard",

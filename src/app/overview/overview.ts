@@ -4,12 +4,13 @@ import { RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 
 import { BikeLogService } from '../bike-log/bike-log.service';
+import { PageLayoutComponent } from '../page-layout';
 import { UserProfileService } from '../user-profile.service';
 
 @Component({
   selector: 'app-overview',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslateModule],
+  imports: [RouterLink, TranslateModule, PageLayoutComponent],
   templateUrl: './overview.html',
 })
 export class OverviewComponent {

@@ -53,7 +53,8 @@
       "ARIA_LABEL": "Erfasste Fahrradtouren",
       "SORT_GROUP_ARIA": "Fahrten sortieren nach",
       "EMPTY": "Noch keine Fahrten erfasst. Fang an zu radeln!"
-    }
+    },
+    "TITLE": "Meine Fahrten"
   },
   "LEADERBOARD": {
     "TITLE": "🏆 Rangliste",

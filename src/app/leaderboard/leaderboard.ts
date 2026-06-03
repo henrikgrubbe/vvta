@@ -4,6 +4,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslateModule } from '@ngx-translate/core';
 
 import { AuthService } from '../auth.service';
+import { PageLayoutComponent } from '../page-layout';
 import { LeaderboardService } from './leaderboard.service';
 
 interface RiderStats {
@@ -18,7 +19,7 @@ interface RiderStats {
 @Component({
   selector: 'app-leaderboard',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, TranslateModule],
+  imports: [DatePipe, TranslateModule, PageLayoutComponent],
   templateUrl: './leaderboard.html',
 })
 export class LeaderboardComponent {
