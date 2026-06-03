@@ -50,11 +50,11 @@ test.describe('Leaderboard', () => {
     });
 
     test('should have a link back to home', async ({ page }) => {
-      await expect(page.locator('nav a', { hasText: '← Home' })).toBeVisible();
+      await expect(page.locator('nav a[routerlink="/"]')).toBeVisible();
     });
 
     test('should navigate back to home when clicking the link', async ({ page }) => {
-      await page.click('nav a', { hasText: '← Home' });
+      await page.click('nav a[routerlink="/"]');
       await expect(page).toHaveURL('/');
     });
   });
