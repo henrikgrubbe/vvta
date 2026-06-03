@@ -20,7 +20,7 @@
       "DATE_LABEL": "Datum",
       "KM_LABEL": "Gefahrene Kilometer",
       "KM_PLACEHOLDER": "z. B. 12,5",
-      "RAINING_LABEL": "🌧️ Es hat geregnet",
+      "RAINING_LABEL": "Es hat geregnet",
       "CHECKING_WEATHER": "Wetter wird geprüft…",
       "SAVING": "Wird gespeichert…",
       "UPDATE": "Fahrt aktualisieren",

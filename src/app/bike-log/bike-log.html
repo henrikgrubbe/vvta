@@ -65,9 +65,10 @@
         type="checkbox"
       />
       <label
-        class="cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300"
+        class="inline-flex cursor-pointer items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-gray-300"
         for="ride-raining"
       >
+        <app-rain-icon [animated]="rideModel().raining" />
         {{ 'BIKE_LOG.FORM.RAINING_LABEL' | translate }}
       </label>
       @if (checkingWeather()) {
@@ -245,7 +246,12 @@
     <ul class="space-y-2" [attr.aria-label]="'BIKE_LOG.RIDES.ARIA_LABEL' | translate">
       @for (entry of sortedEntries(); track entry.id) {
         <li
-          class="flex animate-[fade-in-up_0.25s_ease-out] items-center justify-between gap-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-800"
+          class="flex animate-[fade-in-up_0.25s_ease-out] items-center justify-between gap-2 rounded-lg border px-4 py-3 transition-colors duration-300"
+          [class]="
+            editingId() === entry.id
+              ? 'border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-900/10'
+              : 'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800'
+          "
         >
           <div class="min-w-0 flex-1">
             <span class="text-gray-700 dark:text-gray-300">{{
@@ -257,10 +263,8 @@
             >
             @if (entry.raining) {
               <span class="mx-2 text-gray-400 dark:text-gray-500" aria-hidden="true">·</span>
-              <span
-                class="group relative inline-block cursor-default hover:animate-[wiggle_0.8s_ease-in-out_infinite]"
-              >
-                🌧️
+              <span class="group relative inline-flex cursor-default items-center">
+                <app-rain-icon />
                 <span
                   class="pointer-events-none invisible absolute bottom-full left-1/2 mb-1 -translate-x-1/2 rounded bg-gray-800 px-2 py-1 text-xs whitespace-nowrap text-white group-hover:visible dark:bg-gray-900 dark:text-gray-100"
                   role="tooltip"

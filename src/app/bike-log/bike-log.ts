@@ -20,6 +20,7 @@ import { AuthService } from '../auth.service';
 import { PageLayoutComponent } from '../page-layout';
 import { UserProfileService } from '../user-profile.service';
 import { BikeLogService } from './bike-log.service';
+import { RainIconComponent } from './rain-icon';
 import { WeatherService } from './weather.service';
 
 export type SortField = 'date' | 'kilometers';
@@ -38,7 +39,7 @@ export interface BikeEntry {
 @Component({
   selector: 'app-bike-log',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormField, DatePipe, TranslateModule, PageLayoutComponent],
+  imports: [FormField, DatePipe, TranslateModule, PageLayoutComponent, RainIconComponent],
   templateUrl: './bike-log.html',
 })
 export class BikeLogComponent {
