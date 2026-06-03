@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 
-import { LanguageService, SUPPORTED_LANGS } from './language.service';
-import { LanguageSwitcherComponent } from './language-switcher';
+import { LANG_FLAGS, LanguageService, SUPPORTED_LANGS } from './language.service';
+import { LANG_NAMES, LanguageSwitcherComponent } from './language-switcher';
 import { provideTranslateTesting } from './testing/translate-testing';
 
 describe('LanguageSwitcherComponent', () => {
@@ -25,9 +25,20 @@ describe('LanguageSwitcherComponent', () => {
     expect(select).toBeTruthy();
   });
 
-  it('shows an option for every supported language', () => {
+  it('shows a flag option for every supported language', () => {
     const options: NodeListOf<HTMLOptionElement> = fixture.nativeElement.querySelectorAll('option');
     expect(options.length).toBe(SUPPORTED_LANGS.length);
+    SUPPORTED_LANGS.forEach((lang, i) => {
+      expect(options[i].value).toBe(lang);
+      expect(options[i].textContent?.trim()).toBe(LANG_FLAGS[lang]);
+    });
+  });
+
+  it('shows only the flag (no language name) in each option', () => {
+    const options: NodeListOf<HTMLOptionElement> = fixture.nativeElement.querySelectorAll('option');
+    SUPPORTED_LANGS.forEach((lang, i) => {
+      expect(options[i].textContent).not.toContain(LANG_NAMES[lang]);
+    });
   });
 
   it('reflects the current language as the selected value', () => {
