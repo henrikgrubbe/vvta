@@ -1,9 +1,11 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { linkedSignal } from '@angular/core';
+import { form, FormField } from '@angular/forms/signals';
 import { TranslateModule } from '@ngx-translate/core';
 
 import { AppLang, LANG_FLAGS, LanguageService, SUPPORTED_LANGS } from './language.service';
 
-const LANG_NAMES: Record<AppLang, string> = {
+export const LANG_NAMES: Record<AppLang, string> = {
   en: 'English',
   da: 'Dansk',
   de: 'Deutsch',
@@ -12,7 +14,7 @@ const LANG_NAMES: Record<AppLang, string> = {
 @Component({
   selector: 'app-language-switcher',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslateModule],
+  imports: [FormField, TranslateModule],
   templateUrl: './language-switcher.html',
 })
 export class LanguageSwitcherComponent {
@@ -20,6 +22,11 @@ export class LanguageSwitcherComponent {
   protected readonly langs = SUPPORTED_LANGS;
   protected readonly flags = LANG_FLAGS;
   protected readonly names = LANG_NAMES;
+
+  // linkedSignal keeps the form model in sync when currentLang changes externally
+  private readonly langModel = linkedSignal(() => ({ lang: this.languageService.currentLang() }));
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  protected readonly langForm = form(this.langModel, () => {});
 
   protected onChange(event: Event): void {
     const lang = (event.target as HTMLSelectElement).value as AppLang;
