@@ -4,9 +4,10 @@
   },
   "NAV": {
     "LEADERBOARD": "🏆 Rangliste",
-    "MY_RIDES": "← Mine ture",
+    "MY_RIDES": "Mine ture",
     "SIGN_OUT": "Log ud",
-    "SWITCH_LANG": "Skift sprog"
+    "SWITCH_LANG": "Skift sprog",
+    "HOME": "Hjem"
   },
   "THEME": {
     "SWITCH_LIGHT": "Skift til lys tilstand",
@@ -90,5 +91,25 @@
   "COMMON": {
     "LOADING": "Indlæser…",
     "UNKNOWN": "Ukendt"
+  },
+  "OVERVIEW": {
+    "TITLE": "🚴 Vi viber til arbejde",
+    "GREETING": "Velkommen tilbage, {{name}}! 🚴",
+    "SUBTITLE": "Log dine cykelture og se, hvordan du klarer dig.",
+    "STATS_ARIA": "Din turstatistik",
+    "NAV_ARIA": "Naviger til",
+    "STATS": {
+      "MONTH_KM": "km denne måned",
+      "MONTH_RIDE": "tur denne måned",
+      "MONTH_RIDES": "ture denne måned",
+      "TOTAL_KM": "km i alt",
+      "RAINY_RIDES": "regnvejrsture"
+    },
+    "NAV": {
+      "MY_RIDES": "🚴 Mine ture",
+      "MY_RIDES_DESC": "Log og spor dine daglige cykelture",
+      "LEADERBOARD": "🏆 Rangliste",
+      "LEADERBOARD_DESC": "Se, hvordan du rangerer blandt dine kolleger"
+    }
   }
 }

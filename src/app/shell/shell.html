@@ -12,33 +12,31 @@
           🚴 {{ 'APP.TITLE' | translate }}
         </a>
         <nav class="flex flex-wrap items-center gap-2" aria-label="Main navigation">
-          <a
-            class="rounded px-2 py-1 text-sm font-medium focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
-            #myRidesActive="routerLinkActive"
-            [class]="
-              myRidesActive
-                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100'
-            "
-            [routerLinkActiveOptions]="{ exact: true }"
-            routerLink="/"
-            routerLinkActive
-          >
-            {{ 'NAV.MY_RIDES' | translate }}
-          </a>
-          <a
-            class="rounded px-2 py-1 text-sm font-medium focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
-            #leaderboardActive="routerLinkActive"
-            [class]="
-              leaderboardActive
-                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100'
-            "
-            routerLink="/leaderboard"
-            routerLinkActive
-          >
-            {{ 'NAV.LEADERBOARD' | translate }}
-          </a>
+          @if (!isOnOverview()) {
+            <a
+              class="rounded px-2 py-1 text-sm font-medium text-gray-600 hover:text-gray-900 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 dark:text-gray-400 dark:hover:text-gray-100"
+              routerLink="/"
+            >
+              ← {{ 'NAV.HOME' | translate }}
+            </a>
+            <span class="text-gray-300 dark:text-gray-600" aria-hidden="true">|</span>
+          }
+          @if (!isOnRides()) {
+            <a
+              class="rounded px-2 py-1 text-sm font-medium text-gray-600 hover:text-gray-900 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 dark:text-gray-400 dark:hover:text-gray-100"
+              routerLink="/rides"
+            >
+              {{ 'NAV.MY_RIDES' | translate }}
+            </a>
+          }
+          @if (!isOnLeaderboard()) {
+            <a
+              class="rounded px-2 py-1 text-sm font-medium text-gray-600 hover:text-gray-900 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 dark:text-gray-400 dark:hover:text-gray-100"
+              routerLink="/leaderboard"
+            >
+              {{ 'NAV.LEADERBOARD' | translate }}
+            </a>
+          }
           <span class="text-gray-300 dark:text-gray-600" aria-hidden="true">|</span>
           <app-language-switcher />
           <button

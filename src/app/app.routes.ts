@@ -10,6 +10,11 @@ export const routes: Routes = [
     children: [
       {
         path: '',
+        pathMatch: 'full',
+        loadComponent: () => import('./overview/overview').then((m) => m.OverviewComponent),
+      },
+      {
+        path: 'rides',
         loadChildren: () => import('./bike-log/bike-log.routes'),
       },
       {
