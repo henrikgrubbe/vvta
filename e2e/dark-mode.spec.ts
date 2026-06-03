@@ -133,13 +133,13 @@ test.describe('Dark mode — main app', () => {
 
   // Toggle button — leaderboard
   test('toggle button is visible in leaderboard nav', async ({ page }) => {
-    await page.locator('a', { hasText: 'Leaderboard' }).click();
+    await page.locator('header nav a', { hasText: 'Leaderboard' }).click();
     await page.waitForURL('/leaderboard');
     await expect(page.locator('button[aria-label="Switch to dark mode"]')).toBeVisible();
   });
 
   test('toggle on leaderboard applies dark class', async ({ page }) => {
-    await page.locator('a', { hasText: 'Leaderboard' }).click();
+    await page.locator('header nav a', { hasText: 'Leaderboard' }).click();
     await page.waitForURL('/leaderboard');
     await page.locator('button[aria-label="Switch to dark mode"]').click();
     await expect(page.locator('html')).toHaveClass(/dark/);
@@ -149,7 +149,7 @@ test.describe('Dark mode — main app', () => {
     await page.locator('button[aria-label="Switch to dark mode"]').click();
     await expect(page.locator('html')).toHaveClass(/dark/);
 
-    await page.locator('a', { hasText: 'Leaderboard' }).click();
+    await page.locator('header nav a', { hasText: 'Leaderboard' }).click();
     await page.waitForURL('/leaderboard');
     await expect(page.locator('html')).toHaveClass(/dark/);
     // Toggle shows light_mode icon (currently dark → button offers switch to light)

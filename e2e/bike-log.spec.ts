@@ -63,7 +63,7 @@ test.describe('Bike Log App', () => {
     await injectAuthState(page, sharedAuth!);
 
     // Wipe entries and navigate in parallel — wipe is a REST call, goto is a browser navigation
-    await Promise.all([wipeUserEntries(sharedAuth!.uid), page.goto('/')]);
+    await Promise.all([wipeUserEntries(sharedAuth!.uid), page.goto('/rides')]);
     // Wait for Firestore subscription to resolve and weather check to finish
     await expect(page.locator('text=Loading rides')).not.toBeVisible();
     await expect(page.locator('text=Checking weather')).not.toBeVisible();

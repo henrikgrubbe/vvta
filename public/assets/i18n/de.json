@@ -4,9 +4,10 @@
   },
   "NAV": {
     "LEADERBOARD": "🏆 Rangliste",
-    "MY_RIDES": "← Meine Fahrten",
+    "MY_RIDES": "Meine Fahrten",
     "SIGN_OUT": "Abmelden",
-    "SWITCH_LANG": "Sprache wechseln"
+    "SWITCH_LANG": "Sprache wechseln",
+    "HOME": "Start"
   },
   "THEME": {
     "SWITCH_LIGHT": "Zu hellem Modus wechseln",
@@ -90,5 +91,25 @@
   "COMMON": {
     "LOADING": "Wird geladen…",
     "UNKNOWN": "Unbekannt"
+  },
+  "OVERVIEW": {
+    "TITLE": "🚴 Wir viben zur Arbeit",
+    "GREETING": "Willkommen zurück, {{name}}! 🚴",
+    "SUBTITLE": "Erfasse deine Fahrten und vergleiche dich mit anderen.",
+    "STATS_ARIA": "Deine Fahrtenstatistik",
+    "NAV_ARIA": "Navigieren zu",
+    "STATS": {
+      "MONTH_KM": "km diesen Monat",
+      "MONTH_RIDE": "Fahrt diesen Monat",
+      "MONTH_RIDES": "Fahrten diesen Monat",
+      "TOTAL_KM": "km gesamt",
+      "RAINY_RIDES": "Regenfahrten"
+    },
+    "NAV": {
+      "MY_RIDES": "🚴 Meine Fahrten",
+      "MY_RIDES_DESC": "Erfasse und verfolge deine täglichen Fahrradtouren",
+      "LEADERBOARD": "🏆 Rangliste",
+      "LEADERBOARD_DESC": "Sieh, wie du im Vergleich zu deinen Kollegen abschneidest"
+    }
   }
 }

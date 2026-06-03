@@ -1,0 +1,98 @@
+<div class="mx-auto max-w-lg p-6">
+  <div class="mb-8">
+    @if (firstName()) {
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">
+        {{ 'OVERVIEW.GREETING' | translate: { name: firstName() } }}
+      </h1>
+    } @else {
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">
+        {{ 'OVERVIEW.TITLE' | translate }}
+      </h1>
+    }
+    <p class="mt-2 text-gray-500 dark:text-gray-400">{{ 'OVERVIEW.SUBTITLE' | translate }}</p>
+  </div>
+
+  @if (entries() !== undefined && stats().totalRides > 0) {
+    <section class="mb-8" [attr.aria-label]="'OVERVIEW.STATS_ARIA' | translate">
+      <div class="grid grid-cols-2 gap-3">
+        <div
+          class="rounded-xl border border-blue-100 bg-blue-50 p-4 dark:border-blue-900/40 dark:bg-blue-900/20"
+        >
+          <p class="text-2xl font-bold text-blue-700 dark:text-blue-300">
+            {{ stats().monthKm }} km
+          </p>
+          <p class="mt-0.5 text-sm text-blue-600 dark:text-blue-400">
+            {{ 'OVERVIEW.STATS.MONTH_KM' | translate }}
+          </p>
+        </div>
+        <div
+          class="rounded-xl border border-purple-100 bg-purple-50 p-4 dark:border-purple-900/40 dark:bg-purple-900/20"
+        >
+          <p class="text-2xl font-bold text-purple-700 dark:text-purple-300">
+            {{ stats().monthRides }}
+          </p>
+          <p class="mt-0.5 text-sm text-purple-600 dark:text-purple-400">
+            {{
+              (stats().monthRides === 1
+                ? 'OVERVIEW.STATS.MONTH_RIDE'
+                : 'OVERVIEW.STATS.MONTH_RIDES'
+              ) | translate
+            }}
+          </p>
+        </div>
+        <div
+          class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800"
+        >
+          <p class="text-2xl font-bold text-gray-700 dark:text-gray-300">
+            {{ stats().totalKm }} km
+          </p>
+          <p class="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
+            {{ 'OVERVIEW.STATS.TOTAL_KM' | translate }}
+          </p>
+        </div>
+        <div
+          class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800"
+        >
+          <p class="text-2xl font-bold text-gray-700 dark:text-gray-300">
+            {{ stats().rainyRides }} 🌧️
+          </p>
+          <p class="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
+            {{ 'OVERVIEW.STATS.RAINY_RIDES' | translate }}
+          </p>
+        </div>
+      </div>
+    </section>
+  }
+
+  <nav class="space-y-3" [attr.aria-label]="'OVERVIEW.NAV_ARIA' | translate">
+    <a
+      class="flex items-center justify-between rounded-xl border border-blue-200 bg-blue-600 px-6 py-5 text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 dark:border-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600"
+      routerLink="/rides"
+    >
+      <div>
+        <p class="text-lg font-semibold">{{ 'OVERVIEW.NAV.MY_RIDES' | translate }}</p>
+        <p class="mt-0.5 text-sm text-blue-100">{{ 'OVERVIEW.NAV.MY_RIDES_DESC' | translate }}</p>
+      </div>
+      <span class="material-symbols-outlined text-2xl" aria-hidden="true">arrow_forward</span>
+    </a>
+
+    <a
+      class="flex items-center justify-between rounded-xl border border-yellow-200 bg-yellow-50 px-6 py-5 shadow-sm transition-colors hover:bg-yellow-100 focus:outline-2 focus:outline-offset-2 focus:outline-yellow-500 dark:border-yellow-900/40 dark:bg-yellow-900/20 dark:hover:bg-yellow-900/30"
+      routerLink="/leaderboard"
+    >
+      <div>
+        <p class="text-lg font-semibold text-yellow-800 dark:text-yellow-300">
+          {{ 'OVERVIEW.NAV.LEADERBOARD' | translate }}
+        </p>
+        <p class="mt-0.5 text-sm text-yellow-700 dark:text-yellow-400">
+          {{ 'OVERVIEW.NAV.LEADERBOARD_DESC' | translate }}
+        </p>
+      </div>
+      <span
+        class="material-symbols-outlined text-2xl text-yellow-600 dark:text-yellow-400"
+        aria-hidden="true"
+        >arrow_forward</span
+      >
+    </a>
+  </nav>
+</div>

@@ -4,9 +4,10 @@
   },
   "NAV": {
     "LEADERBOARD": "🏆 Leaderboard",
-    "MY_RIDES": "← My rides",
+    "MY_RIDES": "My rides",
     "SIGN_OUT": "Sign out",
-    "SWITCH_LANG": "Switch language"
+    "SWITCH_LANG": "Switch language",
+    "HOME": "Home"
   },
   "THEME": {
     "SWITCH_LIGHT": "Switch to light mode",
@@ -90,5 +91,25 @@
   "COMMON": {
     "LOADING": "Loading…",
     "UNKNOWN": "Unknown"
+  },
+  "OVERVIEW": {
+    "TITLE": "🚴 We Vibe to Work",
+    "GREETING": "Welcome back, {{name}}! 🚴",
+    "SUBTITLE": "Track your bike commutes and see how you compare.",
+    "STATS_ARIA": "Your ride statistics",
+    "NAV_ARIA": "Navigate to",
+    "STATS": {
+      "MONTH_KM": "km this month",
+      "MONTH_RIDE": "ride this month",
+      "MONTH_RIDES": "rides this month",
+      "TOTAL_KM": "km total",
+      "RAINY_RIDES": "rainy rides"
+    },
+    "NAV": {
+      "MY_RIDES": "🚴 My Rides",
+      "MY_RIDES_DESC": "Log and track your daily bike commutes",
+      "LEADERBOARD": "🏆 Leaderboard",
+      "LEADERBOARD_DESC": "See how you rank against your colleagues"
+    }
   }
 }
