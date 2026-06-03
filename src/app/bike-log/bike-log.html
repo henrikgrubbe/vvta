@@ -9,7 +9,15 @@
     }
   </div>
 
-  <form class="mb-8 space-y-4" (submit)="onSubmit(); $event.preventDefault()">
+  <form
+    class="mb-8 space-y-4 rounded-xl border p-4 transition-colors duration-300"
+    [class]="
+      editingId() !== null
+        ? 'border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-900/10'
+        : 'border-transparent bg-transparent'
+    "
+    (submit)="onSubmit(); $event.preventDefault()"
+  >
     <div>
       <label
         class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
@@ -62,19 +70,79 @@
         {{ 'BIKE_LOG.FORM.RAINING_LABEL' | translate }}
       </label>
       @if (checkingWeather()) {
-        <span class="text-xs text-gray-400 italic dark:text-gray-500">{{
-          'BIKE_LOG.FORM.CHECKING_WEATHER' | translate
-        }}</span>
+        <span
+          class="inline-flex items-center gap-1 text-xs text-gray-400 italic dark:text-gray-500"
+          aria-live="polite"
+          aria-label="Checking weather"
+        >
+          <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <!-- cloud body -->
+            <path
+              class="text-gray-400 dark:text-gray-500"
+              d="M6 18a4 4 0 0 1 0-8 5 5 0 0 1 9.9-1A3.5 3.5 0 0 1 19.5 18H6Z"
+              fill="currentColor"
+            />
+            <!-- animated rain drops -->
+            <line
+              class="animate-[rain-drop_1s_ease-in_0.0s_infinite] text-blue-400"
+              x1="8"
+              y1="20"
+              x2="7"
+              y2="23"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+            />
+            <line
+              class="animate-[rain-drop_1s_ease-in_0.2s_infinite] text-blue-400"
+              x1="12"
+              y1="20"
+              x2="11"
+              y2="23"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+            />
+            <line
+              class="animate-[rain-drop_1s_ease-in_0.4s_infinite] text-blue-400"
+              x1="16"
+              y1="20"
+              x2="15"
+              y2="23"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+            />
+          </svg>
+          {{ 'BIKE_LOG.FORM.CHECKING_WEATHER' | translate }}</span
+        >
       }
     </div>
 
     <button
-      class="w-full rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+      class="w-full rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-blue-700 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
       [disabled]="rideForm().invalid() || saving()"
       type="submit"
     >
       @if (saving()) {
-        {{ 'BIKE_LOG.FORM.SAVING' | translate }}
+        <span class="inline-flex items-center justify-center gap-2">
+          <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            />
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4Z"
+            />
+          </svg>
+          {{ 'BIKE_LOG.FORM.SAVING' | translate }}
+        </span>
       } @else {
         {{ (editingId() !== null ? 'BIKE_LOG.FORM.UPDATE' : 'BIKE_LOG.FORM.ADD') | translate }}
       }
@@ -82,7 +150,7 @@
 
     @if (editingId() !== null) {
       <button
-        class="w-full rounded-lg border border-gray-300 px-4 py-2 font-semibold text-gray-700 hover:bg-gray-100 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+        class="w-full animate-[fade-in-up_0.2s_ease-out] rounded-lg border border-gray-300 px-4 py-2 font-semibold text-gray-700 hover:bg-gray-100 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
         (click)="cancelEdit()"
         type="button"
       >
@@ -176,7 +244,7 @@
     <ul class="space-y-2" [attr.aria-label]="'BIKE_LOG.RIDES.ARIA_LABEL' | translate">
       @for (entry of sortedEntries(); track entry.id) {
         <li
-          class="flex items-center justify-between gap-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-800"
+          class="flex animate-[fade-in-up_0.25s_ease-out] items-center justify-between gap-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-800"
         >
           <div class="min-w-0 flex-1">
             <span class="text-gray-700 dark:text-gray-300">{{
@@ -188,7 +256,9 @@
             >
             @if (entry.raining) {
               <span class="mx-2 text-gray-400 dark:text-gray-500" aria-hidden="true">·</span>
-              <span class="group relative cursor-default">
+              <span
+                class="group relative inline-block animate-[wiggle_0.8s_ease-in-out_infinite] cursor-default"
+              >
                 🌧️
                 <span
                   class="pointer-events-none invisible absolute bottom-full left-1/2 mb-1 -translate-x-1/2 rounded bg-gray-800 px-2 py-1 text-xs whitespace-nowrap text-white group-hover:visible dark:bg-gray-900 dark:text-gray-100"
