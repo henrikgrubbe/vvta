@@ -53,7 +53,8 @@
       "ARIA_LABEL": "Loggede cykelture",
       "SORT_GROUP_ARIA": "Sorter ture efter",
       "EMPTY": "Ingen ture logget endnu. Kom i gang!"
-    }
+    },
+    "TITLE": "Mine ture"
   },
   "LEADERBOARD": {
     "TITLE": "🏆 Rangliste",
