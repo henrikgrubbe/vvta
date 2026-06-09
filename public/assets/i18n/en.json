@@ -112,5 +112,20 @@
       "LEADERBOARD": "🏆 Leaderboard",
       "LEADERBOARD_DESC": "See how you rank against your colleagues"
     }
+  },
+  "SNAKE": {
+    "TITLE": "🚴 Cycling Snake",
+    "SUBTITLE": "Collect bicycles to rack up km — don't crash!",
+    "SCORE": "Distance",
+    "HIGH_SCORE": "Best",
+    "PRESS_TO_START": "Press any key to start",
+    "CONTROLS_HINT": "Arrow keys or WASD to steer · Space to pause · Esc to exit",
+    "CONTROLS": "Arrow keys / WASD · Space = pause · Esc = exit",
+    "PAUSED": "⏸ Paused",
+    "RESUME_HINT": "Press Space to resume",
+    "GAME_OVER": "Crash!",
+    "NEW_HIGH_SCORE": "🏆 New personal best!",
+    "BOARD_ARIA": "Cycling snake game board",
+    "EXIT": "← Exit"
   }
 }

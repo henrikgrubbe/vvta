@@ -112,5 +112,20 @@
       "LEADERBOARD": "🏆 Rangliste",
       "LEADERBOARD_DESC": "Se, hvordan du rangerer blandt dine kolleger"
     }
+  },
+  "SNAKE": {
+    "TITLE": "🚴 Cykel-Snake",
+    "SUBTITLE": "Saml cykler for at køre km — pas på ikke at crashe!",
+    "SCORE": "Afstand",
+    "HIGH_SCORE": "Bedste",
+    "PRESS_TO_START": "Tryk en tast for at starte",
+    "CONTROLS_HINT": "Piletaster eller WASD for at styre · Mellemrum for pause · Esc for at afslutte",
+    "CONTROLS": "Piletaster / WASD · Mellemrum = pause · Esc = afslut",
+    "PAUSED": "⏸ Pause",
+    "RESUME_HINT": "Tryk Mellemrum for at fortsætte",
+    "GAME_OVER": "Crash!",
+    "NEW_HIGH_SCORE": "🏆 Ny personlig rekord!",
+    "BOARD_ARIA": "Cykel-snake spilbræt",
+    "EXIT": "← Afslut"
   }
 }
