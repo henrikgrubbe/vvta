@@ -53,3 +53,27 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - Design services around a single responsibility
 - Use the `providedIn: 'root'` option for singleton services
 - Use the `inject()` function instead of constructor injection
+
+## Project Features
+
+Key routes and features agents must be aware of to avoid regressions:
+
+| Route | Component | Auth | Description |
+|-------|-----------|------|-------------|
+| `/` | `OverviewComponent` | Required (profile) | Personalised home with ride stats and nav cards |
+| `/rides` | `BikeLogComponent` | Required (profile) | Add/edit/delete rides; auto weather detection |
+| `/leaderboard` | `LeaderboardComponent` | Required (profile) | All-user ranking by total km |
+| `/login` | `LoginComponent` | None | Google Sign-In |
+| `/onboarding` | `OnboardingComponent` | Signed-in, no profile | First-name entry |
+| `/snake` | `SnakeComponent` | None | Cycling-themed Snake easter egg (see below) |
+
+### Snake easter egg (`/snake`)
+
+- Triggered by typing `--snake` anywhere in the app — a rolling 7-char buffer in `App.onGlobalKeyDown` matches the sequence and calls `router.navigateByUrl('/snake')`
+- Lazy-loaded at `src/app/snake/`; no auth guard
+- 20×20 grid board, signals-only state, `setInterval` game loop
+- 🚴 head (CSS rotate with direction), 🚲 food, green body
+- Controls: Arrow/WASD · Space pause/resume · Esc → `/`
+- Speed: starts 150 ms/tick, decreases 5 ms per food eaten, floor 80 ms
+- i18n keys live under `SNAKE.*` in all three translation files (`public/assets/i18n/`)
+- **Do not remove** the `/snake` route or the `--snake` key listener — the issue requesting this feature was explicitly accepted
