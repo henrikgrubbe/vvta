@@ -112,5 +112,20 @@
       "LEADERBOARD": "🏆 Rangliste",
       "LEADERBOARD_DESC": "Sieh, wie du im Vergleich zu deinen Kollegen abschneidest"
     }
+  },
+  "SNAKE": {
+    "TITLE": "🚴 Fahrrad-Snake",
+    "SUBTITLE": "Sammel Fahrräder für km — bloß nicht abstürzen!",
+    "SCORE": "Distanz",
+    "HIGH_SCORE": "Bestleistung",
+    "PRESS_TO_START": "Beliebige Taste drücken zum Starten",
+    "CONTROLS_HINT": "Pfeiltasten oder WASD zum Lenken · Leertaste für Pause · Esc zum Beenden",
+    "CONTROLS": "Pfeiltasten / WASD · Leertaste = Pause · Esc = Beenden",
+    "PAUSED": "⏸ Pausiert",
+    "RESUME_HINT": "Leertaste drücken zum Fortfahren",
+    "GAME_OVER": "Crash!",
+    "NEW_HIGH_SCORE": "🏆 Neuer persönlicher Rekord!",
+    "BOARD_ARIA": "Fahrrad-Snake Spielfeld",
+    "EXIT": "← Beenden"
   }
 }

@@ -33,4 +33,8 @@ export const routes: Routes = [
     canActivate: [signedInGuard],
     loadComponent: () => import('./onboarding/onboarding').then((m) => m.OnboardingComponent),
   },
+  {
+    path: 'snake',
+    loadChildren: () => import('./snake/snake.routes'),
+  },
 ];
