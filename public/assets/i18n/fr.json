@@ -1,0 +1,131 @@
+{
+  "APP": {
+    "TITLE": "On vibe au boulot"
+  },
+  "NAV": {
+    "LEADERBOARD": "🏆 Classement",
+    "MY_RIDES": "Mes trajets",
+    "SIGN_OUT": "Se déconnecter",
+    "SWITCH_LANG": "Changer de langue",
+    "HOME": "Accueil"
+  },
+  "THEME": {
+    "SWITCH_LIGHT": "Passer en mode clair",
+    "SWITCH_DARK": "Passer en mode sombre"
+  },
+  "BIKE_LOG": {
+    "GREETING": "Bonjour, {{name}} ! Enregistrez vos trajets à vélo.",
+    "SUBTITLE": "Enregistrez vos trajets quotidiens à vélo.",
+    "FORM": {
+      "DATE_LABEL": "Date",
+      "KM_LABEL": "Kilomètres parcourus",
+      "KM_PLACEHOLDER": "ex. 12,5",
+      "RAINING_LABEL": "Il pleuvait",
+      "CHECKING_WEATHER": "Vérification météo…",
+      "SAVING": "Enregistrement…",
+      "UPDATE": "Modifier le trajet",
+      "ADD": "Ajouter un trajet",
+      "CANCEL": "Annuler"
+    },
+    "RIDES": {
+      "LOAD_ERROR": "Impossible de charger les trajets. Veuillez actualiser.",
+      "LOADING": "Chargement des trajets…",
+      "TITLE": "Trajets enregistrés",
+      "TOTAL": "Total :",
+      "SORT_LABEL": "Trier :",
+      "SORT_DATE": "Date",
+      "SORT_DISTANCE": "Distance",
+      "SORT_DATE_ARIA": "Trier par date",
+      "SORT_DATE_ACTIVE_ARIA": "Trier par date {{direction}}",
+      "SORT_DISTANCE_ARIA": "Trier par distance",
+      "SORT_DISTANCE_ACTIVE_ARIA": "Trier par distance {{direction}}",
+      "SORT_NEWEST": "plus récent d'abord",
+      "SORT_OLDEST": "plus ancien d'abord",
+      "SORT_LONGEST": "plus long d'abord",
+      "SORT_SHORTEST": "plus court d'abord",
+      "RAINING_AUTO": "Détecté automatiquement",
+      "RAINING_MANUAL": "Défini manuellement",
+      "DELETE_CONFIRM": "Supprimer ?",
+      "CONFIRM_DELETE_ARIA": "Confirmer la suppression",
+      "CANCEL_DELETE_ARIA": "Annuler la suppression",
+      "EDIT_ARIA": "Modifier le trajet du {{date}}",
+      "DELETE_ARIA": "Supprimer le trajet du {{date}}",
+      "ARIA_LABEL": "Trajets à vélo enregistrés",
+      "SORT_GROUP_ARIA": "Trier les trajets par",
+      "EMPTY": "Aucun trajet enregistré. Commencez à pédaler !"
+    },
+    "TITLE": "Mes trajets"
+  },
+  "LEADERBOARD": {
+    "TITLE": "🏆 Classement",
+    "SUBTITLE": "Qui a le plus pédalé ?",
+    "EMPTY": "Aucun trajet enregistré. Soyez le premier !",
+    "RANKINGS_ARIA": "Classement des cyclistes",
+    "RANK_ARIA": "Rang {{rank}}",
+    "YOU": "(vous)",
+    "LAST_RIDE": "Dernier trajet :",
+    "RIDE": "trajet",
+    "RIDES": "trajets",
+    "RECENT_RIDES": "Trajets récents",
+    "RAINING_ARIA": "pluie"
+  },
+  "LOGIN": {
+    "SIGNING_IN": "Connexion…",
+    "SIGN_IN": "Se connecter avec Google",
+    "ERROR_GENERIC": "La connexion a échoué. Veuillez réessayer."
+  },
+  "ONBOARDING": {
+    "TITLE": "Bienvenue !",
+    "SUBTITLE": "Juste une chose avant de commencer…",
+    "NAME_LABEL": "Quel est votre prénom ?",
+    "NAME_PLACEHOLDER": "ex. Pierre",
+    "NAME_REQUIRED": "Veuillez entrer votre prénom.",
+    "SAVING": "Enregistrement…",
+    "GET_STARTED": "C'est parti 🚴",
+    "ERROR_GENERIC": "Une erreur est survenue. Veuillez réessayer."
+  },
+  "VALIDATION": {
+    "DATE_REQUIRED": "La date est obligatoire",
+    "KM_REQUIRED": "Les kilomètres sont obligatoires",
+    "KM_MIN": "Doit être au moins 0,1 km"
+  },
+  "COMMON": {
+    "LOADING": "Chargement…",
+    "UNKNOWN": "Inconnu"
+  },
+  "OVERVIEW": {
+    "TITLE": "🚴 On vibe au boulot",
+    "GREETING": "Bon retour, {{name}} ! 🚴",
+    "SUBTITLE": "Enregistrez vos trajets et comparez-vous aux autres.",
+    "STATS_ARIA": "Vos statistiques de trajet",
+    "NAV_ARIA": "Naviguer vers",
+    "STATS": {
+      "MONTH_KM": "km ce mois-ci",
+      "MONTH_RIDE": "trajet ce mois-ci",
+      "MONTH_RIDES": "trajets ce mois-ci",
+      "TOTAL_KM": "km au total",
+      "RAINY_RIDES": "trajets pluvieux"
+    },
+    "NAV": {
+      "MY_RIDES": "🚴 Mes trajets",
+      "MY_RIDES_DESC": "Enregistrez et suivez vos trajets quotidiens",
+      "LEADERBOARD": "🏆 Classement",
+      "LEADERBOARD_DESC": "Voyez votre rang parmi vos collègues"
+    }
+  },
+  "SNAKE": {
+    "TITLE": "🚴 Snake à vélo",
+    "SUBTITLE": "Collectez des vélos pour accumuler des km — ne crashez pas !",
+    "SCORE": "Distance",
+    "HIGH_SCORE": "Meilleur",
+    "PRESS_TO_START": "Appuyez sur une touche pour commencer",
+    "CONTROLS_HINT": "Flèches ou WASD pour diriger · Espace pour pause · Échap pour quitter",
+    "CONTROLS": "Flèches / WASD · Espace = pause · Échap = quitter",
+    "PAUSED": "⏸ En pause",
+    "RESUME_HINT": "Appuyez sur Espace pour reprendre",
+    "GAME_OVER": "Crash !",
+    "NEW_HIGH_SCORE": "🏆 Nouveau record personnel !",
+    "BOARD_ARIA": "Plateau de jeu Snake à vélo",
+    "EXIT": "← Quitter"
+  }
+}

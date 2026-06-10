@@ -33,10 +33,13 @@ describe('LanguageService', () => {
       expect(resolveAppLang('da')).toBe('da');
       expect(resolveAppLang('de')).toBe('de');
       expect(resolveAppLang('en')).toBe('en');
+      expect(resolveAppLang('sv')).toBe('sv');
+      expect(resolveAppLang('fr')).toBe('fr');
+      expect(resolveAppLang('ro')).toBe('ro');
     });
 
     it('falls back to "en" for unsupported languages', () => {
-      expect(resolveAppLang('fr')).toBe('en');
+      expect(resolveAppLang('ja')).toBe('en');
       expect(resolveAppLang('')).toBe('en');
       expect(resolveAppLang('zz')).toBe('en');
     });
@@ -63,12 +66,12 @@ describe('LanguageService', () => {
     });
 
     it('falls back to "en" for unsupported navigator.language', () => {
-      vi.spyOn(navigator, 'language', 'get').mockReturnValue('fr-FR');
+      vi.spyOn(navigator, 'language', 'get').mockReturnValue('ja-JP');
       expect(LanguageService.getPersistedLang()).toBe('en');
     });
 
     it('falls back to "en" for unsupported stored value', () => {
-      localStorage.setItem('lang', 'fr');
+      localStorage.setItem('lang', 'ja');
       expect(LanguageService.getPersistedLang()).toBe('en');
     });
   });

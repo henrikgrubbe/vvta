@@ -1,0 +1,131 @@
+{
+  "APP": {
+    "TITLE": "Vi vibar till jobbet"
+  },
+  "NAV": {
+    "LEADERBOARD": "🏆 Topplista",
+    "MY_RIDES": "Mina turer",
+    "SIGN_OUT": "Logga ut",
+    "SWITCH_LANG": "Byt språk",
+    "HOME": "Hem"
+  },
+  "THEME": {
+    "SWITCH_LIGHT": "Byt till ljust läge",
+    "SWITCH_DARK": "Byt till mörkt läge"
+  },
+  "BIKE_LOG": {
+    "GREETING": "Hej, {{name}}! Logga dina dagliga cykelturer.",
+    "SUBTITLE": "Logga dina dagliga cykelturer till jobbet.",
+    "FORM": {
+      "DATE_LABEL": "Datum",
+      "KM_LABEL": "Kilometer körda",
+      "KM_PLACEHOLDER": "t.ex. 12,5",
+      "RAINING_LABEL": "Det regnade",
+      "CHECKING_WEATHER": "Kontrollerar väder…",
+      "SAVING": "Sparar…",
+      "UPDATE": "Uppdatera tur",
+      "ADD": "Lägg till tur",
+      "CANCEL": "Avbryt"
+    },
+    "RIDES": {
+      "LOAD_ERROR": "Kunde inte ladda turer. Försök igen.",
+      "LOADING": "Laddar turer…",
+      "TITLE": "Loggade turer",
+      "TOTAL": "Totalt:",
+      "SORT_LABEL": "Sortera:",
+      "SORT_DATE": "Datum",
+      "SORT_DISTANCE": "Avstånd",
+      "SORT_DATE_ARIA": "Sortera efter datum",
+      "SORT_DATE_ACTIVE_ARIA": "Sortera efter datum {{direction}}",
+      "SORT_DISTANCE_ARIA": "Sortera efter avstånd",
+      "SORT_DISTANCE_ACTIVE_ARIA": "Sortera efter avstånd {{direction}}",
+      "SORT_NEWEST": "nyast först",
+      "SORT_OLDEST": "äldst först",
+      "SORT_LONGEST": "längst först",
+      "SORT_SHORTEST": "kortast först",
+      "RAINING_AUTO": "Upptäckt automatiskt",
+      "RAINING_MANUAL": "Angett manuellt",
+      "DELETE_CONFIRM": "Radera?",
+      "CONFIRM_DELETE_ARIA": "Bekräfta radering",
+      "CANCEL_DELETE_ARIA": "Avbryt radering",
+      "EDIT_ARIA": "Redigera tur den {{date}}",
+      "DELETE_ARIA": "Radera tur den {{date}}",
+      "ARIA_LABEL": "Loggade cykelturer",
+      "SORT_GROUP_ARIA": "Sortera turer efter",
+      "EMPTY": "Inga turer loggade ännu. Börja cykla!"
+    },
+    "TITLE": "Mina turer"
+  },
+  "LEADERBOARD": {
+    "TITLE": "🏆 Topplista",
+    "SUBTITLE": "Vem har cyklat mest?",
+    "EMPTY": "Inga turer loggade ännu. Bli den första!",
+    "RANKINGS_ARIA": "Cyklistranking",
+    "RANK_ARIA": "Plats {{rank}}",
+    "YOU": "(du)",
+    "LAST_RIDE": "Senaste tur:",
+    "RIDE": "tur",
+    "RIDES": "turer",
+    "RECENT_RIDES": "Senaste turer",
+    "RAINING_ARIA": "regn"
+  },
+  "LOGIN": {
+    "SIGNING_IN": "Loggar in…",
+    "SIGN_IN": "Logga in med Google",
+    "ERROR_GENERIC": "Inloggningen misslyckades. Försök igen."
+  },
+  "ONBOARDING": {
+    "TITLE": "Välkommen!",
+    "SUBTITLE": "Bara en sak innan vi börjar…",
+    "NAME_LABEL": "Vad heter du i förnamn?",
+    "NAME_PLACEHOLDER": "t.ex. Erik",
+    "NAME_REQUIRED": "Ange ditt förnamn.",
+    "SAVING": "Sparar…",
+    "GET_STARTED": "Sätt igång 🚴",
+    "ERROR_GENERIC": "Något gick fel. Försök igen."
+  },
+  "VALIDATION": {
+    "DATE_REQUIRED": "Datum krävs",
+    "KM_REQUIRED": "Kilometer krävs",
+    "KM_MIN": "Måste vara minst 0,1 km"
+  },
+  "COMMON": {
+    "LOADING": "Laddar…",
+    "UNKNOWN": "Okänd"
+  },
+  "OVERVIEW": {
+    "TITLE": "🚴 Vi vibar till jobbet",
+    "GREETING": "Välkommen tillbaka, {{name}}! 🚴",
+    "SUBTITLE": "Logga dina cykelturer och se hur du ligger till.",
+    "STATS_ARIA": "Din turstatistik",
+    "NAV_ARIA": "Navigera till",
+    "STATS": {
+      "MONTH_KM": "km denna månad",
+      "MONTH_RIDE": "tur denna månad",
+      "MONTH_RIDES": "turer denna månad",
+      "TOTAL_KM": "km totalt",
+      "RAINY_RIDES": "regniga turer"
+    },
+    "NAV": {
+      "MY_RIDES": "🚴 Mina turer",
+      "MY_RIDES_DESC": "Logga och spåra dina dagliga cykelturer",
+      "LEADERBOARD": "🏆 Topplista",
+      "LEADERBOARD_DESC": "Se hur du rankas bland dina kollegor"
+    }
+  },
+  "SNAKE": {
+    "TITLE": "🚴 Cykel-Snake",
+    "SUBTITLE": "Samla cyklar för att köra km — kör inte in i något!",
+    "SCORE": "Avstånd",
+    "HIGH_SCORE": "Bästa",
+    "PRESS_TO_START": "Tryck valfri tangent för att starta",
+    "CONTROLS_HINT": "Piltangenter eller WASD för att styra · Mellanslag för paus · Esc för att avsluta",
+    "CONTROLS": "Piltangenter / WASD · Mellanslag = paus · Esc = avsluta",
+    "PAUSED": "⏸ Pausad",
+    "RESUME_HINT": "Tryck Mellanslag för att fortsätta",
+    "GAME_OVER": "Krasch!",
+    "NEW_HIGH_SCORE": "🏆 Nytt personligt rekord!",
+    "BOARD_ARIA": "Cykel-snake spelplan",
+    "EXIT": "← Avsluta"
+  }
+}

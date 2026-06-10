@@ -9,6 +9,9 @@ export const LANG_NAMES: Record<AppLang, string> = {
   en: 'English',
   da: 'Dansk',
   de: 'Deutsch',
+  sv: 'Svenska',
+  fr: 'Français',
+  ro: 'Română',
 };
 
 @Component({
