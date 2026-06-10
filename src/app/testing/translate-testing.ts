@@ -1,13 +1,7 @@
+import { EnvironmentProviders, inject, provideAppInitializer, Provider } from '@angular/core';
 import {
-  EnvironmentProviders,
-  importProvidersFrom,
-  inject,
-  provideAppInitializer,
-  Provider,
-} from '@angular/core';
-import {
+  provideTranslateService,
   TranslateLoader,
-  TranslateModule,
   TranslateService,
   TranslationObject,
 } from '@ngx-translate/core';
@@ -22,14 +16,12 @@ class StaticTranslateLoader implements TranslateLoader {
 }
 
 /** Provides ngx-translate with synchronous English translations for unit tests. */
-export function provideTranslateTesting(): (EnvironmentProviders | Provider)[] {
+export function provideTranslateTesting(): (Provider | EnvironmentProviders)[] {
   return [
-    importProvidersFrom(
-      TranslateModule.forRoot({
-        loader: { provide: TranslateLoader, useClass: StaticTranslateLoader },
-        fallbackLang: 'en',
-      }),
-    ),
+    ...provideTranslateService({
+      loader: { provide: TranslateLoader, useClass: StaticTranslateLoader },
+      fallbackLang: 'en',
+    }),
     provideAppInitializer(() => {
       const translate = inject(TranslateService);
       return firstValueFrom(translate.use('en'));

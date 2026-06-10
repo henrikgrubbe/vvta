@@ -13,7 +13,7 @@ import {
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { form, FormField, min, required, submit } from '@angular/forms/signals';
 import { Router } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { filter, switchMap, tap } from 'rxjs';
 
 import { AuthService } from '../auth.service';
@@ -39,7 +39,7 @@ export interface BikeEntry {
 @Component({
   selector: 'app-bike-log',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormField, DatePipe, TranslateModule, PageLayoutComponent, RainIconComponent],
+  imports: [FormField, DatePipe, TranslatePipe, PageLayoutComponent, RainIconComponent],
   templateUrl: './bike-log.html',
 })
 export class BikeLogComponent {

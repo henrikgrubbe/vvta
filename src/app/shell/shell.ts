@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { filter, map, startWith } from 'rxjs';
 
 import { AuthService } from '../auth.service';
@@ -11,7 +11,7 @@ import { ThemeService } from '../theme.service';
 @Component({
   selector: 'app-shell',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, RouterLink, TranslateModule, LanguageSwitcherComponent],
+  imports: [RouterOutlet, RouterLink, TranslatePipe, LanguageSwitcherComponent],
   templateUrl: './shell.html',
 })
 export class ShellComponent {

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
 import { BikeLogService } from '../bike-log/bike-log.service';
 import { PageLayoutComponent } from '../page-layout';
@@ -10,7 +10,7 @@ import { UserProfileService } from '../user-profile.service';
 @Component({
   selector: 'app-overview',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslateModule, PageLayoutComponent],
+  imports: [RouterLink, TranslatePipe, PageLayoutComponent],
   templateUrl: './overview.html',
 })
 export class OverviewComponent {
