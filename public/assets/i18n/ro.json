@@ -1,0 +1,131 @@
+{
+  "APP": {
+    "TITLE": "Dăm vibe la muncă"
+  },
+  "NAV": {
+    "LEADERBOARD": "🏆 Clasament",
+    "MY_RIDES": "Cursele mele",
+    "SIGN_OUT": "Deconectare",
+    "SWITCH_LANG": "Schimbă limba",
+    "HOME": "Acasă"
+  },
+  "THEME": {
+    "SWITCH_LIGHT": "Comută la modul luminos",
+    "SWITCH_DARK": "Comută la modul întunecat"
+  },
+  "BIKE_LOG": {
+    "GREETING": "Bună, {{name}}! Înregistrează cursele tale zilnice cu bicicleta.",
+    "SUBTITLE": "Înregistrează cursele tale zilnice cu bicicleta la muncă.",
+    "FORM": {
+      "DATE_LABEL": "Data",
+      "KM_LABEL": "Kilometri parcurși",
+      "KM_PLACEHOLDER": "ex. 12,5",
+      "RAINING_LABEL": "A plouat",
+      "CHECKING_WEATHER": "Se verifică vremea…",
+      "SAVING": "Se salvează…",
+      "UPDATE": "Actualizează cursa",
+      "ADD": "Adaugă cursă",
+      "CANCEL": "Anulare"
+    },
+    "RIDES": {
+      "LOAD_ERROR": "Nu s-au putut încărca cursele. Vă rugăm reîncărcați.",
+      "LOADING": "Se încarcă cursele…",
+      "TITLE": "Curse înregistrate",
+      "TOTAL": "Total:",
+      "SORT_LABEL": "Sortare:",
+      "SORT_DATE": "Data",
+      "SORT_DISTANCE": "Distanță",
+      "SORT_DATE_ARIA": "Sortare după dată",
+      "SORT_DATE_ACTIVE_ARIA": "Sortare după dată {{direction}}",
+      "SORT_DISTANCE_ARIA": "Sortare după distanță",
+      "SORT_DISTANCE_ACTIVE_ARIA": "Sortare după distanță {{direction}}",
+      "SORT_NEWEST": "cele mai noi primele",
+      "SORT_OLDEST": "cele mai vechi primele",
+      "SORT_LONGEST": "cele mai lungi primele",
+      "SORT_SHORTEST": "cele mai scurte primele",
+      "RAINING_AUTO": "Detectat automat",
+      "RAINING_MANUAL": "Setat manual",
+      "DELETE_CONFIRM": "Șterge?",
+      "CONFIRM_DELETE_ARIA": "Confirmă ștergerea",
+      "CANCEL_DELETE_ARIA": "Anulează ștergerea",
+      "EDIT_ARIA": "Editează cursa din {{date}}",
+      "DELETE_ARIA": "Șterge cursa din {{date}}",
+      "ARIA_LABEL": "Curse cu bicicleta înregistrate",
+      "SORT_GROUP_ARIA": "Sortează cursele după",
+      "EMPTY": "Nicio cursă înregistrată încă. Începe să pedalezi!"
+    },
+    "TITLE": "Cursele mele"
+  },
+  "LEADERBOARD": {
+    "TITLE": "🏆 Clasament",
+    "SUBTITLE": "Cine a pedalat cel mai mult?",
+    "EMPTY": "Nicio cursă înregistrată încă. Fii primul!",
+    "RANKINGS_ARIA": "Clasamentul cicliștilor",
+    "RANK_ARIA": "Locul {{rank}}",
+    "YOU": "(tu)",
+    "LAST_RIDE": "Ultima cursă:",
+    "RIDE": "cursă",
+    "RIDES": "curse",
+    "RECENT_RIDES": "Curse recente",
+    "RAINING_ARIA": "ploaie"
+  },
+  "LOGIN": {
+    "SIGNING_IN": "Se conectează…",
+    "SIGN_IN": "Conectare cu Google",
+    "ERROR_GENERIC": "Conectarea a eșuat. Vă rugăm încercați din nou."
+  },
+  "ONBOARDING": {
+    "TITLE": "Bine ai venit!",
+    "SUBTITLE": "Un singur lucru înainte de a începe…",
+    "NAME_LABEL": "Care este prenumele tău?",
+    "NAME_PLACEHOLDER": "ex. Andrei",
+    "NAME_REQUIRED": "Te rugăm introdu prenumele.",
+    "SAVING": "Se salvează…",
+    "GET_STARTED": "Hai să începem 🚴",
+    "ERROR_GENERIC": "Ceva nu a funcționat. Te rugăm încearcă din nou."
+  },
+  "VALIDATION": {
+    "DATE_REQUIRED": "Data este obligatorie",
+    "KM_REQUIRED": "Kilometrii sunt obligatorii",
+    "KM_MIN": "Trebuie să fie cel puțin 0,1 km"
+  },
+  "COMMON": {
+    "LOADING": "Se încarcă…",
+    "UNKNOWN": "Necunoscut"
+  },
+  "OVERVIEW": {
+    "TITLE": "🚴 Dăm vibe la muncă",
+    "GREETING": "Bine ai revenit, {{name}}! 🚴",
+    "SUBTITLE": "Înregistrează cursele tale și vezi cum te compari.",
+    "STATS_ARIA": "Statisticile tale de curse",
+    "NAV_ARIA": "Navighează la",
+    "STATS": {
+      "MONTH_KM": "km luna aceasta",
+      "MONTH_RIDE": "cursă luna aceasta",
+      "MONTH_RIDES": "curse luna aceasta",
+      "TOTAL_KM": "km în total",
+      "RAINY_RIDES": "curse cu ploaie"
+    },
+    "NAV": {
+      "MY_RIDES": "🚴 Cursele mele",
+      "MY_RIDES_DESC": "Înregistrează și urmărește cursele tale zilnice",
+      "LEADERBOARD": "🏆 Clasament",
+      "LEADERBOARD_DESC": "Vezi cum te clasezi față de colegii tăi"
+    }
+  },
+  "SNAKE": {
+    "TITLE": "🚴 Snake pe bicicletă",
+    "SUBTITLE": "Colectează biciclete pentru km — nu te prăbuși!",
+    "SCORE": "Distanță",
+    "HIGH_SCORE": "Cel mai bun",
+    "PRESS_TO_START": "Apasă orice tastă pentru a începe",
+    "CONTROLS_HINT": "Săgeți sau WASD pentru direcție · Spațiu pentru pauză · Esc pentru ieșire",
+    "CONTROLS": "Săgeți / WASD · Spațiu = pauză · Esc = ieșire",
+    "PAUSED": "⏸ Pauză",
+    "RESUME_HINT": "Apasă Spațiu pentru a relua",
+    "GAME_OVER": "Crash!",
+    "NEW_HIGH_SCORE": "🏆 Nou record personal!",
+    "BOARD_ARIA": "Tablă de joc Snake pe bicicletă",
+    "EXIT": "← Ieșire"
+  }
+}
