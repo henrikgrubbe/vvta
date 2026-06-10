@@ -120,12 +120,16 @@
     "HIGH_SCORE": "Bedste",
     "PRESS_TO_START": "Tryk en tast for at starte",
     "CONTROLS_HINT": "Piletaster eller WASD for at styre · Mellemrum for pause · Esc for at afslutte",
+    "CONTROLS_HINT_DUAL": "Spiller 1: WASD · Spiller 2: Piletaster · Mellemrum for pause · Esc for at afslutte",
     "CONTROLS": "Piletaster / WASD · Mellemrum = pause · Esc = afslut",
+    "CONTROLS_DUAL": "S1: WASD · S2: Piletaster · Mellemrum = pause · Esc = afslut",
     "PAUSED": "⏸ Pause",
     "RESUME_HINT": "Tryk Mellemrum for at fortsætte",
     "GAME_OVER": "Crash!",
     "NEW_HIGH_SCORE": "🏆 Ny personlig rekord!",
     "BOARD_ARIA": "Cykel-snake spilbræt",
-    "EXIT": "← Afslut"
+    "EXIT": "← Afslut",
+    "PLAYER": "Spiller",
+    "ARROWS": "Piletaster"
   }
 }

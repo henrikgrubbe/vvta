@@ -120,12 +120,16 @@
     "HIGH_SCORE": "Bestleistung",
     "PRESS_TO_START": "Beliebige Taste drücken zum Starten",
     "CONTROLS_HINT": "Pfeiltasten oder WASD zum Lenken · Leertaste für Pause · Esc zum Beenden",
+    "CONTROLS_HINT_DUAL": "Spieler 1: WASD · Spieler 2: Pfeiltasten · Leertaste für Pause · Esc zum Beenden",
     "CONTROLS": "Pfeiltasten / WASD · Leertaste = Pause · Esc = Beenden",
+    "CONTROLS_DUAL": "S1: WASD · S2: Pfeiltasten · Leertaste = Pause · Esc = Beenden",
     "PAUSED": "⏸ Pausiert",
     "RESUME_HINT": "Leertaste drücken zum Fortfahren",
     "GAME_OVER": "Crash!",
     "NEW_HIGH_SCORE": "🏆 Neuer persönlicher Rekord!",
     "BOARD_ARIA": "Fahrrad-Snake Spielfeld",
-    "EXIT": "← Beenden"
+    "EXIT": "← Beenden",
+    "PLAYER": "Spieler",
+    "ARROWS": "Pfeiltasten"
   }
 }

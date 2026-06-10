@@ -1,49 +1,21 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  OnDestroy,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 
 import { ThemeService } from '../theme.service';
+import { BOARD_SIZE, DIR_DELTA, Direction, SnakeEngine } from './snake-engine';
 
-export type GameState = 'idle' | 'playing' | 'paused' | 'game-over';
-export type Direction = 'up' | 'down' | 'left' | 'right';
+export { BOARD_SIZE } from './snake-engine';
+export type { Direction, GameState, Position } from './snake-engine';
 
-export interface Position {
-  x: number;
-  y: number;
+function headlightGradient(engine: SnakeEngine, cellPx: number): string | null {
+  const head = engine.snake()[0];
+  const dir = engine.direction();
+  const offset = DIR_DELTA[dir];
+  const cx = (head.x + 0.5 + offset.x * 0.6) * cellPx;
+  const cy = (head.y + 0.5 + offset.y * 0.6) * cellPx;
+  return `radial-gradient(ellipse 120px 120px at ${cx}px ${cy}px, rgba(255, 255, 180, 0.25) 0%, rgba(255, 255, 100, 0.10) 40%, transparent 100%)`;
 }
-
-export const BOARD_SIZE = 20;
-const INITIAL_SPEED_MS = 150;
-const MIN_SPEED_MS = 80;
-const SPEED_DECREMENT_MS = 5;
-
-const OPPOSITE_DIR: Record<Direction, Direction> = {
-  up: 'down',
-  down: 'up',
-  left: 'right',
-  right: 'left',
-};
-
-const DIR_DELTA: Record<Direction, Position> = {
-  up: { x: 0, y: -1 },
-  down: { x: 0, y: 1 },
-  left: { x: -1, y: 0 },
-  right: { x: 1, y: 0 },
-};
-
-const HEAD_ROTATION: Record<Direction, string> = {
-  right: '0deg',
-  down: '90deg',
-  left: '180deg',
-  up: '-90deg',
-};
 
 @Component({
   selector: 'app-snake',
@@ -60,59 +32,49 @@ export class SnakeComponent implements OnDestroy {
   private readonly themeService = inject(ThemeService);
 
   readonly boardSize = BOARD_SIZE;
-  readonly boardIndices = Array.from({ length: BOARD_SIZE * BOARD_SIZE }, (_, i) => i);
+  readonly p1 = new SnakeEngine();
+  readonly p2 = new SnakeEngine();
 
-  readonly snake = signal<Position[]>([
-    { x: 10, y: 10 },
-    { x: 9, y: 10 },
-    { x: 8, y: 10 },
-  ]);
-  readonly food = signal<Position>({ x: 15, y: 10 });
-  readonly direction = signal<Direction>('right');
-  readonly gameState = signal<GameState>('idle');
-  readonly score = signal(0);
-  readonly highScore = signal(0);
-
-  private pendingDir: Direction = 'right';
-  private gameInterval: ReturnType<typeof setInterval> | null = null;
-  private speedMs = INITIAL_SPEED_MS;
-
-  readonly headRotation = computed(() => HEAD_ROTATION[this.direction()]);
   readonly isDark = computed(() => this.themeService.isDark());
 
-  /** CSS for the headlight radial gradient overlay, positioned ahead of the head */
-  readonly headlightStyle = computed(() => {
-    if (!this.isDark()) return null;
-    const head = this.snake()[0];
-    const dir = this.direction();
-    const cellPx = 24;
-    // Offset the light center slightly ahead of the head
-    const offset = DIR_DELTA[dir];
-    const cx = (head.x + 0.5 + offset.x * 0.6) * cellPx;
-    const cy = (head.y + 0.5 + offset.y * 0.6) * cellPx;
-    return `radial-gradient(ellipse 120px 120px at ${cx}px ${cy}px, rgba(255, 255, 180, 0.25) 0%, rgba(255, 255, 100, 0.10) 40%, transparent 100%)`;
+  /** Headlight overlay gradient for Player 1 (dark mode only) */
+  readonly p1Headlight = computed(() => (this.isDark() ? headlightGradient(this.p1, 16) : null));
+
+  /** Headlight overlay gradient for Player 2 (dark mode only) */
+  readonly p2Headlight = computed(() => (this.isDark() ? headlightGradient(this.p2, 16) : null));
+
+  /** True when both engines are idle or game-over (to show combined overlay) */
+  readonly bothStopped = computed(() => {
+    const s1 = this.p1.gameState();
+    const s2 = this.p2.gameState();
+    return (s1 === 'idle' || s1 === 'game-over') && (s2 === 'idle' || s2 === 'game-over');
   });
 
-  readonly boardFlat = computed((): ('head' | 'body' | 'food' | 'empty')[] => {
-    const snake = this.snake();
-    const food = this.food();
-    const head = snake[0];
-    const bodySet = new Set(snake.slice(1).map((p) => `${p.x},${p.y}`));
-    return Array.from({ length: BOARD_SIZE * BOARD_SIZE }, (_, i) => {
-      const x = i % BOARD_SIZE;
-      const y = Math.floor(i / BOARD_SIZE);
-      if (x === head.x && y === head.y) return 'head';
-      if (bodySet.has(`${x},${y}`)) return 'body';
-      if (x === food.x && y === food.y) return 'food';
-      return 'empty';
-    });
-  });
+  /** True when at least one game ended (to show scores) */
+  readonly anyGameOver = computed(
+    () => this.p1.gameState() === 'game-over' || this.p2.gameState() === 'game-over',
+  );
 
   onKeyDown(event: KeyboardEvent): void {
     const key = event.key;
-    const state = this.gameState();
 
-    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(key)) {
+    if (
+      [
+        'ArrowUp',
+        'ArrowDown',
+        'ArrowLeft',
+        'ArrowRight',
+        'w',
+        'a',
+        's',
+        'd',
+        'W',
+        'A',
+        'S',
+        'D',
+        ' ',
+      ].includes(key)
+    ) {
       event.preventDefault();
     }
 
@@ -121,140 +83,71 @@ export class SnakeComponent implements OnDestroy {
       return;
     }
 
-    if (state === 'idle' || state === 'game-over') {
+    // Start both games on any key when both are stopped
+    if (this.bothStopped()) {
       if (key !== 'Escape') {
         this.startGame();
       }
       return;
     }
 
+    // Space pauses/resumes both
     if (key === ' ') {
-      if (state === 'playing') this.pauseGame();
-      else if (state === 'paused') this.resumeGame();
+      const s1 = this.p1.gameState();
+      const s2 = this.p2.gameState();
+      if (s1 === 'playing' || s2 === 'playing') {
+        if (s1 === 'playing') this.p1.pauseGame();
+        if (s2 === 'playing') this.p2.pauseGame();
+      } else {
+        if (s1 === 'paused') this.p1.resumeGame();
+        if (s2 === 'paused') this.p2.resumeGame();
+      }
       return;
     }
 
-    if (state !== 'playing') return;
-
-    const dirMap: Record<string, Direction> = {
-      ArrowUp: 'up',
+    // WASD → Player 1
+    const wasdMap: Record<string, Direction> = {
       w: 'up',
       W: 'up',
-      ArrowDown: 'down',
-      s: 'down',
-      S: 'down',
-      ArrowLeft: 'left',
       a: 'left',
       A: 'left',
-      ArrowRight: 'right',
+      s: 'down',
+      S: 'down',
       d: 'right',
       D: 'right',
     };
-    const newDir = dirMap[key];
-    if (newDir && newDir !== OPPOSITE_DIR[this.direction()]) {
-      this.pendingDir = newDir;
+    const p1Dir = wasdMap[key];
+    if (p1Dir && this.p1.gameState() === 'playing') {
+      this.p1.setDirection(p1Dir);
+      return;
+    }
+
+    // Arrow keys → Player 2
+    const arrowMap: Record<string, Direction> = {
+      ArrowUp: 'up',
+      ArrowDown: 'down',
+      ArrowLeft: 'left',
+      ArrowRight: 'right',
+    };
+    const p2Dir = arrowMap[key];
+    if (p2Dir && this.p2.gameState() === 'playing') {
+      this.p2.setDirection(p2Dir);
     }
   }
 
   startGame(): void {
-    this.stopInterval();
-    this.score.set(0);
-    this.speedMs = INITIAL_SPEED_MS;
-    const initialSnake: Position[] = [
-      { x: 10, y: 10 },
-      { x: 9, y: 10 },
-      { x: 8, y: 10 },
-    ];
-    this.snake.set(initialSnake);
-    this.direction.set('right');
-    this.pendingDir = 'right';
-    this.spawnFood(initialSnake);
-    this.gameState.set('playing');
-    this.startInterval();
-  }
-
-  pauseGame(): void {
-    this.stopInterval();
-    this.gameState.set('paused');
-  }
-
-  resumeGame(): void {
-    this.gameState.set('playing');
-    this.startInterval();
+    this.p1.startGame();
+    this.p2.startGame();
   }
 
   protected exitGame(): void {
-    this.stopInterval();
+    this.p1.destroy();
+    this.p2.destroy();
     this.router.navigateByUrl('/');
   }
 
-  tick(): void {
-    const newDir = this.pendingDir;
-    this.direction.set(newDir);
-
-    const snake = this.snake();
-    const head = snake[0];
-    const delta = DIR_DELTA[newDir];
-    const newHead: Position = { x: head.x + delta.x, y: head.y + delta.y };
-
-    if (
-      newHead.x < 0 ||
-      newHead.x >= BOARD_SIZE ||
-      newHead.y < 0 ||
-      newHead.y >= BOARD_SIZE ||
-      snake.some((s) => s.x === newHead.x && s.y === newHead.y)
-    ) {
-      this.endGame();
-      return;
-    }
-
-    const food = this.food();
-    const ateFood = newHead.x === food.x && newHead.y === food.y;
-
-    if (ateFood) {
-      const newSnake = [newHead, ...snake];
-      this.snake.set(newSnake);
-      this.score.update((s) => s + 1);
-      this.speedMs = Math.max(MIN_SPEED_MS, this.speedMs - SPEED_DECREMENT_MS);
-      this.stopInterval();
-      this.startInterval();
-      this.spawnFood(newSnake);
-    } else {
-      this.snake.set([newHead, ...snake.slice(0, -1)]);
-    }
-  }
-
-  private endGame(): void {
-    this.stopInterval();
-    const s = this.score();
-    if (s > this.highScore()) this.highScore.set(s);
-    this.gameState.set('game-over');
-  }
-
-  private spawnFood(occupied: Position[]): void {
-    const occupiedSet = new Set(occupied.map((p) => `${p.x},${p.y}`));
-    const empty: Position[] = [];
-    for (let y = 0; y < BOARD_SIZE; y++) {
-      for (let x = 0; x < BOARD_SIZE; x++) {
-        if (!occupiedSet.has(`${x},${y}`)) empty.push({ x, y });
-      }
-    }
-    if (empty.length === 0) return;
-    this.food.set(empty[Math.floor(Math.random() * empty.length)]);
-  }
-
-  private startInterval(): void {
-    this.gameInterval = setInterval(() => this.tick(), this.speedMs);
-  }
-
-  private stopInterval(): void {
-    if (this.gameInterval !== null) {
-      clearInterval(this.gameInterval);
-      this.gameInterval = null;
-    }
-  }
-
   ngOnDestroy(): void {
-    this.stopInterval();
+    this.p1.destroy();
+    this.p2.destroy();
   }
 }

@@ -10,111 +10,224 @@
     </p>
   </header>
 
-  <!-- Score bar -->
-  <div
-    class="flex w-full max-w-[480px] justify-between rounded-lg bg-white px-4 py-2 shadow dark:bg-gray-800"
-    aria-live="polite"
-    aria-atomic="true"
-  >
-    <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">
-      {{ 'SNAKE.SCORE' | translate }}: {{ score() }} km
-    </span>
-    <span class="text-sm text-gray-500 dark:text-gray-400">
-      {{ 'SNAKE.HIGH_SCORE' | translate }}: {{ highScore() }} km
-    </span>
+  <!-- Dual board layout -->
+  <div class="flex flex-wrap items-start justify-center gap-6">
+    <!-- Player 1 (WASD) -->
+    <div class="flex flex-col items-center gap-2">
+      <h2 class="text-sm font-bold text-gray-700 dark:text-gray-300">
+        {{ 'SNAKE.PLAYER' | translate }} 1 (WASD)
+      </h2>
+
+      <!-- Score bar P1 -->
+      <div
+        class="flex w-full justify-between rounded-lg bg-white px-3 py-1.5 shadow dark:bg-gray-800"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">
+          {{ 'SNAKE.SCORE' | translate }}: {{ p1.score() }} km
+        </span>
+        <span class="text-xs text-gray-500 dark:text-gray-400">
+          {{ 'SNAKE.HIGH_SCORE' | translate }}: {{ p1.highScore() }} km
+        </span>
+      </div>
+
+      <!-- Board P1 -->
+      <div class="relative">
+        <div
+          class="grid border-2 border-gray-400 bg-gray-300 dark:border-gray-600 dark:bg-gray-700"
+          [attr.aria-label]="
+            ('SNAKE.BOARD_ARIA' | translate) + ' - ' + ('SNAKE.PLAYER' | translate) + ' 1'
+          "
+          style="grid-template-columns: repeat(20, 1rem); width: 320px; height: 320px"
+          role="application"
+        >
+          @for (cell of p1.boardFlat(); track $index) {
+            <div class="flex h-4 w-4 items-center justify-center">
+              @switch (cell) {
+                @case ('head') {
+                  <span
+                    class="text-xs leading-none"
+                    [class.drop-shadow-[0_0_6px_rgba(255,255,100,0.9)]]="isDark()"
+                    [style.transform]="'rotate(' + p1.headRotation() + ')'"
+                    [style.display]="'inline-block'"
+                    aria-hidden="true"
+                    >🚴</span
+                  >
+                }
+                @case ('body') {
+                  <span
+                    class="block h-3 w-3 rounded-sm bg-green-500 dark:bg-green-600"
+                    aria-hidden="true"
+                  ></span>
+                }
+                @case ('food') {
+                  <span class="text-xs leading-none" aria-hidden="true">🚲</span>
+                }
+              }
+            </div>
+          }
+        </div>
+
+        <!-- P1 headlight overlay (dark mode only) -->
+        @if (p1Headlight(); as gradient) {
+          <div
+            class="pointer-events-none absolute inset-0 border-2 border-transparent"
+            [style.background]="gradient"
+            aria-hidden="true"
+          ></div>
+        }
+
+        <!-- P1 game-over overlay -->
+        @if (p1.gameState() === 'game-over') {
+          <div
+            class="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded bg-black/70"
+            role="alert"
+          >
+            <p class="text-2xl">💥</p>
+            <p class="text-sm font-bold text-white">{{ 'SNAKE.GAME_OVER' | translate }}</p>
+            <p class="text-xs text-white">{{ 'SNAKE.SCORE' | translate }}: {{ p1.score() }} km</p>
+            @if (p1.score() === p1.highScore() && p1.score() > 0) {
+              <p class="text-xs font-semibold text-yellow-300">
+                {{ 'SNAKE.NEW_HIGH_SCORE' | translate }}
+              </p>
+            }
+          </div>
+        }
+
+        <!-- P1 paused overlay -->
+        @if (p1.gameState() === 'paused') {
+          <div
+            class="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded bg-black/60"
+            role="status"
+          >
+            <p class="text-sm font-bold text-white">{{ 'SNAKE.PAUSED' | translate }}</p>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Player 2 (Arrow keys) -->
+    <div class="flex flex-col items-center gap-2">
+      <h2 class="text-sm font-bold text-gray-700 dark:text-gray-300">
+        {{ 'SNAKE.PLAYER' | translate }} 2 ({{ 'SNAKE.ARROWS' | translate }})
+      </h2>
+
+      <!-- Score bar P2 -->
+      <div
+        class="flex w-full justify-between rounded-lg bg-white px-3 py-1.5 shadow dark:bg-gray-800"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">
+          {{ 'SNAKE.SCORE' | translate }}: {{ p2.score() }} km
+        </span>
+        <span class="text-xs text-gray-500 dark:text-gray-400">
+          {{ 'SNAKE.HIGH_SCORE' | translate }}: {{ p2.highScore() }} km
+        </span>
+      </div>
+
+      <!-- Board P2 -->
+      <div class="relative">
+        <div
+          class="grid border-2 border-gray-400 bg-gray-300 dark:border-gray-600 dark:bg-gray-700"
+          [attr.aria-label]="
+            ('SNAKE.BOARD_ARIA' | translate) + ' - ' + ('SNAKE.PLAYER' | translate) + ' 2'
+          "
+          style="grid-template-columns: repeat(20, 1rem); width: 320px; height: 320px"
+          role="application"
+        >
+          @for (cell of p2.boardFlat(); track $index) {
+            <div class="flex h-4 w-4 items-center justify-center">
+              @switch (cell) {
+                @case ('head') {
+                  <span
+                    class="text-xs leading-none"
+                    [class.drop-shadow-[0_0_6px_rgba(255,255,100,0.9)]]="isDark()"
+                    [style.transform]="'rotate(' + p2.headRotation() + ')'"
+                    [style.display]="'inline-block'"
+                    aria-hidden="true"
+                    >🚴</span
+                  >
+                }
+                @case ('body') {
+                  <span
+                    class="block h-3 w-3 rounded-sm bg-blue-500 dark:bg-blue-600"
+                    aria-hidden="true"
+                  ></span>
+                }
+                @case ('food') {
+                  <span class="text-xs leading-none" aria-hidden="true">🚲</span>
+                }
+              }
+            </div>
+          }
+        </div>
+
+        <!-- P2 headlight overlay (dark mode only) -->
+        @if (p2Headlight(); as gradient) {
+          <div
+            class="pointer-events-none absolute inset-0 border-2 border-transparent"
+            [style.background]="gradient"
+            aria-hidden="true"
+          ></div>
+        }
+
+        <!-- P2 game-over overlay -->
+        @if (p2.gameState() === 'game-over') {
+          <div
+            class="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded bg-black/70"
+            role="alert"
+          >
+            <p class="text-2xl">💥</p>
+            <p class="text-sm font-bold text-white">{{ 'SNAKE.GAME_OVER' | translate }}</p>
+            <p class="text-xs text-white">{{ 'SNAKE.SCORE' | translate }}: {{ p2.score() }} km</p>
+            @if (p2.score() === p2.highScore() && p2.score() > 0) {
+              <p class="text-xs font-semibold text-yellow-300">
+                {{ 'SNAKE.NEW_HIGH_SCORE' | translate }}
+              </p>
+            }
+          </div>
+        }
+
+        <!-- P2 paused overlay -->
+        @if (p2.gameState() === 'paused') {
+          <div
+            class="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded bg-black/60"
+            role="status"
+          >
+            <p class="text-sm font-bold text-white">{{ 'SNAKE.PAUSED' | translate }}</p>
+          </div>
+        }
+      </div>
+    </div>
   </div>
 
-  <!-- Game board wrapper -->
-  <div class="relative">
-    <!-- Grid board -->
-    <div
-      class="grid border-2 border-gray-400 bg-gray-300 dark:border-gray-600 dark:bg-gray-700"
-      [attr.aria-label]="'SNAKE.BOARD_ARIA' | translate"
-      style="grid-template-columns: repeat(20, 1.5rem); width: 480px; height: 480px"
-      role="application"
-    >
-      @for (cell of boardFlat(); track $index) {
-        <div class="flex h-6 w-6 items-center justify-center">
-          @switch (cell) {
-            @case ('head') {
-              <span
-                class="text-sm leading-none"
-                [class.drop-shadow-[0_0_8px_rgba(255,255,100,0.9)]]="isDark()"
-                [style.transform]="'rotate(' + headRotation() + ')'"
-                [style.display]="'inline-block'"
-                aria-hidden="true"
-                >🚴</span
-              >
-            }
-            @case ('body') {
-              <span
-                class="block h-4 w-4 rounded-sm bg-green-500 dark:bg-green-600"
-                aria-hidden="true"
-              ></span>
-            }
-            @case ('food') {
-              <span class="text-sm leading-none" aria-hidden="true">🚲</span>
-            }
-          }
+  <!-- Combined start overlay (when both are idle/game-over) -->
+  @if (bothStopped()) {
+    <div class="text-center">
+      @if (anyGameOver()) {
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+          {{ 'SNAKE.PRESS_TO_START' | translate }}
+        </p>
+      } @else {
+        <div class="flex flex-col items-center gap-1">
+          <p class="text-4xl">🚴</p>
+          <p class="text-lg font-bold text-gray-900 dark:text-gray-100">
+            {{ 'SNAKE.PRESS_TO_START' | translate }}
+          </p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            {{ 'SNAKE.CONTROLS_HINT_DUAL' | translate }}
+          </p>
         </div>
       }
     </div>
-
-    <!-- Headlight overlay (dark mode only) -->
-    @if (headlightStyle(); as gradient) {
-      <div
-        class="pointer-events-none absolute inset-0 border-2 border-transparent"
-        [style.background]="gradient"
-        aria-hidden="true"
-      ></div>
-    }
-
-    <!-- Overlay: idle -->
-    @if (gameState() === 'idle') {
-      <div
-        class="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded bg-black/60"
-        role="status"
-      >
-        <p class="text-4xl">🚴</p>
-        <p class="text-lg font-bold text-white">{{ 'SNAKE.PRESS_TO_START' | translate }}</p>
-        <p class="text-sm text-gray-300">{{ 'SNAKE.CONTROLS_HINT' | translate }}</p>
-      </div>
-    }
-
-    <!-- Overlay: paused -->
-    @if (gameState() === 'paused') {
-      <div
-        class="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded bg-black/60"
-        role="status"
-      >
-        <p class="text-lg font-bold text-white">{{ 'SNAKE.PAUSED' | translate }}</p>
-        <p class="text-sm text-gray-300">{{ 'SNAKE.RESUME_HINT' | translate }}</p>
-      </div>
-    }
-
-    <!-- Overlay: game over -->
-    @if (gameState() === 'game-over') {
-      <div
-        class="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded bg-black/70"
-        role="alert"
-      >
-        <p class="text-4xl">💥</p>
-        <p class="text-xl font-bold text-white">{{ 'SNAKE.GAME_OVER' | translate }}</p>
-        <p class="text-white">{{ 'SNAKE.SCORE' | translate }}: {{ score() }} km</p>
-        @if (score() === highScore() && score() > 0) {
-          <p class="text-sm font-semibold text-yellow-300">
-            {{ 'SNAKE.NEW_HIGH_SCORE' | translate }}
-          </p>
-        }
-        <p class="text-sm text-gray-300">{{ 'SNAKE.PRESS_TO_START' | translate }}</p>
-      </div>
-    }
-  </div>
+  }
 
   <!-- Controls legend + exit button -->
-  <div class="flex w-full max-w-[480px] items-center justify-between gap-2">
+  <div class="flex w-full max-w-[700px] items-center justify-between gap-2">
     <p class="text-xs text-gray-500 dark:text-gray-400">
-      {{ 'SNAKE.CONTROLS' | translate }}
+      {{ 'SNAKE.CONTROLS_DUAL' | translate }}
     </p>
     <button
       class="rounded px-3 py-1 text-sm font-medium text-gray-600 hover:bg-gray-200 hover:text-gray-900 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-100"
