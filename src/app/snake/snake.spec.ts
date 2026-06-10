@@ -5,6 +5,115 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { provideTranslateTesting } from '../testing/translate-testing';
 import { ThemeService } from '../theme.service';
 import { BOARD_SIZE, SnakeComponent } from './snake';
+import { SnakeEngine } from './snake-engine';
+
+describe('SnakeEngine', () => {
+  let engine: SnakeEngine;
+
+  beforeEach(() => {
+    engine = new SnakeEngine();
+  });
+
+  afterEach(() => {
+    engine.destroy();
+  });
+
+  it('starts in idle state', () => {
+    expect(engine.gameState()).toBe('idle');
+  });
+
+  it('starts game correctly', () => {
+    engine.startGame();
+    expect(engine.gameState()).toBe('playing');
+    expect(engine.score()).toBe(0);
+  });
+
+  it('pauses and resumes', () => {
+    engine.startGame();
+    engine.pauseGame();
+    expect(engine.gameState()).toBe('paused');
+    engine.resumeGame();
+    expect(engine.gameState()).toBe('playing');
+  });
+
+  it('ignores direction reversal (right → left)', () => {
+    engine.startGame();
+    engine.setDirection('left');
+    engine.tick();
+    expect(engine.direction()).toBe('right');
+  });
+
+  it('accepts valid direction change', () => {
+    engine.startGame();
+    engine.setDirection('up');
+    engine.tick();
+    expect(engine.direction()).toBe('up');
+  });
+
+  it('increments score when snake eats food', () => {
+    engine.startGame();
+    const head = engine.snake()[0];
+    engine.food.set({ x: head.x + 1, y: head.y });
+    engine.tick();
+    expect(engine.score()).toBe(1);
+  });
+
+  it('triggers game-over on wall collision', () => {
+    engine.startGame();
+    const snake = engine.snake().map((_, i) => ({ x: BOARD_SIZE - 1 - i, y: 10 }));
+    engine.snake.set(snake);
+    engine.tick();
+    expect(engine.gameState()).toBe('game-over');
+  });
+
+  it('triggers game-over on self collision', () => {
+    engine.startGame();
+    engine.snake.set([
+      { x: 5, y: 5 },
+      { x: 4, y: 5 },
+      { x: 3, y: 5 },
+      { x: 3, y: 6 },
+      { x: 4, y: 6 },
+      { x: 5, y: 6 },
+      { x: 6, y: 6 },
+      { x: 6, y: 5 },
+    ]);
+    engine.tick();
+    expect(engine.gameState()).toBe('game-over');
+  });
+
+  it('updates high score when current score exceeds it', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0);
+    engine.startGame();
+    const head = engine.snake()[0];
+    engine.food.set({ x: head.x + 1, y: head.y });
+    engine.tick();
+    engine.snake.set([
+      { x: BOARD_SIZE - 1, y: 10 },
+      { x: BOARD_SIZE - 2, y: 10 },
+    ]);
+    engine.tick();
+    expect(engine.highScore()).toBe(1);
+    vi.restoreAllMocks();
+  });
+
+  it('boardFlat returns correct cell types', () => {
+    engine.snake.set([
+      { x: 0, y: 0 },
+      { x: 1, y: 0 },
+    ]);
+    engine.food.set({ x: 2, y: 0 });
+    const flat = engine.boardFlat();
+    expect(flat[0]).toBe('head');
+    expect(flat[1]).toBe('body');
+    expect(flat[2]).toBe('food');
+    expect(flat[3]).toBe('empty');
+  });
+
+  it('boardFlat has correct length', () => {
+    expect(engine.boardFlat().length).toBe(BOARD_SIZE * BOARD_SIZE);
+  });
+});
 
 describe('SnakeComponent', () => {
   let fixture: ComponentFixture<SnakeComponent>;
@@ -21,137 +130,77 @@ describe('SnakeComponent', () => {
     fixture.detectChanges();
   });
 
-  it('renders in idle state', () => {
-    expect(component.gameState()).toBe('idle');
+  it('has two engines in idle state', () => {
+    expect(component.p1.gameState()).toBe('idle');
+    expect(component.p2.gameState()).toBe('idle');
   });
 
-  it('starts game on any key press when idle', () => {
+  it('starts both games on any key press when both idle', () => {
     component.onKeyDown(new KeyboardEvent('keydown', { key: 'Enter' }));
-    expect(component.gameState()).toBe('playing');
+    expect(component.p1.gameState()).toBe('playing');
+    expect(component.p2.gameState()).toBe('playing');
   });
 
-  it('does not start game on Escape from idle', () => {
+  it('does not start games on Escape', () => {
     component.onKeyDown(new KeyboardEvent('keydown', { key: 'Escape' }));
-    expect(component.gameState()).toBe('idle');
+    expect(component.p1.gameState()).toBe('idle');
+    expect(component.p2.gameState()).toBe('idle');
   });
 
-  it('pauses game on Space', () => {
+  it('Space pauses both games', () => {
     component.startGame();
     component.onKeyDown(new KeyboardEvent('keydown', { key: ' ' }));
-    expect(component.gameState()).toBe('paused');
+    expect(component.p1.gameState()).toBe('paused');
+    expect(component.p2.gameState()).toBe('paused');
   });
 
-  it('resumes game on Space when paused', () => {
+  it('Space resumes both paused games', () => {
     component.startGame();
-    component.pauseGame();
+    component.p1.pauseGame();
+    component.p2.pauseGame();
     component.onKeyDown(new KeyboardEvent('keydown', { key: ' ' }));
-    expect(component.gameState()).toBe('playing');
+    expect(component.p1.gameState()).toBe('playing');
+    expect(component.p2.gameState()).toBe('playing');
   });
 
-  it('ignores direction reversal (right → left)', () => {
-    component.startGame();
-    // direction is right, pressing left should be ignored
-    const before = component.direction();
-    component.onKeyDown(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
-    // pendingDir is private but tick() should not reverse
-    component.tick();
-    expect(component.direction()).toBe(before); // still right
-  });
-
-  it('accepts valid direction change', () => {
-    component.startGame();
-    component.onKeyDown(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
-    component.tick();
-    expect(component.direction()).toBe('up');
-  });
-
-  it('WASD keys change direction', () => {
+  it('WASD controls player 1 only', () => {
     component.startGame();
     component.onKeyDown(new KeyboardEvent('keydown', { key: 'w' }));
-    component.tick();
-    expect(component.direction()).toBe('up');
+    component.p1.tick();
+    expect(component.p1.direction()).toBe('up');
+    // P2 still going right
+    expect(component.p2.direction()).toBe('right');
   });
 
-  it('increments score when snake eats food', () => {
+  it('Arrow keys control player 2 only', () => {
     component.startGame();
-    const head = component.snake()[0];
-    // Place food directly in front of the head (one step right)
-    component.food.set({ x: head.x + 1, y: head.y });
-    component.tick();
-    expect(component.score()).toBe(1);
+    component.onKeyDown(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
+    component.p2.tick();
+    expect(component.p2.direction()).toBe('up');
+    // P1 still going right
+    expect(component.p1.direction()).toBe('right');
   });
 
-  it('triggers game-over on wall collision', () => {
+  it('bothStopped is true when both idle', () => {
+    expect(component.bothStopped()).toBe(true);
+  });
+
+  it('bothStopped is false when playing', () => {
     component.startGame();
-    // Move snake to the right wall
-    const snake = component.snake().map((p, i) => ({ x: BOARD_SIZE - 1 - i, y: 10 }));
-    component.snake.set(snake);
-    component.tick(); // head at BOARD_SIZE-1, steps right → hits wall
-    expect(component.gameState()).toBe('game-over');
+    expect(component.bothStopped()).toBe(false);
   });
 
-  it('triggers game-over on self collision', () => {
-    component.startGame();
-    // Build a snake that loops into itself
-    component.snake.set([
-      { x: 5, y: 5 },
-      { x: 4, y: 5 },
-      { x: 3, y: 5 },
-      { x: 3, y: 6 },
-      { x: 4, y: 6 },
-      { x: 5, y: 6 },
-      { x: 6, y: 6 },
-      { x: 6, y: 5 },
-    ]);
-    // going right → head at (5,5) moves to (6,5) — hits body
-    component.tick();
-    expect(component.gameState()).toBe('game-over');
-  });
-
-  it('updates high score when current score exceeds it', () => {
-    vi.spyOn(Math, 'random').mockReturnValue(0);
-    component.startGame();
-    const head = component.snake()[0];
-    component.food.set({ x: head.x + 1, y: head.y });
-    component.tick(); // score = 1
-    // force game over
-    component.snake.set([
-      { x: BOARD_SIZE - 1, y: 10 },
-      { x: BOARD_SIZE - 2, y: 10 },
-    ]);
-    component.tick(); // hits wall → game-over, highScore = 1
-    expect(component.highScore()).toBe(1);
-    vi.restoreAllMocks();
-  });
-
-  it('boardFlat returns correct cell types', () => {
-    component.snake.set([
-      { x: 0, y: 0 },
-      { x: 1, y: 0 },
-    ]);
-    component.food.set({ x: 2, y: 0 });
-    fixture.detectChanges();
-    const flat = component.boardFlat();
-    expect(flat[0]).toBe('head'); // (0,0)
-    expect(flat[1]).toBe('body'); // (1,0)
-    expect(flat[2]).toBe('food'); // (2,0)
-    expect(flat[3]).toBe('empty'); // (3,0)
-  });
-
-  it('boardFlat has correct length', () => {
-    expect(component.boardFlat().length).toBe(BOARD_SIZE * BOARD_SIZE);
-  });
-
-  it('headlightStyle returns null when not in dark mode', () => {
+  it('p1Headlight returns null when not in dark mode', () => {
     const themeService = TestBed.inject(ThemeService);
     themeService.theme.set('light');
-    expect(component.headlightStyle()).toBeNull();
+    expect(component.p1Headlight()).toBeNull();
+    expect(component.p2Headlight()).toBeNull();
   });
 
-  it('headlightStyle returns a gradient string in dark mode', () => {
+  it('p1Headlight returns a gradient string in dark mode', () => {
     const themeService = TestBed.inject(ThemeService);
     themeService.theme.set('dark');
-    const style = component.headlightStyle();
-    expect(style).toContain('radial-gradient');
+    expect(component.p1Headlight()).toContain('radial-gradient');
+    expect(component.p2Headlight()).toContain('radial-gradient');
   });
 });
