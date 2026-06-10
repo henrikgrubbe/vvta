@@ -39,6 +39,7 @@
             @case ('head') {
               <span
                 class="text-sm leading-none"
+                [class.drop-shadow-[0_0_8px_rgba(255,255,100,0.9)]]="isDark()"
                 [style.transform]="'rotate(' + headRotation() + ')'"
                 [style.display]="'inline-block'"
                 aria-hidden="true"
@@ -58,6 +59,15 @@
         </div>
       }
     </div>
+
+    <!-- Headlight overlay (dark mode only) -->
+    @if (headlightStyle(); as gradient) {
+      <div
+        class="pointer-events-none absolute inset-0 border-2 border-transparent"
+        [style.background]="gradient"
+        aria-hidden="true"
+      ></div>
+    }
 
     <!-- Overlay: idle -->
     @if (gameState() === 'idle') {

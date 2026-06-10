@@ -9,6 +9,8 @@ import {
 import { Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 
+import { ThemeService } from '../theme.service';
+
 export type GameState = 'idle' | 'playing' | 'paused' | 'game-over';
 export type Direction = 'up' | 'down' | 'left' | 'right';
 
@@ -55,6 +57,7 @@ const HEAD_ROTATION: Record<Direction, string> = {
 })
 export class SnakeComponent implements OnDestroy {
   private readonly router = inject(Router);
+  private readonly themeService = inject(ThemeService);
 
   readonly boardSize = BOARD_SIZE;
   readonly boardIndices = Array.from({ length: BOARD_SIZE * BOARD_SIZE }, (_, i) => i);
@@ -75,6 +78,20 @@ export class SnakeComponent implements OnDestroy {
   private speedMs = INITIAL_SPEED_MS;
 
   readonly headRotation = computed(() => HEAD_ROTATION[this.direction()]);
+  readonly isDark = computed(() => this.themeService.isDark());
+
+  /** CSS for the headlight radial gradient overlay, positioned ahead of the head */
+  readonly headlightStyle = computed(() => {
+    if (!this.isDark()) return null;
+    const head = this.snake()[0];
+    const dir = this.direction();
+    const cellPx = 24;
+    // Offset the light center slightly ahead of the head
+    const offset = DIR_DELTA[dir];
+    const cx = (head.x + 0.5 + offset.x * 0.6) * cellPx;
+    const cy = (head.y + 0.5 + offset.y * 0.6) * cellPx;
+    return `radial-gradient(ellipse 120px 120px at ${cx}px ${cy}px, rgba(255, 255, 180, 0.25) 0%, rgba(255, 255, 100, 0.10) 40%, transparent 100%)`;
+  });
 
   readonly boardFlat = computed((): ('head' | 'body' | 'food' | 'empty')[] => {
     const snake = this.snake();
