@@ -3,6 +3,7 @@ import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { provideTranslateTesting } from '../testing/translate-testing';
+import { ThemeService } from '../theme.service';
 import { BOARD_SIZE, SnakeComponent } from './snake';
 
 describe('SnakeComponent', () => {
@@ -139,5 +140,18 @@ describe('SnakeComponent', () => {
 
   it('boardFlat has correct length', () => {
     expect(component.boardFlat().length).toBe(BOARD_SIZE * BOARD_SIZE);
+  });
+
+  it('headlightStyle returns null when not in dark mode', () => {
+    const themeService = TestBed.inject(ThemeService);
+    themeService.theme.set('light');
+    expect(component.headlightStyle()).toBeNull();
+  });
+
+  it('headlightStyle returns a gradient string in dark mode', () => {
+    const themeService = TestBed.inject(ThemeService);
+    themeService.theme.set('dark');
+    const style = component.headlightStyle();
+    expect(style).toContain('radial-gradient');
   });
 });
