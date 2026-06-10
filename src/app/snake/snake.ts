@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
 import { ThemeService } from '../theme.service';
 import { BOARD_SIZE, DIR_DELTA, Direction, SnakeEngine } from './snake-engine';
@@ -20,7 +20,7 @@ function headlightGradient(engine: SnakeEngine, cellPx: number): string | null {
 @Component({
   selector: 'app-snake',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslateModule],
+  imports: [TranslatePipe],
   templateUrl: './snake.html',
   host: {
     class: 'block',

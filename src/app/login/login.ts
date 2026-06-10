@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AuthService } from '../auth.service';
 import { LanguageSwitcherComponent } from '../language-switcher';
@@ -9,7 +9,7 @@ import { UserProfileService } from '../user-profile.service';
 @Component({
   selector: 'app-login',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslateModule, LanguageSwitcherComponent],
+  imports: [TranslatePipe, LanguageSwitcherComponent],
   templateUrl: './login.html',
 })
 export class LoginComponent {

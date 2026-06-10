@@ -1,6 +1,5 @@
-import { importProvidersFrom } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { LanguageService, resolveAppLang } from './language.service';
@@ -8,7 +7,7 @@ import { provideTranslateTesting } from './testing/translate-testing';
 
 function createServiceMinimal(): LanguageService {
   TestBed.configureTestingModule({
-    providers: [importProvidersFrom(TranslateModule.forRoot())],
+    providers: [...provideTranslateService()],
   });
   return TestBed.inject(LanguageService);
 }

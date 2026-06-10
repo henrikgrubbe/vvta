@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { linkedSignal } from '@angular/core';
 import { form, FormField } from '@angular/forms/signals';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
 import { AppLang, LANG_FLAGS, LanguageService, SUPPORTED_LANGS } from './language.service';
 
@@ -17,7 +17,7 @@ export const LANG_NAMES: Record<AppLang, string> = {
 @Component({
   selector: 'app-language-switcher',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormField, TranslateModule],
+  imports: [FormField, TranslatePipe],
   templateUrl: './language-switcher.html',
 })
 export class LanguageSwitcherComponent {

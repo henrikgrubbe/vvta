@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 import { LanguageSwitcherComponent } from '../language-switcher';
@@ -9,7 +9,7 @@ import { UserProfileService } from '../user-profile.service';
 @Component({
   selector: 'app-onboarding',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslateModule, LanguageSwitcherComponent],
+  imports: [TranslatePipe, LanguageSwitcherComponent],
   templateUrl: './onboarding.html',
 })
 export class OnboardingComponent {
