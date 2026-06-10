@@ -51,7 +51,8 @@ export class SnakeEngine {
   readonly highScore = signal(0);
 
   private pendingDir: Direction = 'right';
-  private gameInterval: ReturnType<typeof setInterval> | null = null;
+  private rafId: number | null = null;
+  private lastTickTime: number | null = null;
   private speedMs = INITIAL_SPEED_MS;
 
   readonly headRotation = computed(() => HEAD_ROTATION[this.direction()]);
@@ -78,7 +79,7 @@ export class SnakeEngine {
   }
 
   startGame(): void {
-    this.stopInterval();
+    this.stopLoop();
     this.score.set(0);
     this.speedMs = INITIAL_SPEED_MS;
     const initialSnake: Position[] = [
@@ -91,17 +92,17 @@ export class SnakeEngine {
     this.pendingDir = 'right';
     this.spawnFood(initialSnake);
     this.gameState.set('playing');
-    this.startInterval();
+    this.startLoop();
   }
 
   pauseGame(): void {
-    this.stopInterval();
+    this.stopLoop();
     this.gameState.set('paused');
   }
 
   resumeGame(): void {
     this.gameState.set('playing');
-    this.startInterval();
+    this.startLoop();
   }
 
   tick(): void {
@@ -132,8 +133,8 @@ export class SnakeEngine {
       this.snake.set(newSnake);
       this.score.update((s) => s + 1);
       this.speedMs = Math.max(MIN_SPEED_MS, this.speedMs - SPEED_DECREMENT_MS);
-      this.stopInterval();
-      this.startInterval();
+      this.stopLoop();
+      this.startLoop();
       this.spawnFood(newSnake);
     } else {
       this.snake.set([newHead, ...snake.slice(0, -1)]);
@@ -141,11 +142,11 @@ export class SnakeEngine {
   }
 
   destroy(): void {
-    this.stopInterval();
+    this.stopLoop();
   }
 
   private endGame(): void {
-    this.stopInterval();
+    this.stopLoop();
     const s = this.score();
     if (s > this.highScore()) this.highScore.set(s);
     this.gameState.set('game-over');
@@ -163,14 +164,27 @@ export class SnakeEngine {
     this.food.set(empty[Math.floor(Math.random() * empty.length)]);
   }
 
-  private startInterval(): void {
-    this.gameInterval = setInterval(() => this.tick(), this.speedMs);
+  private startLoop(): void {
+    const loop = (timestamp: number) => {
+      if (this.lastTickTime === null) {
+        this.lastTickTime = timestamp;
+      }
+      if (timestamp - this.lastTickTime >= this.speedMs) {
+        this.lastTickTime += this.speedMs;
+        this.tick();
+      }
+      if (this.gameState() === 'playing') {
+        this.rafId = requestAnimationFrame(loop);
+      }
+    };
+    this.rafId = requestAnimationFrame(loop);
   }
 
-  private stopInterval(): void {
-    if (this.gameInterval !== null) {
-      clearInterval(this.gameInterval);
-      this.gameInterval = null;
+  private stopLoop(): void {
+    if (this.rafId !== null) {
+      cancelAnimationFrame(this.rafId);
+      this.rafId = null;
     }
+    this.lastTickTime = null;
   }
 }
