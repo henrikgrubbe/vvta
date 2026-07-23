@@ -43,7 +43,7 @@
     "eslint-plugin-simple-import-sort": "13.0.0",
     "firebase-tools": "15.24.0",
     "jsdom": "29.1.1",
-    "lint-staged": "17.1.1",
+    "lint-staged": "17.2.0",
     "postcss": "8.5.22",
     "prettier": "3.9.6",
     "prettier-plugin-organize-attributes": "1.0.0",
