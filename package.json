@@ -52,7 +52,7 @@
     "tailwindcss": "4.3.4",
     "typescript": "6.0.3",
     "typescript-eslint": "8.72.1",
-    "vitest": "4.1.12"
+    "vitest": "5.1.0"
   },
   "simple-git-hooks": {
     "pre-commit": "npx lint-staged"
